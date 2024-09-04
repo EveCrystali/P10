@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Patient.Migrations
+namespace BackendPatient.Migrations
 {
     /// <inheritdoc />
     public partial class Initializing : Migration

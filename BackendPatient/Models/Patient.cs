@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Patient.Models;
+namespace BackendPatient.Models;
 
 public class Patient
 {

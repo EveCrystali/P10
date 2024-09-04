@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Patient.Data;
+using BackendPatient.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Patient.Data;
+using BackendPatient.Data;
 
 #nullable disable
 
-namespace Patient.Migrations
+namespace BackendPatient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20240904102113_Initializing")]

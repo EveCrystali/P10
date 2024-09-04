@@ -1,8 +1,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Patient.Models;
+using BackendPatient.Models;
 
-namespace Patient.Data;
+namespace BackendPatient.Data;
 
 public class ApplicationDbContext : DbContext
 {
@@ -13,7 +13,7 @@ public class ApplicationDbContext : DbContext
 
     }
 
-    public DbSet<Patient.Models.Patient> Patients { get; set; } = default!;
+    public DbSet<BackendPatient.Models.Patient> Patients { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,7 +21,7 @@ public class ApplicationDbContext : DbContext
 
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Patient.Models.Patient>().HasKey(p => p.Id);
+        modelBuilder.Entity<BackendPatient.Models.Patient>().HasKey(p => p.Id);
     }
 
 }

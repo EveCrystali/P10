@@ -4,16 +4,9 @@ using BackendPatient.Models;
 
 namespace BackendPatient.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
-    {
-
-    }
-
-    public DbSet<BackendPatient.Models.Patient> Patients { get; set; } = default!;
+    public DbSet<Patient> Patients { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,7 +14,7 @@ public class ApplicationDbContext : DbContext
 
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<BackendPatient.Models.Patient>().HasKey(p => p.Id);
+        modelBuilder.Entity<Patient>().HasKey(p => p.Id);
     }
 
 }

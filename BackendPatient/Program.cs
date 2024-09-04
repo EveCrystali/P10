@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using BackendPatient.Data;
+using BackendPatient.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<Patient>();
+
+builder.Services.AddMvc();
 
 var app = builder.Build();
 
@@ -22,6 +27,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseRouting();
+
 app.MapControllers();
 
-await app.RunAsync();
+app.Run();

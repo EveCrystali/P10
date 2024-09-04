@@ -8,8 +8,12 @@ namespace BackendPatient.Models;
 public class Patient
 {
     [Key]
-    public required int Id ;
+    public required int Id;
+
+    [Required(ErrorMessage = "First name is required")]
     public required string FirstName { get; set; }
+
+    [Required(ErrorMessage = "Last name is required")]
     public required string LastName { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }

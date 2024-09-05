@@ -2,13 +2,14 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendPatient.Models;
 
 public class Patient
 {
     [Key]
-    public required int Id;
+    public int Id;
 
     [Required(ErrorMessage = "First name is required")]
     public required string FirstName { get; set; }

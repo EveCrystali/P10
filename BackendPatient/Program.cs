@@ -11,10 +11,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<Patient>();
+builder.Services.AddScoped<DataSeeder>();
 
 builder.Services.AddMvc();
 
 var app = builder.Build();
+
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    dataSeeder.SeedPatients();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,7 +39,7 @@ app.MapControllers();
 
 app.MapGet("/", async context =>
 {
-    await context.Response.WriteAsync("BackendPatient is running.");
+    await context.Response.WriteAsync("BackendPatient is well running.");
 });
 
 app.UseAuthorization();

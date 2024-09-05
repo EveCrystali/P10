@@ -25,10 +25,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
 app.UseRouting();
 
 app.MapControllers();
+
+app.MapGet("/", async context =>
+{
+    await context.Response.WriteAsync("BackendPatient is running.");
+});
+
+app.UseAuthorization();
 
 app.Run();

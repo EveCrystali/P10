@@ -6,7 +6,7 @@ using BackendPatient.Models;
 namespace BackendPatient.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/patient")]
 public class PatientsController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;

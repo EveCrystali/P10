@@ -2,16 +2,29 @@
   "Routes": 
   [
     {
-      "DownstreamPathTemplate": "/api/patients",
+      "UpstreamPathTemplate": "/gateway/patient",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/patient",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
+      "DownstreamHostAndPorts": 
+      [
         {
           "Host": "localhost",
           "Port": 5001
         }
-      ],
-      "UpstreamPathTemplate": "/patients",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      ]
+      
+    },
+    {
+      "UpstreamPathTemplate": "/",
+      "DownstreamPathTemplate": "/",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7252
+        }
+      ]
     }
   ],
 

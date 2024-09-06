@@ -10,8 +10,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // TODO : add custom model configurations
-
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Patient>().HasKey(p => p.Id);

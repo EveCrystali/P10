@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BackendPatient.Data;
 using BackendPatient.Models;
+using BackendPatient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,14 +10,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
 
 builder.Services.AddMvc();
 
 var app = builder.Build();
-
 
 using (IServiceScope scope = app.Services.CreateScope())
 {

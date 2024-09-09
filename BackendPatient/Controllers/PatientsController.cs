@@ -19,11 +19,6 @@ public class PatientsController : ControllerBase
         _updateService = updateService;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Patient>>> GetPatients()
-    {
-        return Ok(await _dbContext.Patients.ToListAsync());
-    }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Patient>> GetPatient(int id)
@@ -39,7 +34,7 @@ public class PatientsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<Patient>> GetPatient()
+    public async Task<ActionResult<Patient>> GetPatients()
     {
         List<Patient> patients = await _dbContext.Patients.ToListAsync();
         return patients != null ? Ok(patients) : BadRequest("No patients found");

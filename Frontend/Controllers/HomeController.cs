@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ShellApp.Models;
+using Frontend.Models;
 
-namespace ShellApp.Controllers;
+
+namespace Frontend.Controllers;
 
 public class HomeController : Controller
 {

@@ -29,6 +29,7 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
+                
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)
@@ -38,9 +39,9 @@
             </td>
 
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                @Html.ActionLink("Edit", "Edit", "patients", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", "patients", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", "patients",new { /* id=item.PrimaryKey */ })
             </td>
         </tr>
 }

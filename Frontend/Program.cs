@@ -1,9 +1,22 @@
+using Frontend.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient();
+
+// Note: Must be removed when not in development
+// Configure the HTTP request pipeline for avoiding self-signed certificates 
+builder.Services.AddHttpClient<HomeController>(client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:5000");
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler 
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator 
+    });
 
 var app = builder.Build();
 

@@ -2,7 +2,7 @@
   "Routes": 
   [
     {
-      "DownstreamPathTemplate": "/api/patient/{everything}",
+      "DownstreamPathTemplate": "/api/patient/{id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -10,7 +10,7 @@
           "Port": 7200
         }
       ],
-      "UpstreamPathTemplate": "/api/patient/{everything}",
+      "UpstreamPathTemplate": "/api/patient/{id}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
     },
     {

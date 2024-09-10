@@ -64,6 +64,11 @@ public class PatientsController : Microsoft.AspNetCore.Mvc.Controller
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
             return View(patient);
         }
+        else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            ModelState.AddModelError(string.Empty, "Patient not found.");
+            return View();
+        }
         ModelState.AddModelError(string.Empty, "Unable to load patient for edit.");
         return View();
     }

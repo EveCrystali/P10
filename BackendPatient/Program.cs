@@ -2,14 +2,24 @@ using Microsoft.EntityFrameworkCore;
 using BackendPatient.Data;
 using BackendPatient.Models;
 using BackendPatient.Services;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using Swashbuckle.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers()
+    // Add XML annotations to swagger documentation
+    .AddXmlSerializerFormatters()
+    .AddXmlDataContractSerializerFormatters();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "BackendPatient API", Version = "v0.1" });
+    c.IncludeXmlComments(Assembly.GetExecutingAssembly());
+});
 builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
@@ -28,7 +38,10 @@ using (IServiceScope scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "BackendPatient API v0.1");
+    });
 }
 
 app.UseHttpsRedirection();

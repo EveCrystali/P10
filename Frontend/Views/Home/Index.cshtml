@@ -2,7 +2,56 @@
     ViewData["Title"] = "Home Page";
 }
 
+@model IEnumerable<Frontend.Models.Patient>
+
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Accueil Médecin</h1>
 </div>
+<h4>Patient</h4>
+<hr />
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateOfBirth)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.FirstName)
+                
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DateOfBirth)
+            </td>
+
+            <td>
+                @try
+                {
+                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-primary">Editer</button></a>
+                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-primary">Details</button></a>
+                    Console.WriteLine($"Patient requested is {item.Id}");
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error in Patients/Index.cshtml: {ex.Message}");
+                }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+

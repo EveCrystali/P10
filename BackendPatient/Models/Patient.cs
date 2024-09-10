@@ -11,7 +11,7 @@ namespace BackendPatient.Models;
 public class Patient : IValidatable
 {
     [Key]
-    public int Id;
+    public int Id {get; set;}
 
     [Required(ErrorMessage = "First name is required")]
     [Length(1, 50, ErrorMessage = "First name should be between 1 and 50 characters")]

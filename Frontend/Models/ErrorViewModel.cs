@@ -1,4 +1,4 @@
-namespace ShellApp.Models;
+namespace Frontend.Models;
 
 public class ErrorViewModel
 {

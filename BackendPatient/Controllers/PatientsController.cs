@@ -8,16 +8,10 @@ namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("api/patient")]
-public class PatientsController : ControllerBase
+public class PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IUpdateService<Patient> _updateService;
-
-    public PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService)
-    {
-        _dbContext = dbContext;
-        _updateService = updateService;
-    }
+    private readonly ApplicationDbContext _dbContext = dbContext;
+    private readonly IUpdateService<Patient> _updateService = updateService;
 
 
     [HttpGet("{id}")]
@@ -41,6 +35,7 @@ public class PatientsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // FIXME: Unable to resolve service for type 'BackendPatient.Data.ApplicationDbContext' while attempting to activate 'BackendPatient.Controllers.PatientsController'.
     public async Task<IActionResult> PutPatient(int id, Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);

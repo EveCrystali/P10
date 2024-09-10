@@ -39,9 +39,16 @@
             </td>
 
             <td>
-                @Html.ActionLink("Edit", "Edit", "patients", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", "patients", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", "patients",new { /* id=item.PrimaryKey */ })
+                @try
+                {
+                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-primary">Editer</button></a>
+                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-primary">Details</button></a>
+                    Console.WriteLine($"Patient requested is {item.Id}");
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Error in Patients/Index.cshtml: {ex.Message}");
+                }
             </td>
         </tr>
 }

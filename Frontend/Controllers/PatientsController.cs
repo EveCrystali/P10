@@ -17,8 +17,14 @@ public class PatientsController : Microsoft.AspNetCore.Mvc.Controller
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
+            foreach (Frontend.Models.Patient patient in patients)
+            {
+                Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
+            }
+            
             return View(patients);
         }
+
         ModelState.AddModelError(string.Empty, "Unable to load patients.");
         return View(new List<Frontend.Models.Patient>());
     }

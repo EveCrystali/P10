@@ -16,10 +16,9 @@ public class Patient
     [Length(1, 50, ErrorMessage = "Last name should be between 1 and 50 characters")]
     public required string LastName { get; set; }
 
-    [DataType(DataType.DateTime, ErrorMessage = "Date Of Birth must be a date")]
+    [DataType(DataType.Date, ErrorMessage = "Date Of Birth must be a date")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    [RegularExpression(@"^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$", ErrorMessage = "Not a valid date")]
-    public DateTime? DateOfBirth { get; set; }
+    public DateOnly? DateOfBirth { get; set; }
 
     [Required(ErrorMessage = "Gender is required")]
     [StringLength(1, ErrorMessage = "Gender should be either M or F")]

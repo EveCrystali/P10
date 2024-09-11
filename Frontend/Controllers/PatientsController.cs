@@ -2,14 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Frontend.Models;
 
 namespace Frontend.Controllers;
-public class PatientsController : Microsoft.AspNetCore.Mvc.Controller
+public class PatientsController(HttpClient httpClient, ILogger<PatientsController> logger) : Microsoft.AspNetCore.Mvc.Controller
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = httpClient;
 
-    public PatientsController(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
+    private ILogger<PatientsController> _logger = logger;
 
     public async Task<IActionResult> Index()
     {
@@ -47,7 +44,7 @@ public class PatientsController : Microsoft.AspNetCore.Mvc.Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Frontend.Models.Patient patient)
+    public async Task<IActionResult> Create([FromBody] Frontend.Models.Patient patient)
     {
         if (ModelState.IsValid)
         {
@@ -79,16 +76,27 @@ public class PatientsController : Microsoft.AspNetCore.Mvc.Controller
         return View();
     }
 
-    [HttpPut]
-    public async Task<IActionResult> Edit(int id, Frontend.Models.Patient patient)
+    [HttpPost]
+    public async Task<IActionResult> Edit(Frontend.Models.Patient patient)
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"https://localhost:5000/api/patient/{id}", patient);
+            _logger.LogInformation($"Updating patient with id {patient.Id} to {patient}");
+
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"https://localhost:5000/api/patient/{patient.Id}", patient);
             if (response.IsSuccessStatusCode)
             {
-                return RedirectToAction(nameof(Details), new { id });
+                _logger.LogInformation($"Patient with id {patient.Id} was successfully updated.");
+                return RedirectToAction(nameof(Details), new { id = patient.Id });
             }
+            else
+            {
+                _logger.LogError($"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}");
+            }
+        }
+        else
+        {
+            _logger.LogError("Model state is not valid.");
         }
 
         ModelState.AddModelError(string.Empty, "Unable to update patient.");

@@ -10,16 +10,10 @@ namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("api/patient")]
-public class PatientsController : ControllerBase
+public class PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IUpdateService<Patient> _updateService;
-
-    public PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService)
-    {
-        _dbContext = dbContext;
-        _updateService = updateService;
-    }
+    private readonly ApplicationDbContext _dbContext = dbContext;
+    private readonly IUpdateService<Patient> _updateService = updateService;
 
 
     /// <summary>
@@ -62,7 +56,7 @@ public class PatientsController : ControllerBase
     /// <param name="patient">The updated patient.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutPatient(int id, Patient patient)
+    public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
     }
@@ -73,7 +67,7 @@ public class PatientsController : ControllerBase
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    public async Task<ActionResult<Patient>> PostPatient(Patient patient)
+    public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database
         try
@@ -127,6 +121,3 @@ public class PatientsController : ControllerBase
     }
 }
 
-internal class SwaggerOperationAttribute : Attribute
-{
-}

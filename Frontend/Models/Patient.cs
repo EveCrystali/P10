@@ -18,7 +18,6 @@ public class Patient
 
     [DataType(DataType.Date, ErrorMessage = "Date Of Birth must be a date")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    [RegularExpression(@"^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$", ErrorMessage = "Not a valid date")]
     public DateOnly? DateOfBirth { get; set; }
 
     [Required(ErrorMessage = "Gender is required")]

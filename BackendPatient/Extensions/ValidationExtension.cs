@@ -52,10 +52,10 @@ public static class ValidationExtensions
             return;
         }
         bool isValid = DateOnly.TryParseExact(date.Value.ToString("yyyy-MM-dd"),
-                                              "yyyy-MM-ddTHH:mm:ss.fffZ",
-                                              CultureInfo.InvariantCulture,
-                                              DateTimeStyles.AssumeUniversal,
-                                              out DateOnly tempDate);
+                                           "yyyy-MM-dd",
+                                           CultureInfo.InvariantCulture,
+                                           DateTimeStyles.None,
+                                           out DateOnly tempDate);
         if (!isValid)
         {
             throw new ValidationException($"{propertyName} must be in the format yyyy-MM-dd");

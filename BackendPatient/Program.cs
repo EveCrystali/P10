@@ -5,6 +5,7 @@ using BackendPatient.Services;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Swashbuckle.AspNetCore.Swagger;
+using BackendPatient.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     // Add XML annotations to swagger documentation
     .AddXmlSerializerFormatters()
-    .AddXmlDataContractSerializerFormatters();
+    .AddXmlDataContractSerializerFormatters()
+    // Add Json DateOnly type support
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    });
+  
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

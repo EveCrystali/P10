@@ -57,7 +57,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
     // FIXME: Unable to resolve service for type 'BackendPatient.Data.ApplicationDbContext' while attempting to activate 'BackendPatient.Controllers.PatientsController'.
-    public async Task<IActionResult> PutPatient(int id, Patient patient)
+    public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
     }
@@ -122,6 +122,3 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     }
 }
 
-internal class SwaggerOperationAttribute : Attribute
-{
-}

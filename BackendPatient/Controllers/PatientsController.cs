@@ -68,7 +68,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    public async Task<ActionResult<Patient>> PostPatient(Patient patient)
+    public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database
         try

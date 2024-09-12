@@ -1,21 +1,34 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ShellApp.Models;
+using Frontend.Models;
+using BackendPatient.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace ShellApp.Controllers;
+
+namespace Frontend.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly HttpClient _httpClient;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, HttpClient httpClient)
     {
         _logger = logger;
+        _httpClient = httpClient;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/api/patient");
+        if (response.IsSuccessStatusCode)
+        {
+            List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
+            return View(patients);
+        }
+
+         _logger.LogError("Failed to load patients from backend. Status Code: {0}", response.StatusCode);
+        return View(new List<Frontend.Models.Patient>());
     }
 
     public IActionResult Privacy()

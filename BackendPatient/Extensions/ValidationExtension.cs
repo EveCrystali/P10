@@ -17,45 +17,45 @@ public static class ValidationExtensions
             throw new ValidationException($"{entity.GetType().Name} is not valid: {errors}");
         }
 
-        // Validate DateTime properties
-        entity.ValidateDateTimeProperties();
+        // Validate DateOnly properties
+        entity.ValidateDateOnlyProperties();
     }
 
-    public static void ValidateDateTimeProperties(this IValidatable entity)
+    public static void ValidateDateOnlyProperties(this IValidatable entity)
     {
-        IEnumerable<System.Reflection.PropertyInfo> dateTimeProperties = entity.GetType().GetProperties()
-            .Where(prop => prop.PropertyType == typeof(DateTime?) || prop.PropertyType == typeof(DateTime));
+        IEnumerable<System.Reflection.PropertyInfo> dateOnlyProperties = entity.GetType().GetProperties()
+            .Where(prop => prop.PropertyType == typeof(DateOnly?) || prop.PropertyType == typeof(DateOnly));
 
-        foreach (System.Reflection.PropertyInfo? prop in dateTimeProperties)
+        foreach (System.Reflection.PropertyInfo? prop in dateOnlyProperties)
         {
-            DateTime? value = prop.GetValue(entity) as DateTime?;
+            DateOnly? value = prop.GetValue(entity) as DateOnly?;
             if (value != null && value.HasValue)
             {
-                ValidateDateTime(value, prop.Name);
+                ValidateDateOnly(value, prop.Name);
             }
-            else if (value == null && prop.PropertyType == typeof(DateTime?))
+            else if (value == null && prop.PropertyType == typeof(DateOnly?))
             {
                 return;
             }
-            else if (value == null && prop.PropertyType == typeof(DateTime))
+            else if (value == null && prop.PropertyType == typeof(DateOnly))
             {
                 throw new ValidationException($"{prop.Name} must not be null or empty");
             }
         }
     }
 
-    public static void ValidateDateTime(DateTime? date, string propertyName)
+    public static void ValidateDateOnly(DateOnly? date, string propertyName)
     {
         if (date == null)
         {
             // if date is null, no validation is required
             return;
         }
-        bool isValid = DateTime.TryParseExact(date.Value.ToString("yyyy-MM-dd"),
-                                              "yyyy-MM-ddTHH:mm:ss.fffZ",
-                                              CultureInfo.InvariantCulture,
-                                              DateTimeStyles.AssumeUniversal,
-                                              out DateTime tempDate);
+        bool isValid = DateOnly.TryParseExact(date.Value.ToString("yyyy-MM-dd"),
+                                           "yyyy-MM-dd",
+                                           CultureInfo.InvariantCulture,
+                                           DateTimeStyles.None,
+                                           out DateOnly tempDate);
         if (!isValid)
         {
             throw new ValidationException($"{propertyName} must be in the format yyyy-MM-dd");

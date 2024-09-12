@@ -16,14 +16,16 @@ public class Patient
     [Length(1, 50, ErrorMessage = "Last name should be between 1 and 50 characters")]
     public required string LastName { get; set; }
 
+    [Required(ErrorMessage = "Date of birth is required")]
     [DataType(DataType.Date, ErrorMessage = "Date Of Birth must be a date")]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-    public DateOnly? DateOfBirth { get; set; }
+    public required DateOnly DateOfBirth { get; set; }
 
     [Required(ErrorMessage = "Gender is required")]
     [StringLength(1, ErrorMessage = "Gender should be either M or F")]
     [DisplayFormat(DataFormatString = "{0:M/F}", ApplyFormatInEditMode = true)]
-    public string? Gender { get; set; }
+    [RegularExpression(@"^[MF]$", ErrorMessage = "Gender should be either M or F")]
+    public required string Gender { get; set; }
 
     [DataType(DataType.Text)]
     [MaxLength(100, ErrorMessage = "Address can't be longer than 100 characters")]

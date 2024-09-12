@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Frontend.Models;
+using Newtonsoft.Json;
 
 namespace Frontend.Controllers;
 public class PatientsController(HttpClient httpClient, ILogger<PatientsController> logger) : Microsoft.AspNetCore.Mvc.Controller
@@ -18,7 +19,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
             {
                 Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
             }
-            
+
             return View(patients);
         }
 
@@ -44,19 +45,37 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Frontend.Models.Patient patient)
+    public async Task<IActionResult> Create(Frontend.Models.Patient patient)
     {
         if (ModelState.IsValid)
         {
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync("https://localhost:5000/api/patient", patient);
             if (response.IsSuccessStatusCode)
             {
-                return RedirectToAction(nameof(Index));
+                var createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
+                if (createdPatient != null)
+                {
+                    return RedirectToAction(nameof(Details), new { id = createdPatient.Id });
+                }
+                else
+                {
+                    return RedirectToAction(nameof(Index), nameof(HomeController));
+                }
             }
-        }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Error from the server");
+                _logger.LogError($"Error from the server : " + response.ReasonPhrase);
+                return RedirectToAction(nameof(Index), nameof(HomeController));
+            }
 
-        ModelState.AddModelError(string.Empty, "Unable to create patient.");
-        return View(patient);
+        }
+        else
+        {
+            _logger.LogError("Model state is not valid.");
+            ModelState.AddModelError(string.Empty, "Unable to create patient.");
+            return View(patient);
+        }
     }
 
     public async Task<IActionResult> Edit(int id)
@@ -122,7 +141,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
         HttpResponseMessage response = await _httpClient.DeleteAsync($"https://localhost:5000/api/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
 
         ModelState.AddModelError(string.Empty, "Unable to delete patient.");
@@ -139,3 +158,4 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
         return null;
     }
 }
+

@@ -7,7 +7,10 @@
 <div class="text-center">
     <h1 class="display-4">Accueil Médecin</h1>
 </div>
-<h4>Patient</h4>
+<div class="table-header d-flex justify-content-between">
+  <h4>Patient</h4>
+  <a asp-controller="Patients" id="newPatient" asp-action="Create"><button class="btn btn-primary">Créer un nouveau patient</button></a>
+</div>
 <hr />
 <table class="table">
     <thead>
@@ -41,8 +44,9 @@
             <td>
                 @try
                 {
-                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-primary">Editer</button></a>
-                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-primary">Details</button></a>
+                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-secondary">Editer</button></a>
+                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-secondary">Details</button></a>
+                    <a asp-controller="Patients" asp-action="Delete" asp-route-id="@item.Id"><button class="btn btn-secondary">Supprimer</button></a>
                     Console.WriteLine($"Patient requested is {item.Id}");
                 }
                 catch(Exception ex)

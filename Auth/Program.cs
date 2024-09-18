@@ -32,6 +32,9 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Add Identity API
+builder.Services.AddIdentityApiEndpoints<IdentityUser>();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -85,5 +88,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
+
+// Map Identity endpoints
+app.MapIdentityApi<IdentityUser>();
 
 app.Run();

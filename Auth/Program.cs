@@ -28,10 +28,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Add Identity
 
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-});
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -67,7 +67,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     DataSeeder dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
     // Seed roles and users
     await DataSeeder.SeedRoles(roleManager);
-    await DataSeeder.SeedUsers(userManager);
+    await DataSeeder.SeedUsers(userManager, logger);
     await DataSeeder.SeedAffectationsRolesToUsers(userManager, roleManager, logger);
 }
 

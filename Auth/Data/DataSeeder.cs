@@ -6,42 +6,31 @@ namespace Auth.Data;
 
 public class DataSeeder
 {
-    private const string AdminEmail = "admin@email.com";
-    private const string PractitionerEmail = "practitioner@email.com";
-    private const string NoRoleUserEmail = "noroleuser@email.com";
-    private static readonly string[] emails = [AdminEmail, PractitionerEmail, NoRoleUserEmail];
-
-    // TODO:  refactor following seed methods to use the Dictionary
-    private static readonly Dictionary<string, string> usersAndRoles = new()
+    private static readonly Dictionary<string, string[]> usersRolesPasswords = new()
     {
-        { "admin@email.com", "Admin" },
-        { "practitioner@email.com", "Practitioner" },
-        { "noroleuser@email.com", "User" }
+        { "Admin", ["admin@email.com",  "0vBZBB.QH83GeE."]},
+        { "Practitioner", ["practitioner@email.com", "1vBZBB.QH83GeE."] },
+        { "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."]}
     };
 
-    public static readonly string[] roleNames = ["Admin", "Practitioner", "User"];
-    public static async Task SeedUsers(UserManager<User> userManager)
+    public static async Task SeedUsers(UserManager<User> userManager, ILogger logger)
     {
-        IdentityUser? adminUser = await userManager.FindByEmailAsync("admin@email.com");
-        if (adminUser == null)
+        IEnumerable<Task> tasks = usersRolesPasswords.Select(async userToAdd =>
         {
-            User newUser = new() { UserName = "admin@email.com", Email = "admin@email.com", EmailConfirmed = true, LockoutEnabled = false };
-            await userManager.CreateAsync(newUser, "0vBZBB.QH83GeE.");
+            if (await userManager.FindByEmailAsync(userToAdd.Value[0]) == null)
+            {
+                User newUser = new() { UserName = userToAdd.Value[0], Email = userToAdd.Value[0], EmailConfirmed = true, LockoutEnabled = false };
+                await userManager.CreateAsync(newUser, userToAdd.Value[1]);
+                logger.LogInformation($"Created new user with email: {userToAdd.Value[0]}");
+            }
+            else
+            {
+                string messageLog = $"The user with the name {userToAdd.Value[0]} already exists.";
+                logger.LogInformation(messageLog);
+            }
         }
-
-        IdentityUser? practitionerUser = await userManager.FindByEmailAsync("practitioner@email.com");
-        if (practitionerUser == null)
-        {
-            User newUser = new() { UserName = "practitioner@email.com", Email = "practitioner@email.com", EmailConfirmed = true, LockoutEnabled = false };
-            await userManager.CreateAsync(newUser, "1vBZBB.QH83GeE.");
-        }
-
-        IdentityUser? noRoleUser = await userManager.FindByEmailAsync("noroleuser@email.com");
-        if (noRoleUser == null)
-        {
-            User newUser = new() { UserName = "noroleuser@email.com", Email = "noroleuser@email.com", EmailConfirmed = true, LockoutEnabled = false };
-            await userManager.CreateAsync(newUser, "2vBZBB.QH83GeE.");
-        }
+        );
+        await Task.WhenAll(tasks);
     }
 
     /// <summary>
@@ -52,19 +41,16 @@ public class DataSeeder
     public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
     {
         // Loop through each role name and see if the role already exists.
-        foreach (string roleName in roleNames)
+        IEnumerable<Task> tasks = usersRolesPasswords.Keys.Select(async roleName =>
         {
-            // If the role does not exist, create it.
-            bool roleExist = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExist)
+            if (!await roleManager.RoleExistsAsync(roleName))
             {
                 await roleManager.CreateAsync(new IdentityRole(roleName));
             }
-        }
+        });
+        await Task.WhenAll(tasks); 
     }
 
-
-    // TODO: Verify the logic of this method
     /// <summary>
     /// Seeds the affectations of roles to users.
     /// </summary>
@@ -72,32 +58,35 @@ public class DataSeeder
     /// <param name="roleManager">The role manager.</param>
     /// <param name="logger">The logger.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <remarks>
+    /// This method goes through each user and their corresponding roles
+    /// and adds the user to the role if it does not already exist.
+    /// If the user is not found, it logs an error.
+    /// </remarks>
     public static async Task SeedAffectationsRolesToUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
     {
-        // Get the users
-        
-        // User? userAdmin = await userManager.FindByNameAsync(AdminEmail);
-        // User? userPractitioner = await userManager.FindByNameAsync(PractitionerEmail);
-        // User? userNoRoleUser = await userManager.FindByNameAsync(NoRoleUserEmail);
-        // List<User?> users = [userAdmin, userPractitioner, userNoRoleUser];
-        int i = 0;
-        
-        foreach (string email in emails) 
+        IEnumerable<Task> tasks = usersRolesPasswords.Select(async userToAffect =>
         {
-            User? user = await userManager.FindByNameAsync(email);
+            User? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
             if (user != null)
             {
-                await userManager.AddToRoleAsync(user, roleNames[i]);
+                if (!await userManager.IsInRoleAsync(user, userToAffect.Key))
+                {
+                    await userManager.AddToRoleAsync(user, userToAffect.Key);
+                    logger.LogInformation($"Added role {userToAffect.Key} to user {userToAffect.Value[0]}.");
+                }
+                else
+                {
+                    logger.LogInformation($"User {userToAffect.Value[0]} already has the role {userToAffect.Key}.");
+                }
             }
             else
             {
-                // Log an error if the user was not found.
-                string messageLog = $"The user with the email emails[] was not found.";
-                logger.LogError(messageLog);
+                logger.LogError($"The user with the email {userToAffect.Value[0]} was not found.");
             }
-            i++;
-        }
+        });
+        
+        await Task.WhenAll(tasks); 
     }
-
 }
 

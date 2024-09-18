@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", ".\ApiGateway\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", ".\Frontend\Frontend.csproj", "{EE18CFCF-1B0C-4FF1-9746-D10E220DE9FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "Auth\Auth.csproj", "{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{EE18CFCF-1B0C-4FF1-9746-D10E220DE9FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE18CFCF-1B0C-4FF1-9746-D10E220DE9FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE18CFCF-1B0C-4FF1-9746-D10E220DE9FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

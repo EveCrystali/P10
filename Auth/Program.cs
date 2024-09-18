@@ -48,7 +48,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
     .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
+    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
+    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
 builder.Services.AddControllersWithViews();
 

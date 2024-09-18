@@ -13,24 +13,31 @@ public class DataSeeder
         { "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."]}
     };
 
-    public static async Task SeedUsers(UserManager<User> userManager, ILogger logger)
+    /// <summary>
+    /// Seeds the users in the database.
+    /// </summary>
+    /// <param name="userManager">The user manager.</param>
+    /// <param name="logger">The logger.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public static async Task SeedUsers(UserManager<IdentityUser> userManager, ILogger logger)
     {
-        IEnumerable<Task> tasks = usersRolesPasswords.Select(async userToAdd =>
+        // Loop through each user and see if the user already exists.
+        foreach (KeyValuePair<string, string[]> userToAdd in usersRolesPasswords)
         {
             if (await userManager.FindByEmailAsync(userToAdd.Value[0]) == null)
             {
+                // Create a new user and add it to the database.
                 User newUser = new() { UserName = userToAdd.Value[0], Email = userToAdd.Value[0], EmailConfirmed = true, LockoutEnabled = false };
                 await userManager.CreateAsync(newUser, userToAdd.Value[1]);
                 logger.LogInformation($"Created new user with email: {userToAdd.Value[0]}");
             }
             else
             {
+                // Log a message if the user already exists.
                 string messageLog = $"The user with the name {userToAdd.Value[0]} already exists.";
                 logger.LogInformation(messageLog);
             }
         }
-        );
-        await Task.WhenAll(tasks);
     }
 
     /// <summary>
@@ -38,17 +45,25 @@ public class DataSeeder
     /// </summary>
     /// <param name="roleManager">The role manager.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+    public static async Task SeedRoles(RoleManager<IdentityRole> roleManager, ILogger logger)
     {
         // Loop through each role name and see if the role already exists.
-        IEnumerable<Task> tasks = usersRolesPasswords.Keys.Select(async roleName =>
+        foreach (string roleName in usersRolesPasswords.Keys)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {
+                // Create a new role and add it to the database.
                 await roleManager.CreateAsync(new IdentityRole(roleName));
+                string messageLog = $"Created new role with name: {roleName}";
+                logger.LogInformation(messageLog);
             }
-        });
-        await Task.WhenAll(tasks); 
+            else
+            {
+                // Log a message if the role already exists.
+                string messageLog = $"The role with the name {roleName} already exists.";
+                logger.LogInformation(messageLog);
+            }
+        }
     }
 
     /// <summary>
@@ -63,11 +78,11 @@ public class DataSeeder
     /// and adds the user to the role if it does not already exist.
     /// If the user is not found, it logs an error.
     /// </remarks>
-    public static async Task SeedAffectationsRolesToUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
+    public static async Task SeedAffectationsRolesToUsers(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
     {
-        IEnumerable<Task> tasks = usersRolesPasswords.Select(async userToAffect =>
+        foreach (KeyValuePair<string, string[]> userToAffect in usersRolesPasswords)
         {
-            User? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
+            IdentityUser? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
             if (user != null)
             {
                 if (!await userManager.IsInRoleAsync(user, userToAffect.Key))
@@ -84,9 +99,7 @@ public class DataSeeder
             {
                 logger.LogError($"The user with the email {userToAffect.Value[0]} was not found.");
             }
-        });
-        
-        await Task.WhenAll(tasks); 
+        }
     }
 }
 

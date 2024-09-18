@@ -13,6 +13,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 // Add services to the container.
 
+// Add Identity
+
 // Ajouter Identity avec Cookie Authentication
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -20,20 +22,23 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Auth/Login";
+    // Cookie name shared between services
+    options.Cookie.Name = "P10AuthCookie"; 
+    // Redirect to login page if unauthorized
+    options.LoginPath = "/Auth/Login"; 
+    // Redirect to access denied page if unauthorized
     options.AccessDeniedPath = "/Auth/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Cookie expires after 30 minutes
-    options.SlidingExpiration = true; // Extend the cookie expiration if the user remains active
+    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
+    options.Cookie.HttpOnly = true;
+    // Attribute that helps protect against cross-site request forgery (CSRF) attacks 
+    // by specifying whether a cookie should be sent along with cross-site requests
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    // Extend the cookie expiration if the user remains active
+    options.SlidingExpiration = true;
 });
 
-// Add Identity
-
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
 // Add Identity API
-builder.Services.AddIdentityApiEndpoints<IdentityUser>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -60,18 +65,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<DataSeeder>();
+
 var app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
-    UserManager<User> userManager = services.GetRequiredService<UserManager<User>>();
+    UserManager<IdentityUser> userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     RoleManager<IdentityRole> roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
-    DataSeeder dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-    // Seed roles and users
-    await DataSeeder.SeedRoles(roleManager);
+    // Seed users and roles
     await DataSeeder.SeedUsers(userManager, logger);
+    await DataSeeder.SeedRoles(roleManager, logger);
     await DataSeeder.SeedAffectationsRolesToUsers(userManager, roleManager, logger);
 }
 
@@ -88,8 +94,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
-
-// Map Identity endpoints
-app.MapIdentityApi<IdentityUser>();
 
 app.Run();

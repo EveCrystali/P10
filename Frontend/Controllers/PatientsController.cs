@@ -15,9 +15,12 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
-            foreach (Frontend.Models.Patient patient in patients)
+            if (patients != null)
             {
-                Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
+                foreach (Frontend.Models.Patient patient in patients)
+                {
+                    Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
+                }
             }
 
             return View(patients);

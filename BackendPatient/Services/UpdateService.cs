@@ -16,7 +16,6 @@ public class UpdateService<T>(ApplicationDbContext dbContext) : IUpdateService<T
     /// It checks if the entity to be updated is valid, if the id parameter is the same as the id of the entity in the body,
     /// and if the entity exists in the database.
     /// </summary>
-    /// <typeparam name="T">The type of entity to be updated.</typeparam>
     /// <param name="id">The id of the entity to be updated.</param>
     /// <param name="entity">The updated entity.</param>
     /// <param name="existsFunc">A function that checks if the entity exists in the database.</param>

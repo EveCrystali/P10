@@ -7,10 +7,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace Auth.Data;
 
 
-public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<IdentityUser>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :
-        base(options)
-    { }
 }
 

@@ -25,9 +25,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     // Cookie name shared between services
     options.Cookie.Name = "P10AuthCookie"; 
     // Redirect to login page if unauthorized
-    options.LoginPath = "/Auth/Login"; 
+    options.LoginPath = "/auth/login"; 
     // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.AccessDeniedPath = "/auth/accessDenied";
     // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
     options.Cookie.HttpOnly = true;
     // Attribute that helps protect against cross-site request forgery (CSRF) attacks 
@@ -62,10 +62,37 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddControllersWithViews();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "P10.Api", Version = "v1" });
+    options.AddSecurityDefinition("CookieAuth", new OpenApiSecurityScheme
+    {
+        Description = "Entrer votre nom de cookie pour avoir l'authorisation",
+        Type = SecuritySchemeType.ApiKey,
+        Name = ".AspNetCore.Identity.Application",
+        In = ParameterLocation.Cookie
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "P10AuthCookie"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddEndpointsApiExplorer();
+
 
 var app = builder.Build();
 
@@ -89,6 +116,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.MapControllers();
 
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();

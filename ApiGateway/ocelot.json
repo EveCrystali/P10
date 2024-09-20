@@ -46,7 +46,10 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/login",
-      "UpstreamHttpMethod": [ "Post", "Get" ]
+      "UpstreamHttpMethod": [ "Post", "Get" ],
+      "AddHeadersToRequest": {
+        "Cookie": "{Cookie}"
+      }
     },
     {
       "DownstreamPathTemplate": "/auth/register",

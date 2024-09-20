@@ -7,16 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Frontend.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger, HttpClient httpClient) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly HttpClient _httpClient;
-
-    public HomeController(ILogger<HomeController> logger, HttpClient httpClient)
-    {
-        _logger = logger;
-        _httpClient = httpClient;
-    }
+    private readonly ILogger<HomeController> _logger = logger;
+    private readonly HttpClient _httpClient = httpClient;
 
     public async Task<IActionResult> Index()
     {
@@ -29,11 +23,6 @@ public class HomeController : Controller
 
          _logger.LogError("Failed to load patients from backend. Status Code: {0}", response.StatusCode);
         return View(new List<Frontend.Models.Patient>());
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

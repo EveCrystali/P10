@@ -50,7 +50,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     // Attribute that helps protect against cross-site request forgery (CSRF) attacks 
     // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     // Extend the cookie expiration if the user remains active
     options.SlidingExpiration = true;

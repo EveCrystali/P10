@@ -15,7 +15,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 // Add Identity
 
-// Ajouter Identity avec Cookie Authentication
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Identity with Cookie Authentication
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -23,9 +26,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie"; 
+    options.Cookie.Name = "P10AuthCookie";
     // Redirect to login page if unauthorized
-    options.LoginPath = "/auth/login"; 
+    options.LoginPath = "/auth/login";
     // Redirect to access denied page if unauthorized
     options.AccessDeniedPath = "/auth/accessDenied";
     // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
@@ -51,6 +54,16 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.User.RequireUniqueEmail = true;
 });
+
+// Add Cors policy to allow all origins because we are using Ocelot Api Gateway 
+// We need to allow all origins because Frontend and Auth are not on the same port
+builder.Services.AddCors(options =>
+  {
+      options.AddPolicy("AllowAllOrigins",
+          builder => builder.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader());
+  });
 
 // Add Authorization policies
 builder.Services.AddAuthorizationBuilder()
@@ -89,9 +102,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddEndpointsApiExplorer();
+
 
 
 var app = builder.Build();
@@ -115,13 +128,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.MapControllers();
+
+// Configure Cors policy to allow all origins because we are using Ocelot Api Gateway 
+// We need to allow all origins because Frontend and Auth are not on the same port
+app.UseCors("AllowAllOrigins");
 
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
+
+app.UseHttpsRedirection();
 
 app.Run();

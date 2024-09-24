@@ -14,7 +14,7 @@ public class HomeController(ILogger<HomeController> logger, HttpClient httpClien
 
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/api/patient");
+        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/patient");
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();

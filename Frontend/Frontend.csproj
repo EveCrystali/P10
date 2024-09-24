@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BackendPatient\BackendPatient.csproj" />
+    <ProjectReference Include="..\Auth\Auth.csproj" />
   </ItemGroup>
 
   <ItemGroup>

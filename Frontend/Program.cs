@@ -1,9 +1,12 @@
 using Frontend.Controllers;
+using Microsoft.AspNetCore.Identity;
+using BackendPatient.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Authorization policies and cookie authentification
 
+// Add Identity with Cookie Authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie name shared between services
@@ -60,11 +63,19 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Configure Cors policy to allow all origins because we are using Ocelot Api Gateway 
+// We need to allow all origins because Frontend and Auth are not on the same port
+app.UseCors("AllowAllOrigins");
+
+// Add protection gainst CSRF attacks and secure authentication
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseCookiePolicy();
+
+
 
 app.Run();

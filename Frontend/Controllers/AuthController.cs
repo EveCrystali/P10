@@ -1,20 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Frontend.Models;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Identity;
 
 namespace Frontend.Controllers;
 
-public class AuthController : Controller
+public class AuthController(ILogger<AuthController> logger, HttpClient httpClient) : Controller
 {
-    private readonly ILogger<AuthController> _logger;
-    private readonly HttpClient _httpClient;
+    private readonly ILogger<AuthController> _logger = logger;
 
-    public AuthController(ILogger<AuthController> logger, IHttpClientFactory httpClientFactory)
-    {
-        _logger = logger;
-        _httpClient = httpClientFactory.CreateClient();
-        _httpClient.BaseAddress = new Uri("https://localhost:5000");
+    private readonly HttpClient _httpClient = httpClient;
 
-    }
 
     [HttpGet]
     public IActionResult Login()
@@ -30,7 +26,11 @@ public class AuthController : Controller
             return View(loginModel);
         }
 
-        var response = await _httpClient.PostAsJsonAsync("/auth/login", loginModel);
+        // FIXME: Is that correct ? 
+        // Old way :
+        // var response = await _httpClient.PostAsJsonAsync("/auth/login", loginModel);
+        // New way :
+        var response = await _httpClient.PostAsync("/auth/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
 
         if (response.IsSuccessStatusCode)
         {
@@ -66,7 +66,7 @@ public class AuthController : Controller
             return View(registerModel);
         }
 
-        var response = await _httpClient.PostAsJsonAsync("/auth/register", registerModel);
+        var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerModel);
 
         if (response.IsSuccessStatusCode)
         {
@@ -96,7 +96,7 @@ public class AuthController : Controller
                 }
                 return View(registerModel);
             }
-            else 
+            else
             {
                 ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
                 return View(registerModel);
@@ -107,7 +107,7 @@ public class AuthController : Controller
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        var response = await _httpClient.PostAsync("/auth/logout", null);
+        var response = await _httpClient.PostAsync("api/auth/logout", null);
 
         if (response.IsSuccessStatusCode)
         {

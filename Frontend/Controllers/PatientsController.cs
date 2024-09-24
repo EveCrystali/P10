@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Frontend.Models;
-using Newtonsoft.Json;
 
 namespace Frontend.Controllers;
-public class PatientsController(HttpClient httpClient, ILogger<PatientsController> logger) : Microsoft.AspNetCore.Mvc.Controller
+public class PatientsController(HttpClient httpClient, ILogger<PatientsController> logger) : Controller
 {
     private readonly HttpClient _httpClient = httpClient;
 
@@ -11,7 +9,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
 
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/api/patient");
+        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/patient");
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
@@ -32,7 +30,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
 
     public async Task<IActionResult> Details(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/api/patient/{id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -52,7 +50,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("https://localhost:5000/api/patient", patient);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("https://localhost:5000/patient", patient);
             if (response.IsSuccessStatusCode)
             {
                 var createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -83,7 +81,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
 
     public async Task<IActionResult> Edit(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/api/patient/{id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -105,7 +103,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
         {
             _logger.LogInformation($"Updating patient with id {patient.Id} to {patient}");
 
-            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"https://localhost:5000/api/patient/{patient.Id}", patient);
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"https://localhost:5000/patient/{patient.Id}", patient);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation($"Patient with id {patient.Id} was successfully updated.");
@@ -127,21 +125,21 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
 
     public async Task<IActionResult> Delete(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/api/patient/{id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
             return View(patient);
         }
 
-        ModelState.AddModelError(string.Empty, "Unable to load patient for deletion.");
+        ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load patient for deletion.");
         return View();
     }
 
     [HttpPost, ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        HttpResponseMessage response = await _httpClient.DeleteAsync($"https://localhost:5000/api/patient/{id}");
+        HttpResponseMessage response = await _httpClient.DeleteAsync($"https://localhost:5000/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
             return RedirectToAction("Index", "Home");
@@ -153,7 +151,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
 
     private async Task<Frontend.Models.Patient?> GetPatientById(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/api/patient/{id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"https://localhost:5000/patient/{id}");
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();

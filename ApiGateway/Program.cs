@@ -14,25 +14,26 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie"; 
-    // Redirect to login page if unauthorized
-    options.LoginPath = "/Auth/Login"; 
-    // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
-    options.Cookie.HttpOnly = true;
-    // Attribute that helps protect against cross-site request forgery (CSRF) attacks 
-    // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Extend the cookie expiration if the user remains active
-    options.SlidingExpiration = true;
-});
+
+// Add Authentication services with cookie authentication
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.Cookie.Name = "P10AuthCookie";
+        options.LoginPath = "/auth/login";
+        options.AccessDeniedPath = "/auth/accessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None; // ou Lax selon vos besoins
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Assurez-vous que cela est correct pour votre environnement
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+        options.SlidingExpiration = true;
+    });
 
 var app = builder.Build();
+
+app.UseRouting();
+app.UseAuthentication(); 
+app.UseAuthorization(); 
 
 await app.UseOcelot();
 

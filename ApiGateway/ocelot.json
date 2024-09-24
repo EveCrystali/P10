@@ -2,7 +2,7 @@
   "Routes": 
   [
     {
-      "DownstreamPathTemplate": "/api/patient/{id}",
+      "DownstreamPathTemplate": "/patient/{id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -10,7 +10,7 @@
           "Port": 7200
         }
       ],
-      "UpstreamPathTemplate": "/api/patient/{id}",
+      "UpstreamPathTemplate": "/patient/{id}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
     },
     {
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "DownstreamPathTemplate": "/api/auth/",
+      "DownstreamPathTemplate": "/auth/",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -33,22 +33,23 @@
           "Port": 7201
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/",
+      "UpstreamPathTemplate": "/auth/",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
     },
     {
       "DownstreamPathTemplate": "/auth/login",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7201
-        }
+          {
+              "Host": "localhost",
+              "Port": 7201
+          }
       ],
       "UpstreamPathTemplate": "/auth/login",
-      "UpstreamHttpMethod": [ "Post", "Get" ],
-      "AddHeadersToRequest": {
-        "Cookie": "{Cookie}"
+      "UpstreamHttpMethod": [ "POST" ],
+      "AuthenticationOptions": {
+          "AuthenticationProviderKey": "CookieAuth",
+          "AllowedScopes": []
       }
     },
     {

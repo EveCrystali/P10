@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
+
 public class PatientsController(HttpClient httpClient, ILogger<PatientsController> logger) : Controller
 {
     private readonly HttpClient _httpClient = httpClient;
@@ -53,7 +54,7 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
             HttpResponseMessage response = await _httpClient.PostAsJsonAsync("https://localhost:5000/patient", patient);
             if (response.IsSuccessStatusCode)
             {
-                var createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
+                Models.Patient? createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
                 if (createdPatient != null)
                 {
                     return RedirectToAction(nameof(Details), new { id = createdPatient.Id });
@@ -69,7 +70,6 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
                 _logger.LogError($"Error from the server : " + response.ReasonPhrase);
                 return RedirectToAction(nameof(Index), nameof(HomeController));
             }
-
         }
         else
         {
@@ -159,4 +159,3 @@ public class PatientsController(HttpClient httpClient, ILogger<PatientsControlle
         return null;
     }
 }
-

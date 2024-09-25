@@ -1,5 +1,3 @@
-using System;
-using System.Globalization;
 using BackendPatient.Models;
 
 namespace BackendPatient.Data;
@@ -7,7 +5,6 @@ namespace BackendPatient.Data;
 public class DataSeeder(ApplicationDbContext dbContext)
 {
     private readonly ApplicationDbContext _dbContext = dbContext;
-
 
     public void SeedPatients()
     {

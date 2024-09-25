@@ -1,9 +1,6 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Frontend.Models;
-using BackendPatient.Data;
-using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
 
@@ -21,7 +18,7 @@ public class HomeController(ILogger<HomeController> logger, HttpClient httpClien
             return View(patients);
         }
 
-         _logger.LogError("Failed to load patients from backend. Status Code: {0}", response.StatusCode);
+        _logger.LogError("Failed to load patients from backend. Status Code: {0}", response.StatusCode);
         return View(new List<Frontend.Models.Patient>());
     }
 

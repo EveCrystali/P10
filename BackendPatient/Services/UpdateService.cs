@@ -1,7 +1,4 @@
-using System;
 using BackendPatient.Data;
-using BackendPatient.Models;
-using BackendPatient.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +7,7 @@ namespace BackendPatient.Services;
 public class UpdateService<T>(ApplicationDbContext dbContext) : IUpdateService<T> where T : class
 {
     private readonly ApplicationDbContext _dbContext = dbContext;
-    
+
     /// <summary>
     /// This service is used to update an entity in the database.
     /// It checks if the entity to be updated is valid, if the id parameter is the same as the id of the entity in the body,
@@ -71,6 +68,4 @@ public class UpdateService<T>(ApplicationDbContext dbContext) : IUpdateService<T
         Console.WriteLine("The entity was successfully updated");
         return new OkObjectResult(entity);
     }
-
-
 }

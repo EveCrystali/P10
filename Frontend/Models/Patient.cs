@@ -1,12 +1,10 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using Frontend.Models;
 
 namespace Frontend.Models;
 
 public class Patient
 {
-    public int Id {get; set;}
+    public int Id { get; set; }
 
     [Required(ErrorMessage = "First name is required")]
     [Length(1, 50, ErrorMessage = "First name should be between 1 and 50 characters")]
@@ -34,5 +32,4 @@ public class Patient
     [DataType(DataType.PhoneNumber)]
     [RegularExpression(@"^[0-9]{3}[-]([0-9]{3})[-]([0-9]{4})$", ErrorMessage = "Not a valid phone number")]
     public string? PhoneNumber { get; set; }
-
 }

@@ -1,6 +1,6 @@
+using Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Auth.Models;
 
 namespace Auth.Controllers;
 
@@ -19,7 +19,7 @@ public class AuthController(
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         _logger.LogInformation($"Login request in Auth microservice from Auth controller in Login method with username: {model.Username}");
-        var user = await _userManager.FindByNameAsync(model.Username);
+        IdentityUser? user = await _userManager.FindByNameAsync(model.Username);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
             _logger.LogInformation($"User {model.Username} found and password is correct");
@@ -49,7 +49,7 @@ public class AuthController(
 
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
+            foreach (IdentityError error in result.Errors)
             {
                 ModelState.AddModelError("", error.Description);
             }
@@ -60,6 +60,4 @@ public class AuthController(
 
         return Ok("Registered successfully");
     }
-
 }
-

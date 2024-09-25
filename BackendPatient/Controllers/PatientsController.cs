@@ -1,22 +1,16 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using BackendPatient.Data;
 using BackendPatient.Models;
 using BackendPatient.Services;
-using Microsoft.AspNetCore.Authorization;
-using Swashbuckle.AspNetCore.Annotations;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("patient")]
-
 public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
 {
     private readonly BackendPatient.Data.ApplicationDbContext _dbContext = dbContext;
     private readonly IUpdateService<Patient> _updateService = updateService;
-
 
     /// <summary>
     /// Retrieves a <see cref="Patient"/> from the database by its identifier.
@@ -58,8 +52,6 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The updated patient.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
-    // TODO: Uncomment this when the auth service is ready
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
@@ -71,8 +63,6 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    // TODO: Uncomment this when the auth service is ready
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database
@@ -103,12 +93,10 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="id">The id of the patient to delete.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpDelete("{id}")]
-    // TODO: Uncomment this when the auth service is ready
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeletePatient(int id)
     {
         // Find the patient in the database
-        var patient = await _dbContext.Patients.FindAsync(id);
+        Patient? patient = await _dbContext.Patients.FindAsync(id);
         if (patient == null)
         {
             // Return a 404 Not Found response if the patient is not found
@@ -128,4 +116,3 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
         return _dbContext.Patients.Any(e => e.Id == patient.Id);
     }
 }
-

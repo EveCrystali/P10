@@ -1,6 +1,5 @@
-using System;
-using Microsoft.AspNetCore.Identity;
 using Auth.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Data;
 
@@ -102,4 +101,3 @@ public class DataSeeder
         }
     }
 }
-

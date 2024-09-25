@@ -2,9 +2,8 @@ using Auth.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -38,8 +37,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
 });
-
-
 
 // Configuration de CORS
 builder.Services.AddCors(options =>
@@ -95,7 +92,7 @@ builder.Services.AddScoped<DataSeeder>();
 // Découverte des endpoints API
 builder.Services.AddEndpointsApiExplorer();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Seed des utilisateurs et des rôles
 using (IServiceScope scope = app.Services.CreateScope())

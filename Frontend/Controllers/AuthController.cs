@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
 using Frontend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Identity;
 
 namespace Frontend.Controllers;
 
@@ -10,7 +9,6 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
     private readonly ILogger<AuthController> _logger = logger;
 
     private readonly HttpClient _httpClient = httpClient;
-
 
     [HttpGet]
     public IActionResult Login()
@@ -26,18 +24,18 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
             return View(loginModel);
         }
 
-        // FIXME: Is that correct ? 
+        // FIXME: Is that correct ?
         // Old way :
         // var response = await _httpClient.PostAsJsonAsync("/auth/login", loginModel);
         // New way :
-        var response = await _httpClient.PostAsync("/auth/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
+        HttpResponseMessage response = await _httpClient.PostAsync("/auth/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
 
         if (response.IsSuccessStatusCode)
         {
             // Récupérer les cookies de la réponse et les ajouter à la réponse du Frontend
-            if (response.Headers.TryGetValues("Set-Cookie", out var setCookies))
+            if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? setCookies))
             {
-                foreach (var cookie in setCookies)
+                foreach (string cookie in setCookies)
                 {
                     // Ajuster le cookie si nécessaire
                     Response.Headers.Append("Set-Cookie", cookie);
@@ -66,14 +64,14 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
             return View(registerModel);
         }
 
-        var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerModel);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/auth/register", registerModel);
 
         if (response.IsSuccessStatusCode)
         {
             // Récupérer les cookies de la réponse et les ajouter à la réponse du Frontend
-            if (response.Headers.TryGetValues("Set-Cookie", out var setCookies))
+            if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? setCookies))
             {
-                foreach (var cookie in setCookies)
+                foreach (string cookie in setCookies)
                 {
                     // Ajuster le cookie si nécessaire
                     Response.Headers.Append("Set-Cookie", cookie);
@@ -84,12 +82,12 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
         else
         {
             // Récupérer et afficher les erreurs
-            var errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
+            Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
             if (errors != null)
             {
-                foreach (var error in errors)
+                foreach (KeyValuePair<string, string[]> error in errors)
                 {
-                    foreach (var desc in error.Value)
+                    foreach (string desc in error.Value)
                     {
                         ModelState.AddModelError(string.Empty, desc);
                     }
@@ -107,7 +105,7 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        var response = await _httpClient.PostAsync("api/auth/logout", null);
+        HttpResponseMessage response = await _httpClient.PostAsync("api/auth/logout", null);
 
         if (response.IsSuccessStatusCode)
         {

@@ -1,6 +1,5 @@
 {
-  "Routes": 
-  [
+  "Routes": [
     {
       "DownstreamPathTemplate": "/patient/{id}",
       "DownstreamScheme": "https",
@@ -36,8 +35,8 @@
       "UpstreamPathTemplate": "/auth/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "AuthenticationOptions": {
-          "AuthenticationProviderKey": "CookieAuth",
-          "AllowedScopes": []
+        "AuthenticationProviderKey": "CookieAuth",
+        "AllowedScopes": []
       }
     }
   ],

@@ -1,7 +1,7 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
@@ -29,11 +29,11 @@ builder.Services.AddAuthentication("CookieAuth")
         options.SlidingExpiration = true;
     });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseRouting();
-app.UseAuthentication(); 
-app.UseAuthorization(); 
+app.UseAuthentication();
+app.UseAuthorization();
 
 await app.UseOcelot();
 

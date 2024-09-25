@@ -1,48 +1,21 @@
 using Auth.Data;
-using Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 using Swashbuckle.AspNetCore.Swagger;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Add services to the container.
-
-// Add Identity
-
+// Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Identity with Cookie Authentication
+// Configuration d'Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie";
-    // Redirect to login page if unauthorized
-    options.LoginPath = "/auth/login";
-    // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/auth/accessDenied";
-    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
-    options.Cookie.HttpOnly = true;
-    // Attribute that helps protect against cross-site request forgery (CSRF) attacks 
-    // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Extend the cookie expiration if the user remains active
-    options.SlidingExpiration = true;
-});
-
-// Add Identity API
-
+// Configuration des options d'Identity
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -50,40 +23,54 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
-    // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(2);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.User.RequireUniqueEmail = true;
 });
 
-// Add Cors policy to allow all origins because we are using Ocelot Api Gateway 
-// We need to allow all origins because Frontend and Auth are not on the same port
+// Configuration des cookies
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Name = "P10AuthCookie";
+    options.LoginPath = "/auth/login";
+    options.AccessDeniedPath = "/auth/accessDenied";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
+});
+
+
+
+// Configuration de CORS
 builder.Services.AddCors(options =>
-  {
-      options.AddPolicy("AllowAllOrigins",
-          builder => builder.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader());
-  });
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
 
-// Add Authorization policies
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
-    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+// Configuration des politiques d'autorisation
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"));
+    options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
+    options.AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+});
 
+// Ajout des services MVC
 builder.Services.AddControllersWithViews();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
+// Configuration de Swagger
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new() { Title = "P10.Api", Version = "v1" });
+    options.SwaggerDoc("v1", new() { Title = "P10.Auth.Api", Version = "v1" });
     options.AddSecurityDefinition("CookieAuth", new OpenApiSecurityScheme
     {
         Description = "Entrer votre nom de cookie pour avoir l'authorisation",
         Type = SecuritySchemeType.ApiKey,
-        Name = ".AspNetCore.Identity.Application",
+        Name = "P10AuthCookie", // Assurez-vous que le nom correspond au cookie configuré
         In = ParameterLocation.Cookie
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -94,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "P10AuthCookie"
+                    Id = "CookieAuth"
                 }
             },
             new string[] {}
@@ -102,43 +89,48 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Seed des données
 builder.Services.AddScoped<DataSeeder>();
+
+// Découverte des endpoints API
 builder.Services.AddEndpointsApiExplorer();
-
-
 
 var app = builder.Build();
 
+// Seed des utilisateurs et des rôles
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
     UserManager<IdentityUser> userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     RoleManager<IdentityRole> roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
-    // Seed users and roles
     await DataSeeder.SeedUsers(userManager, logger);
     await DataSeeder.SeedRoles(roleManager, logger);
     await DataSeeder.SeedAffectationsRolesToUsers(userManager, roleManager, logger);
 }
 
-// Configure the HTTP request pipeline.
+// Configuration du pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapControllers();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-// Configure Cors policy to allow all origins because we are using Ocelot Api Gateway 
-// We need to allow all origins because Frontend and Auth are not on the same port
+app.UseRouting();
+
+// Application des politiques CORS
 app.UseCors("AllowAllOrigins");
 
-// Add protection gainst CSRF attacks and secure authentication
+// Application des middlewares d'authentification et d'autorisation
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Gestion des cookies
 app.UseCookiePolicy();
 
-app.UseHttpsRedirection();
+app.MapControllers();
 
 app.Run();

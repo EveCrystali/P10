@@ -19,7 +19,19 @@
         </div>
     </div> *@
     <button type="submit" class="btn btn-primary">Se connecter</button>
-    <div class="mt-2">
+    @* <div class="mt-2">
         <a href="/Account/ForgotPassword">Mot de passe oublié ?</a>
-    </div>
+    </div> *@
 </form>
+
+<script>
+    $(document).ready(function () {
+        $("form").submit(function (event) {
+            console.log("Login form submitted");
+            console.log("Username: " + $("#Username").val());
+            console.log("Password: " + $("#Password").val());
+            console.log("RememberMe: " + $("#RememberMe").is(":checked"));
+        });
+    });
+</script>
+

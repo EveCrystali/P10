@@ -1,6 +1,5 @@
 ﻿<ul class="navbar-nav">
-@if (User.Identity.IsAuthenticated)
-{
+
     <li class="nav-item">
        @User.Identity?.Name
     </li>
@@ -10,11 +9,9 @@
             <button  type="submit" class="nav-link btn btn-link">Se déconnecter</button>
         </form>
     </li>  
-}
-else
-{
+
     <li class="nav-item">
         <a class="nav-link" asp-controller="Auth" asp-action="Login">Connexion</a>
     </li>
-}
+
 </ul>

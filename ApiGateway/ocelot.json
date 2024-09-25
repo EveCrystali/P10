@@ -25,7 +25,7 @@
       ]
     },
     {
-      "DownstreamPathTemplate": "/auth/",
+      "DownstreamPathTemplate": "/auth/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -33,48 +33,12 @@
           "Port": 7201
         }
       ],
-      "UpstreamPathTemplate": "/auth/",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
-    },
-    {
-      "DownstreamPathTemplate": "/auth/login",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-          {
-              "Host": "localhost",
-              "Port": 7201
-          }
-      ],
-      "UpstreamPathTemplate": "/auth/login",
-      "UpstreamHttpMethod": [ "POST" ],
+      "UpstreamPathTemplate": "/auth/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "AuthenticationOptions": {
           "AuthenticationProviderKey": "CookieAuth",
           "AllowedScopes": []
       }
-    },
-    {
-      "DownstreamPathTemplate": "/auth/register",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7201
-        }
-      ],
-      "UpstreamPathTemplate": "/auth/register",
-      "UpstreamHttpMethod": [ "Post" ]
-    },
-    {
-      "DownstreamPathTemplate": "/auth/logout",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7201
-        }
-      ],
-      "UpstreamPathTemplate": "/auth/logout",
-      "UpstreamHttpMethod": [ "Post" ]
     }
   ],
 

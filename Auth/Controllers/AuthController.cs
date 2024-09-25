@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Auth.Models;
@@ -7,15 +6,19 @@ namespace Auth.Controllers;
 
 [Route("auth")]
 [ApiController]
-public class AuthController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, ILogger<AuthController> logger) : ControllerBase
+public class AuthController(
+    UserManager<IdentityUser> userManager,
+    SignInManager<IdentityUser> signInManager,
+    ILogger<AuthController> logger) : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager = userManager;
     private readonly SignInManager<IdentityUser> _signInManager = signInManager;
-    private ILogger<AuthController> _logger = logger;
+    private readonly ILogger<AuthController> _logger = logger;
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
+        _logger.LogInformation($"Login request in Auth microservice from Auth controller in Login method with username: {model.Username}");
         var user = await _userManager.FindByNameAsync(model.Username);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {

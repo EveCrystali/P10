@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", ".\ApiGateway\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", ".\Frontend\Frontend.csproj", "{EE18CFCF-1B0C-4FF1-9746-D10E220DE9FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "Auth\Auth.csproj", "{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", ".\Auth\Auth.csproj", "{95BB5354-BC66-46EA-AC9E-B84E7A81AC34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

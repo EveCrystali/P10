@@ -1,17 +1,26 @@
 using System.Diagnostics;
+using Frontend.Controllers.Service;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
 
-public class HomeController(ILogger<HomeController> logger, HttpClient httpClient) : Controller
+public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger = logger;
-    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<HomeController> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly string _homeServiceUrl; 
+
+    public HomeController(ILogger<HomeController> logger, HttpClient httpClient, IConfiguration configuration)
+    {
+        _logger = logger;
+        _httpClient = httpClient;
+        _homeServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Home");
+    }
 
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync("https://localhost:5000/patient");
+        HttpResponseMessage response = await _httpClient.GetAsync($"{_homeServiceUrl}patient/");
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();

@@ -16,8 +16,8 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
 // Add Authentication services with cookie authentication
-builder.Services.AddAuthentication("CookieAuth")
-    .AddCookie("CookieAuth", options =>
+builder.Services.AddAuthentication("P10AuthCookie")
+    .AddCookie("P10AuthCookie", options =>
     {
         options.Cookie.Name = "P10AuthCookie";
         options.LoginPath = "/auth/login";

@@ -1,8 +1,4 @@
 ﻿<ul class="navbar-nav">
-
-    <li class="nav-item">
-       @User.Identity?.Name
-    </li>
     <li class="nav-item">
         <form  class="form-inline" asp-controller="Auth" asp-action="Logout" 
             asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

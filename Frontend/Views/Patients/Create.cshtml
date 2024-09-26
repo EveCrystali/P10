@@ -20,38 +20,49 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+                <label asp-for="FirstName" for="FirstName" class="control-label">
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                    Prénom
+                </label>
             </div>
             <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+                <label asp-for="LastName" for="LastName" class="control-label">
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                    Nom
+                </label>
             </div>
             <div>
-                <label asp-for="DateOfBirth" class="control-label"></label>
+                <label asp-for="DateOfBirth" for="DateOfBirth"  class="control-label">
                 <input asp-for="DateOfBirth" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                Date de naissance
+                </label>
             </div>
             <div class="form-group">
-                <label asp-for="Gender" class="control-label"></label>
-                <!--<input asp-for="Gender" class="form-control" />-->
-                <select asp-for="Gender" class="form-control">
-                    <option value="M">Masculin</option>
-                    <option value="F">Feminin</option>
-                </select>
-                <span asp-validation-for="Gender" class="text-danger"></span>
+                <label asp-for="Gender" for="Gender" class="control-label">
+                    <select asp-for="Gender" class="form-control">
+                        <option value="M">Masculin</option>
+                        <option value="F">Feminin</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                    Sexe
+                </label>
             </div>
             <div class="form-group">
-                <label asp-for="Address" class="control-label"></label>
-                <input asp-for="Address" class="form-control" />
-                <span asp-validation-for="Address" class="text-danger"></span>
+                <label asp-for="Address" for="Address" class="control-label">
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                    Adresse
+                </label>
             </div>
             <div class="form-group">
-                <label asp-for="PhoneNumber" class="control-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                <label asp-for="PhoneNumber" for="PhoneNumber" class="control-label">
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    Téléphone
+                </label>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

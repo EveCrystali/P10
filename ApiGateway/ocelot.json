@@ -13,6 +13,18 @@
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
     },
     {
+      "DownstreamPathTemplate": "/patient",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7200
+        }
+      ],
+      "UpstreamPathTemplate": "/patient",
+      "UpstreamHttpMethod": [ "Get" ]
+    },
+    {
       "UpstreamPathTemplate": "/",
       "DownstreamPathTemplate": "/",
       "DownstreamScheme": "https",
@@ -35,7 +47,7 @@
       "UpstreamPathTemplate": "/auth/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "AuthenticationOptions": {
-        "AuthenticationProviderKey": "CookieAuth",
+        "AuthenticationProviderKey": "P10AuthCookie",
         "AllowedScopes": []
       }
     }

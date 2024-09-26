@@ -1,6 +1,12 @@
+using System.Net.Security;
 using Frontend.Controllers;
+using Microsoft.Extensions.Configuration;
+
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+IConfiguration Configuration = builder.Configuration;
 
 // Add Authorization policies and cookie authentification
 
@@ -38,11 +44,20 @@ builder.Services.AddHttpClient();
 // Configure the HTTP request pipeline for avoiding self-signed certificates
 builder.Services.AddHttpClient<HomeController>(client =>
     {
-        client.BaseAddress = new Uri("http://localhost:5000");
+        // Remplacer l'URI codée en dur par une configuration
+        string? apiGatewayBaseUrl = Configuration["ApiGatewayAddress:BaseUrl"];
+        if (string.IsNullOrEmpty(apiGatewayBaseUrl)) 
+        {
+            throw new ArgumentNullException(apiGatewayBaseUrl, "L'URL de base ne peut pas être nulle ou vide.");
+        }
+        client.BaseAddress = new Uri(apiGatewayBaseUrl);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
     {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+        {
+            return errors == SslPolicyErrors.None;
+        }
     });
 
 WebApplication app = builder.Build();
@@ -73,4 +88,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
 
-app.Run();
+await app.RunAsync();

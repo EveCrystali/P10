@@ -1,14 +1,23 @@
+using Frontend.Controllers.Service;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace Frontend.Controllers;
 
-public class AuthController(ILogger<AuthController> logger, HttpClient httpClient) : Controller
+public class AuthController : Controller
 {
-    private readonly ILogger<AuthController> _logger = logger;
+    private readonly ILogger<AuthController> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly string _authServiceUrl; 
+    private const string SetCookieHeader = "Set-Cookie";
 
-    private readonly HttpClient _httpClient = httpClient;
+    public AuthController(ILogger<AuthController> logger, HttpClient httpClient, IConfiguration configuration)
+    {
+        _logger = logger;
+        _httpClient = httpClient;
+        _authServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Auth");
+    }
 
     [HttpGet]
     public IActionResult Login()
@@ -21,30 +30,28 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
     {
         if (!ModelState.IsValid)
         {
+            _logger.LogError("Model state is not valid.");
             return View(loginModel);
         }
 
-        // FIXME: Is that correct ?
-        // Old way :
-        // var response = await _httpClient.PostAsJsonAsync("/auth/login", loginModel);
-        // New way :
-        HttpResponseMessage response = await _httpClient.PostAsync("/auth/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
 
         if (response.IsSuccessStatusCode)
         {
-            // Récupérer les cookies de la réponse et les ajouter à la réponse du Frontend
-            if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? setCookies))
+            _logger.LogInformation("Response is Success Status Code.");
+
+            if (response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
             {
                 foreach (string cookie in setCookies)
                 {
-                    // Ajuster le cookie si nécessaire
-                    Response.Headers.Append("Set-Cookie", cookie);
+                    Response.Headers.Append(SetCookieHeader, cookie);
                 }
             }
             return RedirectToAction("Index", "Home");
         }
         else
         {
+            _logger.LogError("Response is not Success Status Code.");
             ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
             return View(loginModel);
         }
@@ -64,56 +71,48 @@ public class AuthController(ILogger<AuthController> logger, HttpClient httpClien
             return View(registerModel);
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/auth/register", registerModel);
 
-        if (response.IsSuccessStatusCode)
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/register/", registerModel);
+
+        if (response.IsSuccessStatusCode && response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
         {
-            // Récupérer les cookies de la réponse et les ajouter à la réponse du Frontend
-            if (response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? setCookies))
+            foreach (string cookie in setCookies)
             {
-                foreach (string cookie in setCookies)
-                {
-                    // Ajuster le cookie si nécessaire
-                    Response.Headers.Append("Set-Cookie", cookie);
-                }
+                Response.Headers.Append(SetCookieHeader, cookie);
             }
+
             return RedirectToAction("Index", "Home");
         }
         else
         {
-            // Récupérer et afficher les erreurs
             Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
             if (errors != null)
             {
-                foreach (KeyValuePair<string, string[]> error in errors)
+                foreach (string desc in errors.SelectMany(error => error.Value))
                 {
-                    foreach (string desc in error.Value)
-                    {
-                        ModelState.AddModelError(string.Empty, desc);
-                    }
+                    ModelState.AddModelError(string.Empty, desc);
                 }
-                return View(registerModel);
             }
             else
             {
                 ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
-                return View(registerModel);
             }
+            return View(registerModel);
         }
     }
 
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        HttpResponseMessage response = await _httpClient.PostAsync("api/auth/logout", null);
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/logout/", null);
 
         if (response.IsSuccessStatusCode)
         {
-            // Supprimer le cookie d'authentification
             Response.Cookies.Delete("P10AuthCookie");
             return RedirectToAction("Index", "Home");
         }
 
         return BadRequest("Erreur lors de la déconnexion.");
     }
+
 }

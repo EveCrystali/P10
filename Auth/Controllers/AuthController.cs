@@ -26,7 +26,7 @@ public class AuthController(
             Microsoft.AspNetCore.Identity.SignInResult? result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
             return Ok("Logged in successfully");
         }
-        else if (user == null) 
+        else if (user == null)
         {
             _logger.LogError($"User {model.Username} not found");
             return NotFound("User not found");
@@ -36,11 +36,11 @@ public class AuthController(
             _logger.LogError($"User {model.Username} found but password is incorrect");
             return Unauthorized("Invalid username or password");
         }
-        else 
+        else
         {
             _logger.LogError("Something went wrong");
             return StatusCode(500, "Something went wrong");
-        }       
+        }
     }
 
     [HttpPost]
@@ -73,4 +73,14 @@ public class AuthController(
 
         return Ok("Registered successfully");
     }
+
+    [HttpGet]
+    [Route("status")]
+    public async Task<IActionResult> Status()
+    {
+        bool isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+        string? username = isAuthenticated ? User.Identity.Name : null;
+        return Ok(new { isAuthenticated, username });
+    }
+
 }

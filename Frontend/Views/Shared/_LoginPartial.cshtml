@@ -1,13 +1,56 @@
 ﻿<ul class="navbar-nav">
-    <li class="nav-item">
-        <form  class="form-inline" asp-controller="Auth" asp-action="Logout" 
-            asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link">Se déconnecter</button>
-        </form>
-    </li>  
-
-    <li class="nav-item">
+    <li class="nav-item" id="login-item" style="display: true;">
         <a class="nav-link" asp-controller="Auth" asp-action="Login">Connexion</a>
     </li>
+    
+    <li class="nav-item" id="logout-item" style="display: false;">
+        <form class="form-inline" asp-controller="Auth" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="nav-link btn btn-link">Se déconnecter</button>
+        </form>
+    </li>
 
+    <li class="nav-item" id="user-name-item" style="display: none;">
+        <span class="nav-link" id="user-name"></span>
+    </li>
 </ul>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        console.log("Starting to fetch user data from /status");
+        $.ajax({
+            url: "/status",
+            method: "GET",
+            success: function (data) {
+                console.log("Received user data from /status", data);
+
+                // Vérifie le type des données reçues pour s'assurer qu'il s'agit bien d'un objet
+                console.log("Type of isAuthenticated:", typeof data.isAuthenticated);
+                console.log("Type of username:", typeof data.username);
+
+                // Assure-toi que `isAuthenticated` est un booléen et non un tableau vide
+                const isAuthenticated = Array.isArray(data.isAuthenticated) ? false : data.isAuthenticated;
+                const username = Array.isArray(data.username) ? "Utilisateur inconnu" : data.username;
+
+                if (isAuthenticated) {
+                    console.log("User is authenticated, showing logout item and user name item");
+                    $("#logout-item").show();
+                    $("#user-name-item").show();
+                    $("#user-name").text(username || "Utilisateur");
+                    $("#login-item").hide();
+                } else {
+                    console.log("User is not authenticated, showing login item");
+                    $("#login-item").show();
+                    $("#logout-item").hide();
+                    $("#user-name-item").hide();
+                }
+            },
+            error: function (err) {
+                console.log("Error fetching user data from /status", err);
+                $("#login-item").show();
+            }
+        });
+    });
+
+</script>
+

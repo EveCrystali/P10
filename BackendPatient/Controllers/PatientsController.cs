@@ -1,5 +1,6 @@
 using BackendPatient.Models;
 using BackendPatient.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,6 +53,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The updated patient.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
@@ -63,6 +65,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database
@@ -93,6 +96,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="id">The id of the patient to delete.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpDelete("{id}")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeletePatient(int id)
     {
         // Find the patient in the database

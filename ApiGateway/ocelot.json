@@ -78,7 +78,32 @@
         "AllowedMethods": ["GET", "POST", "OPTIONS"],
         "AllowedHeaders": ["*"]
       }
+    },
+    {
+      "DownstreamPathTemplate": "/auth/status",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7201 
+        }
+      ],
+      "UpstreamPathTemplate": "/auth/status",
+      "UpstreamHttpMethod": ["GET"],
+      "RouteIsCaseSensitive": false,
+      "AuthenticationOptions": null,
+      "RateLimitOptions": {
+        "EnableRateLimiting": false
+      },
+      "CorsPolicy": {
+        "AllowAnyOrigin": false,
+        "AllowCredentials": true,
+        "AllowedOrigins": ["http://localhost:7000"],
+        "AllowedMethods": ["GET"],
+        "AllowedHeaders": ["*"]
+      }
     }
+
   ],
 
   "GlobalConfiguration": {

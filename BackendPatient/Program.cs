@@ -9,6 +9,20 @@ using Microsoft.OpenApi.Models;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+
+builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowApiGateway",
+            builder =>
+            {
+                builder.WithOrigins("http://localhost:5000") // URL de l'API Gateway
+                       .AllowCredentials() // Permettre les cookies
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            });
+    });
+
 builder.Services.AddControllers()
     // Add XML annotations to swagger documentation
     .AddXmlSerializerFormatters()
@@ -18,6 +32,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
+
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
@@ -79,6 +95,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors("AllowApiGateway");
+
 app.MapControllers();
 
 app.MapGet("/", async context =>
@@ -88,4 +106,4 @@ app.MapGet("/", async context =>
 
 app.UseAuthorization();
 
-app.Run();
+await app.RunAsync();

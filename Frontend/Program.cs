@@ -36,6 +36,7 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();

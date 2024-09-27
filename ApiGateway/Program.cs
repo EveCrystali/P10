@@ -37,4 +37,4 @@ app.UseAuthorization();
 
 await app.UseOcelot();
 
-app.Run();
+await app.RunAsync();

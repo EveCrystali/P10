@@ -41,11 +41,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Configuration de CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin()
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                        .AllowCredentials());
+    options.AddPolicy("AllowFrontend",
+        builder => builder.WithOrigins("http://localhost:7000") // URL du Frontend
+                       .AllowCredentials() // Permettre l'utilisation des cookies
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                    );
 });
 
 // Configuration des politiques d'autorisation
@@ -120,7 +121,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // Application des politiques CORS
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontend");
 
 // Application des middlewares d'authentification et d'autorisation
 app.UseAuthentication();
@@ -131,4 +132,4 @@ app.UseCookiePolicy();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

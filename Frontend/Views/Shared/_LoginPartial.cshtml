@@ -1,10 +1,10 @@
 ﻿<ul class="navbar-nav">
     <li class="nav-item" id="login-item" style="display: true;">
-        <a class="nav-link" asp-controller="Auth" asp-action="Login">Connexion</a>
+        <a class="nav-link" asp-controller="auth" asp-action="login">Connexion</a>
     </li>
-    
+
     <li class="nav-item" id="logout-item" style="display: false;">
-        <form class="form-inline" asp-controller="Auth" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+        <form class="form-inline" asp-controller="auth" asp-action="logout">
             <button type="submit" class="nav-link btn btn-link">Se déconnecter</button>
         </form>
     </li>
@@ -19,7 +19,7 @@
     $(document).ready(function () {
         console.log("Starting to fetch user data from /status");
         $.ajax({
-            url: "/status",
+            url: window.location.protocol + '//' + window.location.host + '/auth/status', 
             method: "GET",
             success: function (data) {
                 console.log("Received user data from /status", data);
@@ -53,4 +53,3 @@
     });
 
 </script>
-

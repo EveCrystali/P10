@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
 
+[Route("patient")]
 public class PatientsController : Controller
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<PatientsController> _logger ;
-    private readonly string _patientServiceUrl ;
-    
+    private readonly ILogger<PatientsController> _logger;
+    private readonly string _patientServiceUrl;
+
     public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, IConfiguration configuration)
     {
         _logger = logger;
@@ -37,6 +38,7 @@ public class PatientsController : Controller
         return View(new List<Frontend.Models.Patient>());
     }
 
+    [HttpGet("{id}")]
     public async Task<IActionResult> Details(int id)
     {
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
@@ -87,6 +89,7 @@ public class PatientsController : Controller
         }
     }
 
+    [HttpGet("edit/{id}")]
     public async Task<IActionResult> Edit(int id)
     {
         if (ModelState.IsValid)
@@ -113,7 +116,7 @@ public class PatientsController : Controller
         }
     }
 
-    [HttpPost]
+    [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Frontend.Models.Patient patient)
     {
         if (ModelState.IsValid)
@@ -127,7 +130,7 @@ public class PatientsController : Controller
             }
             else
             {
-                _logger.LogError("Failed to update patient with id {PatientId}. Status code: {StatusCode}", patient.Id, response.StatusCode);   
+                _logger.LogError("Failed to update patient with id {PatientId}. Status code: {StatusCode}", patient.Id, response.StatusCode);
             }
         }
         else
@@ -139,6 +142,7 @@ public class PatientsController : Controller
         return View(patient);
     }
 
+    [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
 
@@ -153,7 +157,8 @@ public class PatientsController : Controller
         return View();
     }
 
-    [HttpPost, ActionName("Delete")]
+    [HttpPost("delete/{id}")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         HttpResponseMessage response = await _httpClient.DeleteAsync($"{_patientServiceUrl}/{id}");
@@ -165,4 +170,5 @@ public class PatientsController : Controller
         ModelState.AddModelError(string.Empty, "Unable to delete patient.");
         return View();
     }
+
 }

@@ -1,7 +1,7 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/patient/{id}",
+      "DownstreamPathTemplate": "/patient/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -9,20 +9,8 @@
           "Port": 7200
         }
       ],
-      "UpstreamPathTemplate": "/patient/{id}",
+      "UpstreamPathTemplate": "/patient/{everything}",
       "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
-    },
-    {
-      "DownstreamPathTemplate": "/patient",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7200
-        }
-      ],
-      "UpstreamPathTemplate": "/patient",
-      "UpstreamHttpMethod": ["GET"]
     },
     {
       "UpstreamPathTemplate": "/",

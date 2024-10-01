@@ -13,17 +13,6 @@
       "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
     },
     {
-      "UpstreamPathTemplate": "/",
-      "DownstreamPathTemplate": "/",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7200
-        }
-      ]
-    },
-    {
       "DownstreamPathTemplate": "/auth/logout",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -35,10 +24,6 @@
       "UpstreamPathTemplate": "/auth/logout",
       "UpstreamHttpMethod": ["POST"],
       "RouteIsCaseSensitive": false,
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "P10AuthCookie",
-        "AllowedScopes": []
-      },
       "RateLimitOptions": {
         "EnableRateLimiting": false
       },
@@ -97,8 +82,18 @@
         "AllowedMethods": ["GET"],
         "AllowedHeaders": ["*"]
       }
+    },
+    {
+      "UpstreamPathTemplate": "/",
+      "DownstreamPathTemplate": "/",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7200
+        }
+      ]
     }
-
   ],
 
   "GlobalConfiguration": {

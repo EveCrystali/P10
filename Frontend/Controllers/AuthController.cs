@@ -116,7 +116,7 @@ public class AuthController : Controller
             return View();
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/logout/", null);
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/logout", null);
 
         if (response.IsSuccessStatusCode)
         {

@@ -5,6 +5,8 @@ using Microsoft.OpenApi.Models;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+string cookiePolicySecurityName = "P10AuthCookie";
+
 // Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -29,7 +31,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Configuration des cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.Name = "P10AuthCookie";
+    options.Cookie.Name = cookiePolicySecurityName;
     options.LoginPath = "/auth/login";
     options.LogoutPath = "/auth/logout";
     options.AccessDeniedPath = "/auth/accessDenied";
@@ -66,11 +68,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "P10.Auth.Api", Version = "v1" });
-    options.AddSecurityDefinition("P10AuthCookie", new OpenApiSecurityScheme
+    options.AddSecurityDefinition(cookiePolicySecurityName, new OpenApiSecurityScheme
     {
         Description = "Entrer votre nom de cookie pour avoir l'authorisation",
         Type = SecuritySchemeType.ApiKey,
-        Name = "P10AuthCookie", // Assurez-vous que le nom correspond au cookie configuré
+        Name = cookiePolicySecurityName, // Assurez-vous que le nom correspond au cookie configuré
         In = ParameterLocation.Cookie
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -81,7 +83,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "P10AuthCookie"
+                    Id = cookiePolicySecurityName
                 }
             },
             new string[] {}

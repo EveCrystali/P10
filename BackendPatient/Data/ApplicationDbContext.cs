@@ -1,6 +1,5 @@
-using System;
-using Microsoft.EntityFrameworkCore;
 using BackendPatient.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendPatient.Data;
 
@@ -14,5 +13,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<Patient>().HasKey(p => p.Id);
     }
-
 }

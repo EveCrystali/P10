@@ -1,15 +1,27 @@
-using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using BackendPatient.Data;
+using BackendPatient.Extensions;
 using BackendPatient.Models;
 using BackendPatient.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
-using Swashbuckle.AspNetCore.Swagger;
-using BackendPatient.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowApiGateway",
+            builder =>
+            {
+                builder.WithOrigins("http://localhost:5000") // URL de l'API Gateway
+                       .AllowCredentials() // Permettre les cookies
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            });
+    });
+
 builder.Services.AddControllers()
     // Add XML annotations to swagger documentation
     .AddXmlSerializerFormatters()
@@ -19,7 +31,6 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
-  
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
@@ -32,13 +43,38 @@ builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
 
+// Add Authorization policies
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
+    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
+    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
+    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Cookie name shared between services
+    options.Cookie.Name = "P10AuthCookie";
+    // Redirect to login page if unauthorized
+    options.LoginPath = "/Auth/Login";
+    // Redirect to access denied page if unauthorized
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
+    options.Cookie.HttpOnly = true;
+    // Attribute that helps protect against cross-site request forgery (CSRF) attacks
+    // by specifying whether a cookie should be sent along with cross-site requests
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    // Extend the cookie expiration if the user remains active
+    options.SlidingExpiration = true;
+});
+
 builder.Services.AddMvc();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())
 {
-    var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    DataSeeder dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
     dataSeeder.SeedPatients();
 }
 
@@ -56,6 +92,8 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors("AllowApiGateway");
+
 app.MapControllers();
 
 app.MapGet("/", async context =>
@@ -65,4 +103,4 @@ app.MapGet("/", async context =>
 
 app.UseAuthorization();
 
-app.Run();
+await app.RunAsync();

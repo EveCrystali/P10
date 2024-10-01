@@ -121,7 +121,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
 // Application des middlewares d'authentification et d'autorisation
 app.UseAuthentication();
 app.UseAuthorization();

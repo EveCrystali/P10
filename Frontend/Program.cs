@@ -1,8 +1,5 @@
 using System.Net.Security;
 using Frontend.Controllers;
-using Microsoft.Extensions.Configuration;
-
-
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +35,6 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
@@ -49,7 +45,7 @@ builder.Services.AddHttpClient<HomeController>(client =>
     {
         // Remplacer l'URI codée en dur par une configuration
         string? apiGatewayBaseUrl = Configuration["ApiGatewayAddress:BaseUrl"];
-        if (string.IsNullOrEmpty(apiGatewayBaseUrl)) 
+        if (string.IsNullOrEmpty(apiGatewayBaseUrl))
         {
             throw new ArgumentNullException(apiGatewayBaseUrl, "L'URL de base ne peut pas être nulle ou vide.");
         }

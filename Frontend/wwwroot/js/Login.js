@@ -1,7 +1,7 @@
 // /wwwroot/js/login.js
 document.addEventListener("DOMContentLoaded", function() {
     const loginForm = document.getElementById('login-form'); // Si tu utilises un formulaire
-    
+
     if (loginForm) {
         loginForm.addEventListener('submit', function(event) {
             event.preventDefault();

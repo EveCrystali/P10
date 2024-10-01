@@ -72,7 +72,6 @@ public class AuthController : Controller
             return View(registerModel);
         }
 
-
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/register", registerModel);
 
         if (response.IsSuccessStatusCode && response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
@@ -102,14 +101,9 @@ public class AuthController : Controller
         }
     }
 
-    // FIXME : Logout is not working properly
-
-    // Note : BadREquest POST https://localhost:7000/Auth/Logout?returnUrl=%2F 400 (Bad Request)
-    // Note : Uncaught (in promise) Error: QUOTA_BYTES_PER_ITEM quota exceeded
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-
         if (!ModelState.IsValid)
         {
             _logger.LogError("Model state is not valid.");
@@ -126,7 +120,7 @@ public class AuthController : Controller
 
         return BadRequest("Erreur lors de la déconnexion.");
     }
-    
+
     [HttpGet("status")]
     public async Task<IActionResult> Status()
     {
@@ -138,11 +132,11 @@ public class AuthController : Controller
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Status request returned a success status code.");
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 _logger.LogInformation("Response content: {Content}", content);
 
                 // Retourner directement le contenu sous forme d'objet JSON au lieu d'une chaîne de texte
-                var jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+                Dictionary<string, object>? jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
                 return Ok(jsonObject);
             }
 
@@ -155,5 +149,4 @@ public class AuthController : Controller
             return StatusCode(500, "Erreur interne lors de la récupération du statut.");
         }
     }
-
 }

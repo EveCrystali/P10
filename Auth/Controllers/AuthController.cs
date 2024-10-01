@@ -82,5 +82,4 @@ public class AuthController(
         string? username = isAuthenticated ? User.Identity.Name : null;
         return Ok(new { isAuthenticated, username });
     }
-
 }

@@ -146,7 +146,6 @@ public class PatientsController : Controller
     [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
@@ -171,5 +170,4 @@ public class PatientsController : Controller
         ModelState.AddModelError(string.Empty, "Unable to delete patient.");
         return View();
     }
-
 }

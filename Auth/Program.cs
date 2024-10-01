@@ -31,6 +31,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "P10AuthCookie";
     options.LoginPath = "/auth/login";
+    options.LogoutPath = "/auth/logout";
     options.AccessDeniedPath = "/auth/accessDenied";
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.None;
@@ -42,7 +43,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("http://localhost:7000") // URL du Frontend
+        builder => builder.WithOrigins("https://localhost:7000") // URL du Frontend
                        .AllowCredentials() // Permettre l'utilisation des cookies
                        .AllowAnyHeader()
                        .AllowAnyMethod()
@@ -65,7 +66,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "P10.Auth.Api", Version = "v1" });
-    options.AddSecurityDefinition("CookieAuth", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("P10AuthCookie", new OpenApiSecurityScheme
     {
         Description = "Entrer votre nom de cookie pour avoir l'authorisation",
         Type = SecuritySchemeType.ApiKey,
@@ -80,7 +81,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "CookieAuth"
+                    Id = "P10AuthCookie"
                 }
             },
             new string[] {}
@@ -120,8 +121,6 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Application des politiques CORS
-app.UseCors("AllowFrontend");
 
 // Application des middlewares d'authentification et d'autorisation
 app.UseAuthentication();

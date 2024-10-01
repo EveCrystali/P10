@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace Frontend.Controllers;
 
+[Route("Auth")]
 public class AuthController : Controller
 {
     private readonly ILogger<AuthController> _logger;
@@ -19,13 +20,13 @@ public class AuthController : Controller
         _authServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Auth");
     }
 
-    [HttpGet]
+    [HttpGet("login")]
     public IActionResult Login()
     {
         return View();
     }
 
-    [HttpPost]
+    [HttpPost("login")]
     public async Task<IActionResult> Login(LoginModel loginModel)
     {
         if (!ModelState.IsValid)
@@ -57,13 +58,13 @@ public class AuthController : Controller
         }
     }
 
-    [HttpGet]
+    [HttpGet("register")]
     public IActionResult Register()
     {
         return View();
     }
 
-    [HttpPost]
+    [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterModel registerModel)
     {
         if (!ModelState.IsValid)
@@ -72,7 +73,7 @@ public class AuthController : Controller
         }
 
 
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/register/", registerModel);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/register", registerModel);
 
         if (response.IsSuccessStatusCode && response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
         {
@@ -101,12 +102,20 @@ public class AuthController : Controller
         }
     }
 
-    // FIXME: Logout is not working properly
+    // FIXME : Logout is not working properly
+
     // Note : BadREquest POST https://localhost:7000/Auth/Logout?returnUrl=%2F 400 (Bad Request)
     // Note : Uncaught (in promise) Error: QUOTA_BYTES_PER_ITEM quota exceeded
-    [HttpPost]
+    [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
+
+        if (!ModelState.IsValid)
+        {
+            _logger.LogError("Model state is not valid.");
+            return View();
+        }
+
         HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/logout/", null);
 
         if (response.IsSuccessStatusCode)
@@ -117,7 +126,7 @@ public class AuthController : Controller
 
         return BadRequest("Erreur lors de la déconnexion.");
     }
-
+    
     [HttpGet("status")]
     public async Task<IActionResult> Status()
     {

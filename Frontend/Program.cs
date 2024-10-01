@@ -17,6 +17,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = "P10AuthCookie";
     // Redirect to login page if unauthorized
     options.LoginPath = "/auth/login";
+    // Redirect to logout page if authorized
+    options.LogoutPath = "/auth/logout";
     // Redirect to access denied page if unauthorized
     options.AccessDeniedPath = "/auth/accesscenied";
     // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
@@ -82,7 +84,7 @@ app.MapControllerRoute(
 
 // Configure Cors policy to allow all origins because we are using Ocelot Api Gateway
 // We need to allow all origins because Frontend and Auth are not on the same port
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowFrontend");
 
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();

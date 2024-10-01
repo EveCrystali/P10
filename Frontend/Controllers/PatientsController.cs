@@ -51,12 +51,13 @@ public class PatientsController : Controller
         return View();
     }
 
+    [HttpGet("create")]
     public IActionResult Create()
     {
         return View();
     }
 
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Patient patient)
     {
         if (ModelState.IsValid)

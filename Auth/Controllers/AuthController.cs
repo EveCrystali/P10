@@ -18,22 +18,23 @@ public class AuthController(
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        _logger.LogInformation($"Login request in Auth microservice from Auth controller in Login method with username: {model.Username}");
+        string messageLog = "Login request in Auth microservice from Auth controller in Login method";
+        _logger.LogInformation(messageLog);
         IdentityUser? user = await _userManager.FindByNameAsync(model.Username);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            _logger.LogInformation($"User {model.Username} found and password is correct");
-            Microsoft.AspNetCore.Identity.SignInResult? result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+            _logger.LogInformation($"User found and password is correct");
+            await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
             return Ok("Logged in successfully");
         }
         else if (user == null)
         {
-            _logger.LogError($"User {model.Username} not found");
+            _logger.LogError($"User not found");
             return NotFound("User not found");
         }
-        else if (user != null && !await _userManager.CheckPasswordAsync(user, model.Password))
+        else if (!await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            _logger.LogError($"User {model.Username} found but password is incorrect");
+            _logger.LogError($"User found but password is incorrect");
             return Unauthorized("Invalid username or password");
         }
         else

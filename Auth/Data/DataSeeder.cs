@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Auth.Data;
 
-public class DataSeeder
+public static class DataSeeder
 {
     private static readonly Dictionary<string, string[]> usersRolesPasswords = new()
     {

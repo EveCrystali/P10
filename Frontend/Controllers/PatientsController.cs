@@ -41,6 +41,11 @@ public class PatientsController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> Details(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
@@ -146,6 +151,11 @@ public class PatientsController : Controller
     [HttpGet("delete/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
@@ -161,6 +171,11 @@ public class PatientsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         HttpResponseMessage response = await _httpClient.DeleteAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {

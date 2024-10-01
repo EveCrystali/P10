@@ -33,7 +33,7 @@ public class DataSeeder(ApplicationDbContext dbContext)
         foreach (Patient patient in patientsFormatted)
         {
             // Avoid duplicate patients
-            if (existingPatients.Any(p => p.FirstName == patient.FirstName &&
+            if (existingPatients.Exists(p => p.FirstName == patient.FirstName &&
                                           p.LastName == patient.LastName &&
                                           p.DateOfBirth == patient.DateOfBirth))
             {

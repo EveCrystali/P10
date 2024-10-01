@@ -21,6 +21,7 @@ builder.Services.AddAuthentication("P10AuthCookie")
     {
         options.Cookie.Name = "P10AuthCookie";
         options.LoginPath = "/auth/login";
+        options.LogoutPath = "/auth/logout";
         options.AccessDeniedPath = "/auth/accessDenied";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.None; // ou Lax selon vos besoins

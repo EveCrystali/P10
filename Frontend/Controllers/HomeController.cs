@@ -9,7 +9,7 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly HttpClient _httpClient;
-    private readonly string _homeServiceUrl; 
+    private readonly string _homeServiceUrl;
 
     public HomeController(ILogger<HomeController> logger, HttpClient httpClient, IConfiguration configuration)
     {

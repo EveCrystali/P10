@@ -91,9 +91,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Seed des données
-builder.Services.AddScoped<DataSeeder>();
-
 // Découverte des endpoints API
 builder.Services.AddEndpointsApiExplorer();
 

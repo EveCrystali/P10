@@ -64,7 +64,8 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    // FUTURE : Handle authorization
+    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database

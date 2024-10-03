@@ -8,10 +8,12 @@ namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("patient")]
-public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
+public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService, ILogger<PatientsController> logger) : ControllerBase
 {
     private readonly BackendPatient.Data.ApplicationDbContext _dbContext = dbContext;
     private readonly IUpdateService<Patient> _updateService = updateService;
+
+    private readonly ILogger<PatientsController> _logger = logger;
 
     /// <summary>
     /// Retrieves a <see cref="Patient"/> from the database by its identifier.
@@ -53,6 +55,8 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The updated patient.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
+    // FIXME : Handle authorization
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
         return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
@@ -64,8 +68,8 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    // FUTURE : Handle authorization
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    // FIXME : Handle authorization
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
         // Validate the patient before adding it to the database
@@ -96,6 +100,8 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="id">The id of the patient to delete.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpDelete("{id}")]
+    // FIXME : Handle authorization
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeletePatient(int id)
     {
         // Find the patient in the database

@@ -3,24 +3,63 @@ using BackendPatient.Data;
 using BackendPatient.Extensions;
 using BackendPatient.Models;
 using BackendPatient.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+string cookiePolicySecurityName = "P10AuthCookie";
+
 // Add services to the container.
 
-builder.Services.AddCors(options =>
+string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
+string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("P10AuthApp");
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
-        options.AddPolicy("AllowApiGateway",
-            builder =>
+        options.Cookie.Name = cookiePolicySecurityName;
+        options.LoginPath = "/auth/login";
+        options.LogoutPath = "/auth/logout";
+        options.AccessDeniedPath = "/auth/accessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
             {
-                builder.WithOrigins("http://localhost:5000") // URL de l'API Gateway
-                       .AllowCredentials() // Permettre les cookies
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
-            });
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+        };
     });
+
+// Add Authorization policies
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
+    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
+    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
+    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("https://localhost:7200", "https://localhost:7201", "https://localhost:5000", "https://localhost:7000")
+                   .AllowCredentials() // Permettre les cookies
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 
 builder.Services.AddControllers()
     // Add XML annotations to swagger documentation
@@ -43,30 +82,6 @@ builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
 
-// Add Authorization policies
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
-    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie";
-    // Redirect to login page if unauthorized
-    options.LoginPath = "/Auth/Login";
-    // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/Auth/AccessDenied";
-    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
-    options.Cookie.HttpOnly = true;
-    // Attribute that helps protect against cross-site request forgery (CSRF) attacks
-    // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Extend the cookie expiration if the user remains active
-    options.SlidingExpiration = true;
-});
 
 builder.Services.AddMvc();
 
@@ -92,7 +107,10 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors("AllowApiGateway");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 
@@ -101,6 +119,6 @@ app.MapGet("/", async context =>
     await context.Response.WriteAsync("BackendPatient is well running.");
 });
 
-app.UseAuthorization();
+
 
 await app.RunAsync();

@@ -2,10 +2,19 @@ using Auth.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 string cookiePolicySecurityName = "P10AuthCookie";
+
+string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
+string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("P10AuthApp");
 
 // Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -41,16 +50,20 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+
 // Configuration de CORS
 builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("https://localhost:7000") // URL du Frontend
-                       .AllowCredentials() // Permettre l'utilisation des cookies
+    {
+        options.AddPolicy("AllowSpecificOrigin",
+            builder =>
+            {
+                builder.WithOrigins("https://localhost:7200", "https://localhost:7201", "https://localhost:5000", "https://localhost:7000") 
+                       .AllowCredentials() // Permettre les cookies
                        .AllowAnyHeader()
-                       .AllowAnyMethod()
-                    );
-});
+                       .AllowAnyMethod();
+            });
+    });
+
 
 // Configuration des politiques d'autorisation
 builder.Services.AddAuthorization(options =>
@@ -117,6 +130,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseCors("AllowSpecificOrigin");
 
 app.UseRouting();
 

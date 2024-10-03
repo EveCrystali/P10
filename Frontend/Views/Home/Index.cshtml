@@ -7,6 +7,12 @@
 <div class="text-center">
     <h1 class="display-4">Accueil Médecin</h1>
 </div>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
 <div class="table-header d-flex justify-content-between">
   <h4>Patient</h4>
   <a asp-controller="Patients" method="get" id="newPatient" asp-action="Create"><button class="btn btn-primary">Créer un nouveau patient</button></a>

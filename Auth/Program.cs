@@ -2,10 +2,10 @@ using Auth.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-string cookiePolicySecurityName = "P10AuthCookie";
 
 // Configuration de la base de données
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -15,6 +15,34 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Ajouter la configuration pour JWT
+IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 // Configuration des options d'Identity
 builder.Services.Configure<IdentityOptions>(options =>
@@ -28,18 +56,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
-// Configuration des cookies
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.Name = cookiePolicySecurityName;
-    options.LoginPath = "/auth/login";
-    options.LogoutPath = "/auth/logout";
-    options.AccessDeniedPath = "/auth/accessDenied";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    options.SlidingExpiration = true;
-});
 
 // Configuration de CORS
 builder.Services.AddCors(options =>
@@ -68,12 +84,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "P10.Auth.Api", Version = "v1" });
-    options.AddSecurityDefinition(cookiePolicySecurityName, new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Entrer votre nom de cookie pour avoir l'authorisation",
+        In = ParameterLocation.Header,
+        Description = "Veuillez entrer 'Bearer' suivi d'un espace et du token JWT",
+        Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
-        Name = cookiePolicySecurityName, // Assurez-vous que le nom correspond au cookie configuré
-        In = ParameterLocation.Cookie
+        Scheme = "Bearer"
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -83,10 +100,10 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = cookiePolicySecurityName
+                    Id = "Bearer"
                 }
             },
-            new string[] {}
+            new string[] { }
         }
     });
 });

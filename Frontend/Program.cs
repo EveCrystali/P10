@@ -1,11 +1,13 @@
 using System.Net.Security;
 using Frontend.Controllers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration Configuration = builder.Configuration;
 
+string cookiePolicySecurityName = "P10AuthCookie";
 
 string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
 string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
@@ -18,26 +20,25 @@ builder.Services.AddHttpContextAccessor();
 // Add Authorization policies and cookie authentification
 
 // Add Identity with Cookie Authentication
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie";
-    // Redirect to login page if unauthorized
-    options.LoginPath = "/auth/login";
-    // Redirect to logout page if authorized
-    options.LogoutPath = "/auth/logout";
-    // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/auth/accesscenied";
-    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
-    options.Cookie.HttpOnly = true;
-    // Attribute that helps protect against cross-site request forgery (CSRF) attacks
-    // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Extend the cookie expiration if the user remains active
-    options.SlidingExpiration = true;
-});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.Cookie.Name = cookiePolicySecurityName;
+        options.LoginPath = "/auth/login";
+        options.LogoutPath = "/auth/logout";
+        options.AccessDeniedPath = "/auth/accessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))

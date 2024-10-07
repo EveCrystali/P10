@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Auth.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -110,6 +111,13 @@ builder.Services.AddSwaggerGen(options =>
 
 // Découverte des endpoints API
 builder.Services.AddEndpointsApiExplorer();
+
+
+// Add Services to the container
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHostedService<TokenCleanupService>();
+builder.Services.AddScoped<IJwtRevocationService, JwtRevocationService>();
+
 
 WebApplication app = builder.Build();
 

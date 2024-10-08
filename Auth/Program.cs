@@ -40,7 +40,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
-    // options.Lockout.MaxFailedAccessAttempts = 5;
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedEmail = false;
 });
@@ -85,7 +84,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    IConfiguration configuration = builder.Configuration;
+    ConfigurationManager configuration = builder.Configuration;
     string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
     if (string.IsNullOrEmpty(secretKey))
     {
@@ -98,7 +97,6 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        // ?: Multiple audiences are not supported
         ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.Zero,

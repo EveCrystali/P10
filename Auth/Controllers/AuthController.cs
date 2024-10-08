@@ -30,21 +30,18 @@ public class AuthController(
         User? user = await _userManager.FindByNameAsync(model.Username);
         if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            _logger.LogInformation("User found, updating last login date.");
             user.LastLoginDate = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            _logger.LogInformation("Generating JWT token and refresh token.");
+            _logger.LogInformation("User found, last login date updated. Generating JWT token and refresh token.");
             IList<string> userRoles = await _userManager.GetRolesAsync(user);
             string token = _jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
             RefreshToken refreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-            _logger.LogInformation("Saving refresh token to the database.");
             await _context.RefreshTokens.AddAsync(refreshToken);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Login successful, returning tokens.");
-            await _signInManager.SignInAsync(user, isPersistent: false);
 
             return Ok(new { Token = token, RefreshToken = refreshToken.Token });
         }
@@ -84,16 +81,11 @@ public class AuthController(
         }
 
         // Revoke all refresh tokens for the user
-        RefreshToken? currentToken = await GetCurrentRefreshTokenAsync(userId);
-        if (currentToken == null)
+        bool isRevoked = await RevokeAllTokensForUserAsync(userId);
+        if (!isRevoked)
         {
-            _logger.LogError("Impossible to get current token.");
-            return BadRequest("Impossible to get current token.");
+            _logger.LogWarning("No tokens found or an error occurred during revocation.");
         }
-
-        currentToken.IsRevoked = true;
-        _context.RefreshTokens.Update(currentToken);
-        await _context.SaveChangesAsync();
 
         return Ok(new { Message = "Logout successful" });
     }
@@ -154,24 +146,20 @@ public class AuthController(
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("revoke")]
-    public async Task<IActionResult> RevokeTokens([FromBody] RevokeTokensRequest model)
+    public async Task<IActionResult> RevokeTokens(string userId)
     {
-        User? user = await _userManager.FindByIdAsync(model.UserId);
+        User? user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
             return NotFound();
         }
 
-        List<RefreshToken> userTokens = [.. _context.RefreshTokens.Where(rt => rt.UserId == model.UserId)];
-        foreach (RefreshToken? token in userTokens)
+        bool isRevoked = await RevokeAllTokensForUserAsync(userId);
+        if (!isRevoked)
         {
-            token.IsRevoked = true;
+            return BadRequest("No tokens found or an error occurred during revocation.");
         }
-
-        _context.RefreshTokens.UpdateRange(userTokens);
-        await _context.SaveChangesAsync();
-
-        return Ok();
+        return Ok("All tokens of the user have been revoked successfully.");
     }
 
     [HttpGet]
@@ -191,4 +179,37 @@ public class AuthController(
             .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No valid refresh token found for the user.");
         return refreshToken;
     }
+
+    private async Task<bool> RevokeAllTokensForUserAsync(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            _logger.LogError("User ID is null or empty, cannot revoke tokens.");
+            return false;
+        }
+
+        // Find all refresh tokens associated with the user
+        var userTokens = await _context.RefreshTokens
+                                       .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                                       .ToListAsync();
+
+        if (userTokens == null || userTokens.Count == 0)
+        {
+            _logger.LogWarning("No active refresh tokens found for the user.");
+            return false;
+        }
+
+        // Revoke all refresh tokens 
+        foreach (var token in userTokens)
+        {
+            token.IsRevoked = true;
+        }
+
+        _context.RefreshTokens.UpdateRange(userTokens);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation($"All refresh tokens for user have been revoked.");
+
+        return true;
+    }
+
 }

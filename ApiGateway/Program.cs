@@ -1,7 +1,8 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,26 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 // Add services to the container.
 builder.Services.AddOcelot(builder.Configuration);
 
+IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer("P10AuthProviderKey", options =>
+    {
+        options.Authority = "https://localhost:7201";
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters.ValidateIssuer = true;
+        options.TokenValidationParameters.ValidIssuer = jwtSettings["Issuer"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidAudiences = jwtSettings.GetSection("Audience").Get<string[]>(),
+        };
+    });
+
+
 // Add Authorization policies
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
@@ -24,24 +45,21 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
-// Add Authentication services with cookie authentication
-builder.Services.AddAuthentication("P10AuthCookie")
-    .AddCookie("P10AuthCookie", options =>
-    {
-        options.Cookie.Name = "P10AuthCookie";
-        options.LoginPath = "/auth/login";
-        options.LogoutPath = "/auth/logout";
-        options.AccessDeniedPath = "/auth/accessDenied";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.None; // ou Lax selon vos besoins
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Assurez-vous que cela est correct pour votre environnement
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-        options.SlidingExpiration = true;
-    });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder.WithOrigins("https://localhost:7000") 
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials()); 
+});
 
 WebApplication app = builder.Build();
 
 app.UseRouting();
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

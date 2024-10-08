@@ -1,3 +1,4 @@
+using System.Text;
 using Frontend.Controllers.Service;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,7 @@ public class AuthController : Controller
     private readonly ILogger<AuthController> _logger;
     private readonly HttpClient _httpClient;
     private readonly string _authServiceUrl;
-    private const string SetCookieHeader = "Set-Cookie";
+
 
     public AuthController(ILogger<AuthController> logger, HttpClient httpClient, IConfiguration configuration)
     {
@@ -35,25 +36,48 @@ public class AuthController : Controller
             return View(loginModel);
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/login", new StringContent(JsonConvert.SerializeObject(loginModel), System.Text.Encoding.UTF8, "application/json"));
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/login", 
+                                                                    new StringContent(JsonConvert.SerializeObject(loginModel), 
+                                                                    System.Text.Encoding.UTF8, "application/json"));
 
         if (response.IsSuccessStatusCode)
         {
             _logger.LogInformation("Response is Success Status Code.");
 
-            if (response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
+            // Deserialize directly to AuthResponseModel
+            AuthResponseModel? authResponseDeserialized = await response.Content.ReadFromJsonAsync<AuthResponseModel>();
+
+            if (authResponseDeserialized == null || string.IsNullOrEmpty(authResponseDeserialized.Token) 
+                    || string.IsNullOrEmpty(authResponseDeserialized.RefreshToken))
             {
-                foreach (string cookie in setCookies)
-                {
-                    Response.Headers.Append(SetCookieHeader, cookie);
-                }
+                _logger.LogError("Token or refresh token is null or empty.");
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View(loginModel);
             }
+
+            // Create a combined object
+            AuthToken authToken = new()
+            {
+                Token = authResponseDeserialized.Token,
+                RefreshToken = authResponseDeserialized.RefreshToken
+            };
+
+            // Serialize to JSON and store in a cookie
+            CookieOptions cookieOptions = new()
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            };
+
+            HttpContext.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(authToken), cookieOptions);
+
             return RedirectToAction("Index", "Home");
         }
         else
         {
             _logger.LogError("Response is not Success Status Code.");
-            ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(loginModel);
         }
     }
@@ -64,42 +88,55 @@ public class AuthController : Controller
         return View();
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterModel registerModel)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View(registerModel);
-        }
+    // [HttpPost("register")]
+    // public async Task<IActionResult> Register(RegisterModel registerModel)
+    // {
+    //     if (!ModelState.IsValid)
+    //     {
+    //         return View(registerModel);
+    //     }
 
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/register", registerModel);
+        // using HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/register");
+        // request.Content = new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json");
 
-        if (response.IsSuccessStatusCode && response.Headers.TryGetValues(SetCookieHeader, out IEnumerable<string>? setCookies))
-        {
-            foreach (string cookie in setCookies)
-            {
-                Response.Headers.Append(SetCookieHeader, cookie);
-            }
+        // using HttpResponseMessage response = await _httpClient.SendAsync(request);
+        // if (response.IsSuccessStatusCode)
+        // {
+        //     string? token = await response.Content.ReadFromJsonAsync<string>();
+        //     if (string.IsNullOrEmpty(token))
+        //     {
+        //         ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
+        //         return View(registerModel);
+        //     }
 
-            return RedirectToAction("Index", "Home");
-        }
-        else
-        {
-            Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
-            if (errors != null)
-            {
-                foreach (string desc in errors.SelectMany(error => error.Value))
-                {
-                    ModelState.AddModelError(string.Empty, desc);
-                }
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
-            }
-            return View(registerModel);
-        }
-    }
+        //     // Store the JWT token (for example, in cookies or local storage)
+        //     HttpContext.Response.Cookies.Append("JwtToken", token, new CookieOptions
+        //     {
+        //         HttpOnly = true,
+        //         Secure = true,
+        //         SameSite = SameSiteMode.Strict
+        //     });
+
+        //     return RedirectToAction("Index", "Home");
+        // }
+        // else
+        // {
+        //     Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
+        //     if (errors != null)
+        //     {
+        //         foreach (string desc in errors.SelectMany(error => error.Value))
+        //         {
+        //             ModelState.AddModelError(string.Empty, desc);
+        //         }
+        //     }
+        //     else
+        //     {
+        //         ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
+        //     }
+        //     return View(registerModel);
+        // }
+    // }
+
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
@@ -114,7 +151,7 @@ public class AuthController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            Response.Cookies.Delete("P10AuthCookie");
+            HttpContext.Response.Cookies.Delete("AuthTokens");
             return RedirectToAction("Index", "Home");
         }
 

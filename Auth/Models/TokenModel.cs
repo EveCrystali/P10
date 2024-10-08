@@ -13,8 +13,3 @@ public class RefreshRequest
 {
     public string RefreshToken { get; set; }
 }
-
-public class RevokeTokensRequest
-{
-    public string UserId { get; set; }
-}

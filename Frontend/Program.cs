@@ -1,33 +1,40 @@
 using System.Net.Security;
+using System.Text;
 using Frontend.Controllers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration Configuration = builder.Configuration;
 
 // Add Authorization policies and cookie authentification
-
-// Add Identity with Cookie Authentication
-builder.Services.ConfigureApplicationCookie(options =>
+builder.Services.AddAuthentication(options =>
 {
-    // Cookie name shared between services
-    options.Cookie.Name = "P10AuthCookie";
-    // Redirect to login page if unauthorized
-    options.LoginPath = "/auth/login";
-    // Redirect to logout page if authorized
-    options.LogoutPath = "/auth/logout";
-    // Redirect to access denied page if unauthorized
-    options.AccessDeniedPath = "/auth/accesscenied";
-    // Set if the cookie should be HttpOnly or not meaning it cannot be accessed via JavaScript or not
-    options.Cookie.HttpOnly = true;
-    // Attribute that helps protect against cross-site request forgery (CSRF) attacks
-    // by specifying whether a cookie should be sent along with cross-site requests
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Extend the cookie expiration if the user remains active
-    options.SlidingExpiration = true;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    ConfigurationManager configuration = builder.Configuration;
+    string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero,
+    };
 });
+
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
@@ -59,6 +66,16 @@ builder.Services.AddHttpClient<HomeController>(client =>
         }
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder.WithOrigins("https://localhost:7000") 
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials()); 
+});
+
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -85,6 +102,7 @@ app.UseCors("AllowFrontend");
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseCookiePolicy();
 
 await app.RunAsync();

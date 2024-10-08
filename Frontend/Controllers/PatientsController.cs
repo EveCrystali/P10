@@ -170,7 +170,6 @@ public class PatientsController : Controller
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             return View(patient);
         }
-
     }
 
     [HttpGet("delete/{id}")]
@@ -217,7 +216,7 @@ public class PatientsController : Controller
             _logger.LogError("Failed to delete patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
             ModelState.AddModelError(string.Empty, "Unable to delete patient.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-           return RedirectToAction(nameof(Index), nameof(HomeController));
+            return RedirectToAction(nameof(Index), nameof(HomeController));
         }
     }
 }

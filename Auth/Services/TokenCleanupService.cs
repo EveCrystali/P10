@@ -1,4 +1,3 @@
-using System;
 using Auth.Data;
 
 namespace Auth.Services;
@@ -73,19 +72,19 @@ public class TokenCleanupService : IHostedService, IDisposable
     {
         _timer?.Dispose();
         /*
-        The issue is that the Dispose method in the TokenCleanupService class 
-        does not call GC.SuppressFinalize(this). This is a good practice when 
+        The issue is that the Dispose method in the TokenCleanupService class
+        does not call GC.SuppressFinalize(this). This is a good practice when
         implementing the IDisposable interface.
 
-        GC.SuppressFinalize(this) is used to prevent the garbage collector from 
-        calling the finalizer (also known as the destructor) of the object. 
-        When an object implements IDisposable, it's likely that it has some 
-        unmanaged resources that need to be cleaned up, and the finalizer is 
+        GC.SuppressFinalize(this) is used to prevent the garbage collector from
+        calling the finalizer (also known as the destructor) of the object.
+        When an object implements IDisposable, it's likely that it has some
+        unmanaged resources that need to be cleaned up, and the finalizer is
         not necessary.
 
-        By calling GC.SuppressFinalize(this), you're telling the garbage 
-        collector that the object has already been properly cleaned up and 
-        there's no need to call the finalizer. This can improve performance 
+        By calling GC.SuppressFinalize(this), you're telling the garbage
+        collector that the object has already been properly cleaned up and
+        there's no need to call the finalizer. This can improve performance
         and prevent potential issues.
         */
         GC.SuppressFinalize(this);

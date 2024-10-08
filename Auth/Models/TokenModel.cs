@@ -1,5 +1,3 @@
-using System;
-
 namespace Auth.Models;
 
 public class RefreshToken

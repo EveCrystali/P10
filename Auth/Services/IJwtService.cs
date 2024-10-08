@@ -1,4 +1,3 @@
-using System;
 using Auth.Models;
 
 namespace Auth.Services;

@@ -8,8 +8,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.DataProtection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+string cookiePolicySecurityName = "P10AuthCookie";
 
 // Add services to the container.
 
@@ -43,16 +46,17 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowApiGateway",
-            builder =>
-            {
-                builder.WithOrigins("http://localhost:5000") // URL de l'API Gateway
-                       .AllowCredentials() // Permettre les cookies
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
-            });
-    });
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("https://localhost:7200", "https://localhost:7201", "https://localhost:5000", "https://localhost:7000")
+                   .AllowCredentials() // Permettre les cookies
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 
 builder.Services.AddControllers()
     // Add XML annotations to swagger documentation
@@ -130,7 +134,10 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-app.UseCors("AllowApiGateway");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 

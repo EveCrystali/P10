@@ -9,6 +9,16 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration Configuration = builder.Configuration;
 
+string cookiePolicySecurityName = "P10AuthCookie";
+
+string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
+string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("P10AuthApp");
+
+builder.Services.AddHttpContextAccessor();
+
 // Add Authorization policies and cookie authentification
 builder.Services.AddAuthentication(options =>
 {
@@ -92,15 +102,15 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+// Configure Cors policy to allow all origins because we are using Ocelot Api Gateway
+// We need to allow all origins because Frontend and Auth are not on the same port
+app.UseCors("AllowSpecificOrigin");
+
 app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-// Configure Cors policy to allow all origins because we are using Ocelot Api Gateway
-// We need to allow all origins because Frontend and Auth are not on the same port
-app.UseCors("AllowFrontend");
 
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();

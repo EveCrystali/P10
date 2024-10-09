@@ -48,9 +48,6 @@
         "POST"
       ],
       "RouteIsCaseSensitive": false,
-      "RateLimitOptions": {
-        "EnableRateLimiting": false
-      },
       "CorsPolicy": {
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
@@ -120,7 +117,6 @@
         "GET"
       ],
       "RouteIsCaseSensitive": false,
-      "AuthenticationOptions": null,
       "RateLimitOptions": {
         "EnableRateLimiting": false
       },

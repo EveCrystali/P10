@@ -8,10 +8,12 @@ namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("patient")]
-public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
+public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService, ILogger<PatientsController> logger) : ControllerBase
 {
     private readonly BackendPatient.Data.ApplicationDbContext _dbContext = dbContext;
     private readonly IUpdateService<Patient> _updateService = updateService;
+
+    private readonly ILogger<PatientsController> _logger = logger;
 
     /// <summary>
     /// Retrieves a <see cref="Patient"/> from the database by its identifier.

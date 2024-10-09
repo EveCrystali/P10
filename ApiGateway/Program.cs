@@ -61,12 +61,16 @@ builder.Services.AddCors(options =>
 
 WebApplication app = builder.Build();
 
+app.UseCors("AllowSpecificOrigin");
+
 app.UseRouting();
 
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// app.UseMiddleware<CustomAuthMiddleware>();
 
 await app.UseOcelot();
 

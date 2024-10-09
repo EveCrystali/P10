@@ -1,5 +1,9 @@
 using Frontend.Controllers.Service;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Frontend.Controllers;
 
@@ -21,22 +25,25 @@ public class PatientsController : Controller
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 
-    public async Task<IActionResult> Index()
-    {
-        HttpResponseMessage response = await _httpClient.GetAsync(_patientServiceUrl);
-        if (response.IsSuccessStatusCode)
+        public async Task<IActionResult> Index()
         {
-            List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
-            if (patients != null)
-            {
-                foreach (Frontend.Models.Patient patient in patients)
-                {
-                    Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
-                }
-            }
+            var client = _httpClientFactory.CreateClient();
+            var request = CreateRequest(HttpMethod.Get, _patientServiceUrl);
+            HttpResponseMessage response = await client.SendAsync(request);
 
-            return View(patients);
-        }
+            if (response.IsSuccessStatusCode)
+            {
+                List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
+                if (patients != null)
+                {
+                    foreach (Frontend.Models.Patient patient in patients)
+                    {
+                        Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
+                    }
+                }
+
+                return View(patients);
+            }
 
         ModelState.AddModelError(string.Empty, "Unable to load patients.");
         // FUTURE: Add TempData on the view
@@ -44,13 +51,13 @@ public class PatientsController : Controller
         return View(new List<Frontend.Models.Patient>());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Details(int id)
-    {
-        if (!ModelState.IsValid)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Details(int id)
         {
-            return BadRequest(ModelState);
-        }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
@@ -64,11 +71,11 @@ public class PatientsController : Controller
         return View();
     }
 
-    [HttpGet("create")]
-    public IActionResult Create()
-    {
-        return View();
-    }
+        [HttpGet("create")]
+        public IActionResult Create()
+        {
+            return View();
+        }
 
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Patient patient)
@@ -189,13 +196,13 @@ public class PatientsController : Controller
         }
     }
 
-    [HttpGet("delete/{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        if (!ModelState.IsValid)
+        [HttpGet("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            return BadRequest(ModelState);
-        }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
         HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
@@ -216,14 +223,14 @@ public class PatientsController : Controller
         }
     }
 
-    [HttpPost("delete/{id}")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
-    {
-        if (!ModelState.IsValid)
+        [HttpPost("delete/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            return BadRequest(ModelState);
-        }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
         HttpRequestMessage request = new(HttpMethod.Delete, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);

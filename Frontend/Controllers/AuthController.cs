@@ -1,3 +1,6 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using Frontend.Controllers.Service;
 using Frontend.Models;
@@ -11,14 +14,19 @@ public class AuthController : Controller
 {
     private readonly ILogger<AuthController> _logger;
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly HttpClientService _httpClientService;
     private readonly string _authServiceUrl;
+    private readonly JwtValidationService _jwtValidationService;
 
-
-    public AuthController(ILogger<AuthController> logger, HttpClient httpClient, IConfiguration configuration)
+    public AuthController(ILogger<AuthController> logger, IConfiguration configuration, HttpClientService httpClientService, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, JwtValidationService jwtValidationService)
     {
         _logger = logger;
+        _httpClientService = httpClientService;
+        _httpContextAccessor = httpContextAccessor;
         _httpClient = httpClient;
         _authServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Auth");
+        _jwtValidationService = jwtValidationService;
     }
 
     [HttpGet("login")]
@@ -36,9 +44,7 @@ public class AuthController : Controller
             return View(loginModel);
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/login", 
-                                                                    new StringContent(JsonConvert.SerializeObject(loginModel), 
-                                                                    System.Text.Encoding.UTF8, "application/json"));
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/login", loginModel);
 
         if (response.IsSuccessStatusCode)
         {
@@ -47,7 +53,7 @@ public class AuthController : Controller
             // Deserialize directly to AuthResponseModel
             AuthResponseModel? authResponseDeserialized = await response.Content.ReadFromJsonAsync<AuthResponseModel>();
 
-            if (authResponseDeserialized == null || string.IsNullOrEmpty(authResponseDeserialized.Token) 
+            if (authResponseDeserialized == null || string.IsNullOrEmpty(authResponseDeserialized.Token)
                     || string.IsNullOrEmpty(authResponseDeserialized.RefreshToken))
             {
                 _logger.LogError("Token or refresh token is null or empty.");
@@ -96,45 +102,45 @@ public class AuthController : Controller
     //         return View(registerModel);
     //     }
 
-        // using HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/register");
-        // request.Content = new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json");
+    // using HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/register");
+    // request.Content = new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json");
 
-        // using HttpResponseMessage response = await _httpClient.SendAsync(request);
-        // if (response.IsSuccessStatusCode)
-        // {
-        //     string? token = await response.Content.ReadFromJsonAsync<string>();
-        //     if (string.IsNullOrEmpty(token))
-        //     {
-        //         ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
-        //         return View(registerModel);
-        //     }
+    // using HttpResponseMessage response = await _httpClientServiceync(request);
+    // if (response.IsSuccessStatusCode)
+    // {
+    //     string? token = await response.Content.ReadFromJsonAsync<string>();
+    //     if (string.IsNullOrEmpty(token))
+    //     {
+    //         ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
+    //         return View(registerModel);
+    //     }
 
-        //     // Store the JWT token (for example, in cookies or local storage)
-        //     HttpContext.Response.Cookies.Append("JwtToken", token, new CookieOptions
-        //     {
-        //         HttpOnly = true,
-        //         Secure = true,
-        //         SameSite = SameSiteMode.Strict
-        //     });
+    //     // Store the JWT token (for example, in cookies or local storage)
+    //     HttpContext.Response.Cookies.Append("JwtToken", token, new CookieOptions
+    //     {
+    //         HttpOnly = true,
+    //         Secure = true,
+    //         SameSite = SameSiteMode.Strict
+    //     });
 
-        //     return RedirectToAction("Index", "Home");
-        // }
-        // else
-        // {
-        //     Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
-        //     if (errors != null)
-        //     {
-        //         foreach (string desc in errors.SelectMany(error => error.Value))
-        //         {
-        //             ModelState.AddModelError(string.Empty, desc);
-        //         }
-        //     }
-        //     else
-        //     {
-        //         ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
-        //     }
-        //     return View(registerModel);
-        // }
+    //     return RedirectToAction("Index", "Home");
+    // }
+    // else
+    // {
+    //     Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
+    //     if (errors != null)
+    //     {
+    //         foreach (string desc in errors.SelectMany(error => error.Value))
+    //         {
+    //             ModelState.AddModelError(string.Empty, desc);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
+    //     }
+    //     return View(registerModel);
+    // }
     // }
 
 
@@ -147,7 +153,8 @@ public class AuthController : Controller
             return View();
         }
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_authServiceUrl}/logout", null);
+        HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/logout");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
         {
@@ -161,29 +168,21 @@ public class AuthController : Controller
     [HttpGet("status")]
     public async Task<IActionResult> Status()
     {
-        try
-        {
-            _logger.LogInformation("Checking status.");
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_authServiceUrl}/status");
+        string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
 
-            if (response.IsSuccessStatusCode)
+        if (tokenSerialized != null)
+        {
+            AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized);
+            if (authToken != null && !string.IsNullOrEmpty(authToken.Token))
             {
-                _logger.LogInformation("Status request returned a success status code.");
-                string content = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("Response content: {Content}", content);
-
-                // Retourner directement le contenu sous forme d'objet JSON au lieu d'une chaîne de texte
-                Dictionary<string, object>? jsonObject = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
-                return Ok(jsonObject);
+                ClaimsPrincipal? principal = _jwtValidationService.ValidateToken(authToken.Token);
+                if (principal != null)
+                {
+                    string? username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
+                    return Ok(new { isAuthenticated = true, username = username });
+                }
             }
-
-            _logger.LogError("Status request returned a non-success status code.");
-            return BadRequest("Erreur lors de la tentative de récupération du statut.");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Exception during Status check.");
-            return StatusCode(500, "Erreur interne lors de la récupération du statut.");
-        }
+        return Ok(new { isAuthenticated = false, username = (string?)null });
     }
 }

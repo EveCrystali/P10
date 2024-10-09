@@ -162,15 +162,6 @@ public class AuthController(
         return Ok("All tokens of the user have been revoked successfully.");
     }
 
-    [HttpGet]
-    [Route("status")]
-    public IActionResult Status()
-    {
-        bool isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-        string? username = isAuthenticated ? User.Identity?.Name : null;
-        return Ok(new { isAuthenticated, username });
-    }
-
     private async Task<RefreshToken> GetCurrentRefreshTokenAsync(string userId)
     {
         RefreshToken? refreshToken = await _context.RefreshTokens

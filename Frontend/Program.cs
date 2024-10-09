@@ -49,6 +49,7 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddHttpClient<HttpClientService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<JwtValidationService>();
 
 // Note: Must be removed when not in development
 // Configure the HTTP request pipeline for avoiding self-signed certificates

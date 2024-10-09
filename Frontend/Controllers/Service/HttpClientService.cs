@@ -11,7 +11,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
     private readonly HttpClient _httpClient = httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-    private void AddJwtToken()
+    public void AddJwtToken()
     {
         string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
 
@@ -22,27 +22,11 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
         }
     }
 
-    public async Task<HttpResponseMessage> GetAsync(string url)
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequest)
     {
         AddJwtToken();
-        return await _httpClient.GetAsync(url);
-    }
-
-    public async Task<HttpResponseMessage> PostAsJsonAsync<T>(string url, T data)
-    {
-        AddJwtToken();
-        return await _httpClient.PostAsJsonAsync(url, data);
-    }
-
-    public async Task<HttpResponseMessage> PutAsJsonAsync<T>(string url, T data)
-    {
-        AddJwtToken();
-        return await _httpClient.PutAsJsonAsync(url, data);
-    }
-
-    public async Task<HttpResponseMessage> DeleteAsync(string url)
-    {
-        AddJwtToken();
-        return await _httpClient.DeleteAsync(url);
+        return await _httpClient.SendAsync(httpRequest);
     }
 }
+
+

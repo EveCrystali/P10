@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Frontend.Controllers.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,20 +8,24 @@ namespace Frontend.Controllers;
 [Route("patient")]
 public class PatientsController : Controller
 {
+    private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _patientServiceUrl;
 
-    public PatientsController(ILogger<PatientsController> logger, HttpClientService httpClientService, IConfiguration configuration)
+    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService, IConfiguration configuration)
     {
         _logger = logger;
+        _httpClient = httpClient;
+        _httpContextAccessor = httpContextAccessor;
         _httpClientService = httpClientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClientService.GetAsync(_patientServiceUrl);
+        HttpResponseMessage response = await _httpClient.GetAsync(_patientServiceUrl);
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
@@ -48,7 +54,7 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -71,7 +77,12 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClientService.PostAsJsonAsync(_patientServiceUrl, patient);
+            HttpRequestMessage request = new(HttpMethod.Post, $"{_patientServiceUrl}/")
+            {
+                Content = JsonContent.Create(patient)
+            };
+            HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 Models.Patient? createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -111,7 +122,9 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
+            HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
+            HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -145,8 +158,15 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
+
             _logger.LogInformation("Updating patient with id {PatientId} to {Patient}", patient.Id, patient);
-            HttpResponseMessage response = await _httpClientService.PutAsJsonAsync($"{_patientServiceUrl}/{patient.Id}", patient);
+
+            HttpRequestMessage request = new(HttpMethod.Put, $"{_patientServiceUrl}/{patient.Id}")
+            {
+                Content = JsonContent.Create(patient)
+            };
+            HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Patient with id {PatientId} was successfully updated.", patient.Id);
@@ -180,7 +200,9 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -206,7 +228,9 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClientService.DeleteAsync($"{_patientServiceUrl}/{id}");
+        HttpRequestMessage request = new(HttpMethod.Delete, $"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
         if (response.IsSuccessStatusCode)
         {
             // FIXME: redirection is not working

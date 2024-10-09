@@ -18,7 +18,7 @@ public static class DataSeeder
     /// <param name="userManager">The user manager.</param>
     /// <param name="logger">The logger.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public static async Task SeedUsers(UserManager<IdentityUser> userManager, ILogger logger)
+    public static async Task SeedUsers(UserManager<User> userManager, ILogger logger)
     {
         // Loop through each user and see if the user already exists.
         foreach (KeyValuePair<string, string[]> userToAdd in usersRolesPasswords)
@@ -77,11 +77,11 @@ public static class DataSeeder
     /// and adds the user to the role if it does not already exist.
     /// If the user is not found, it logs an error.
     /// </remarks>
-    public static async Task SeedAffectationsRolesToUsers(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
+    public static async Task SeedAffectationsRolesToUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
     {
         foreach (KeyValuePair<string, string[]> userToAffect in usersRolesPasswords)
         {
-            IdentityUser? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
+            User? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
             if (user != null)
             {
                 if (!await userManager.IsInRoleAsync(user, userToAffect.Key))

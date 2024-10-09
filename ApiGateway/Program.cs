@@ -1,12 +1,47 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Configuration de Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddOcelot(builder.Configuration);
+
+IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
+ConfigurationManager configuration = builder.Configuration;
+string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+    ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer("P10AuthProviderKey", options =>
+    {
+        options.Authority = "https://localhost:7201";
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidAudiences = jwtSettings.GetSection("Audience").Get<string[]>(),
+            ValidIssuer = jwtSettings["Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        };
+    });
 
 // Add Authorization policies
 builder.Services.AddAuthorizationBuilder()
@@ -15,24 +50,21 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
-// Add Authentication services with cookie authentication
-builder.Services.AddAuthentication("P10AuthCookie")
-    .AddCookie("P10AuthCookie", options =>
-    {
-        options.Cookie.Name = "P10AuthCookie";
-        options.LoginPath = "/auth/login";
-        options.LogoutPath = "/auth/logout";
-        options.AccessDeniedPath = "/auth/accessDenied";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.None; // ou Lax selon vos besoins
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Assurez-vous que cela est correct pour votre environnement
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-        options.SlidingExpiration = true;
-    });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder.WithOrigins("https://localhost:7000")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
 
 WebApplication app = builder.Build();
 
 app.UseRouting();
+
+app.UseCors("AllowFrontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

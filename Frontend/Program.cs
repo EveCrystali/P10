@@ -1,7 +1,9 @@
 using System.Net.Security;
+using System.Text;
 using Frontend.Controllers;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.DataProtection;
+using Frontend.Controllers.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -18,27 +20,31 @@ builder.Services.AddDataProtection()
 builder.Services.AddHttpContextAccessor();
 
 // Add Authorization policies and cookie authentification
-
-// Add Identity with Cookie Authentication
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    ConfigurationManager configuration = builder.Configuration;
+    string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+    if (string.IsNullOrEmpty(secretKey))
     {
-        options.Cookie.Name = cookiePolicySecurityName;
-        options.LoginPath = "/auth/login";
-        options.LogoutPath = "/auth/logout";
-        options.AccessDeniedPath = "/auth/accessDenied";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Events = new CookieAuthenticationEvents
-        {
-            OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
-            }
-        };
-    });
+        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero,
+    };
+});
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
@@ -49,6 +55,10 @@ builder.Services.AddAuthorizationBuilder()
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient<HttpClientService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<JwtValidationService>();
 
 // Note: Must be removed when not in development
 // Configure the HTTP request pipeline for avoiding self-signed certificates
@@ -71,17 +81,13 @@ builder.Services.AddHttpClient<HomeController>(client =>
     });
 
 builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowSpecificOrigin",
-            builder =>
-            {
-                builder.WithOrigins("https://localhost:7200", "https://localhost:7201", "https://localhost:5000", "https://localhost:7000") 
-                       .AllowCredentials() // Permettre les cookies
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
-            });
-    });
-
+{
+    options.AddPolicy("AllowFrontend",
+        builder => builder.WithOrigins("https://localhost:7000")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
 
 WebApplication app = builder.Build();
 
@@ -109,6 +115,7 @@ app.MapControllerRoute(
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseCookiePolicy();
 
 await app.RunAsync();

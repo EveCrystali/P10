@@ -1,6 +1,11 @@
+using System.Text;
 using Auth.Data;
+using Auth.Models;
+using Auth.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
@@ -8,24 +13,29 @@ using System.IO;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-string cookiePolicySecurityName = "P10AuthCookie";
-
-string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
-string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
-    .SetApplicationName("P10AuthApp");
-
-// Configuration de la base de données
+// Database configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configuration d'Identity
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+// Add JWT configuration
+IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
+if (jwtSettings == null)
+{
+    throw new ArgumentNullException(nameof(jwtSettings), "JWT settings configuration is missing.");
+}
+
+string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+if (string.IsNullOrEmpty(secretKey))
+{
+    throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+}
+
+// Identity configuration
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Configuration des options d'Identity
+// Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireDigit = true;
@@ -33,60 +43,24 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
-    options.Lockout.MaxFailedAccessAttempts = 5;
     options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = false;
 });
 
-// Configuration des cookies
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.Name = cookiePolicySecurityName;
-    options.LoginPath = "/auth/login";
-    options.LogoutPath = "/auth/logout";
-    options.AccessDeniedPath = "/auth/accessDenied";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    options.SlidingExpiration = true;
-});
+builder.Services.AddControllers();
 
-
-// Configuration de CORS
-builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowSpecificOrigin",
-            builder =>
-            {
-                builder.WithOrigins("https://localhost:7200", "https://localhost:7201", "https://localhost:5000", "https://localhost:7000") 
-                       .AllowCredentials() // Permettre les cookies
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
-            });
-    });
-
-
-// Configuration des politiques d'autorisation
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"));
-    options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
-    options.AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
-});
-
-// Ajout des services MVC
-builder.Services.AddControllersWithViews();
-
-// Configuration de Swagger
+// Configure Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "P10.Auth.Api", Version = "v1" });
-    options.AddSecurityDefinition(cookiePolicySecurityName, new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "Entrer votre nom de cookie pour avoir l'authorisation",
+        In = ParameterLocation.Header,
+        Description = "Please enter 'Bearer' followed by a space and the JWT token",
+        Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
-        Name = cookiePolicySecurityName, // Assurez-vous que le nom correspond au cookie configuré
-        In = ParameterLocation.Cookie
+        Scheme = "Bearer",
+        BearerFormat = "JWT"
     });
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -96,24 +70,62 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = cookiePolicySecurityName
+                    Id = "Bearer"
                 }
             },
-            new string[] {}
+            new string[] { }
         }
     });
 });
 
-// Découverte des endpoints API
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    ConfigurationManager configuration = builder.Configuration;
+    string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+    if (string.IsNullOrEmpty(secretKey))
+    {
+        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero,
+    };
+});
+
+// Add Services to the container
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHostedService<TokenCleanupService>();
+builder.Services.AddScoped<IJwtRevocationService, JwtRevocationService>();
+
+// Configure authorization policies
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
+    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
+    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
+    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+
+// Discover API endpoints
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
 
-// Seed des utilisateurs et des rôles
+// Seed users and roles
 using (IServiceScope scope = app.Services.CreateScope())
 {
     IServiceProvider services = scope.ServiceProvider;
-    UserManager<IdentityUser> userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    UserManager<User> userManager = services.GetRequiredService<UserManager<User>>();
     RoleManager<IdentityRole> roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
     await DataSeeder.SeedUsers(userManager, logger);
@@ -121,7 +133,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     await DataSeeder.SeedAffectationsRolesToUsers(userManager, roleManager, logger);
 }
 
-// Configuration du pipeline HTTP
+// Configure the HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -135,12 +147,9 @@ app.UseCors("AllowSpecificOrigin");
 
 app.UseRouting();
 
-// Application des middlewares d'authentification et d'autorisation
+// Apply authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Gestion des cookies
-app.UseCookiePolicy();
 
 app.MapControllers();
 

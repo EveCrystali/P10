@@ -1,10 +1,12 @@
 using System.Reflection;
+using System.Text;
 using BackendPatient.Data;
 using BackendPatient.Extensions;
 using BackendPatient.Models;
 using BackendPatient.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -14,39 +16,34 @@ string cookiePolicySecurityName = "P10AuthCookie";
 
 // Add services to the container.
 
-string parentDirectory = Path.GetDirectoryName(builder.Environment.ContentRootPath);
-string sharedKeysPath = Path.Combine(parentDirectory, "SharedKeys");
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
-    .SetApplicationName("P10AuthApp");
+IConfiguration Configuration = builder.Configuration;
 
-
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+// Add Authorization policies and cookie authentification
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    ConfigurationManager configuration = builder.Configuration;
+    string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+    if (string.IsNullOrEmpty(secretKey))
     {
-        options.Cookie.Name = cookiePolicySecurityName;
-        options.LoginPath = "/auth/login";
-        options.LogoutPath = "/auth/logout";
-        options.AccessDeniedPath = "/auth/accessDenied";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Events = new CookieAuthenticationEvents
-        {
-            OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-// Add Authorization policies
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
-    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
+    }
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero,
+    };
+});
 
 builder.Services.AddCors(options =>
 {
@@ -77,11 +74,41 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "BackendPatient API", Version = "v0.1" });
     c.IncludeXmlComments(Assembly.GetExecutingAssembly());
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Veuillez entrer 'Bearer' suivi de l'espace et du token JWT dans la case de l'en-tête",
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
 
+// Add Authorization policies
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
+    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
+    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
+    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
 
 builder.Services.AddMvc();
 
@@ -119,6 +146,7 @@ app.MapGet("/", async context =>
     await context.Response.WriteAsync("BackendPatient is well running.");
 });
 
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 await app.RunAsync();

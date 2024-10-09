@@ -55,7 +55,6 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The updated patient.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPut("{id}")]
-    // FIXME : Handle authorization
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
     {
@@ -68,7 +67,6 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="patient">The new patient to be created.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpPost]
-    // FIXME : Handle authorization
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
     {
@@ -100,7 +98,6 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="id">The id of the patient to delete.</param>
     /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
     [HttpDelete("{id}")]
-    // FIXME : Handle authorization
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeletePatient(int id)
     {

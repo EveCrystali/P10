@@ -9,33 +9,13 @@
           "Port": 7200
         }
       ],
-      "UpstreamPathTemplate": "/patient{id}",
-      "UpstreamHttpMethod": ["GET"]
-    },
-    {
-      "DownstreamPathTemplate": "/patient/{id}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7200
-        }
-      ],
       "UpstreamPathTemplate": "/patient/{id}",
-      "UpstreamHttpMethod": ["POST", "PUT", "DELETE"],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Cookies"
-      },
-      "CorsPolicy": {
-        "AllowAnyOrigin": false,
-        "AllowCredentials": true,
-        "AllowedOrigins": ["https://localhost:7000"],
-        "AllowedMethods": ["POST", "PUT", "DELETE"],
-        "AllowedHeaders": ["*"]
-      }
+      "UpstreamHttpMethod": [
+        "GET"
+      ]
     },
     {
-      "DownstreamPathTemplate": "/patient",
+      "DownstreamPathTemplate": "/patient/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -43,8 +23,16 @@
           "Port": 7200
         }
       ],
-      "UpstreamPathTemplate": "/patient",
-      "UpstreamHttpMethod": ["GET"]
+      "UpstreamPathTemplate": "/patient/{everything}",
+      "UpstreamHttpMethod": [
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
     },
     {
       "DownstreamPathTemplate": "/auth/logout",
@@ -56,14 +44,26 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/logout",
-      "UpstreamHttpMethod": ["POST"],
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
       "RouteIsCaseSensitive": false,
       "CorsPolicy": {
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
-        "AllowedOrigins": ["https://localhost:7000"],
-        "AllowedMethods": ["POST"],
-        "AllowedHeaders": ["*"]
+        "AllowedOrigins": [
+          "https://localhost:7000"
+        ],
+        "AllowedMethods": [
+          "POST"
+        ],
+        "AllowedHeaders": [
+          "*"
+        ]
+      },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
       }
     },
     {
@@ -76,14 +76,31 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/login",
-      "UpstreamHttpMethod": ["POST"],
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
       "RouteIsCaseSensitive": false,
+      "AuthenticationOptions": null,
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 5,
+        "Limit": 5
+      },
       "CorsPolicy": {
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
-        "AllowedOrigins": ["https://localhost:7000"],
-        "AllowedMethods": ["POST"],
-        "AllowedHeaders": ["*"]
+        "AllowedOrigins": [
+          "https://localhost:7000"
+        ],
+        "AllowedMethods": [
+          "GET",
+          "POST",
+          "OPTIONS"
+        ],
+        "AllowedHeaders": [
+          "*"
+        ]
       }
     },
     {
@@ -96,7 +113,9 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/status",
-      "UpstreamHttpMethod": ["GET"],
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
       "RouteIsCaseSensitive": false,
       "RateLimitOptions": {
         "EnableRateLimiting": false
@@ -104,9 +123,15 @@
       "CorsPolicy": {
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
-        "AllowedOrigins": ["https://localhost:7000"],
-        "AllowedMethods": ["GET"],
-        "AllowedHeaders": ["*"]
+        "AllowedOrigins": [
+          "https://localhost:7000"
+        ],
+        "AllowedMethods": [
+          "GET"
+        ],
+        "AllowedHeaders": [
+          "*"
+        ]
       }
     },
     {

@@ -42,7 +42,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowApiGateway",
@@ -71,7 +70,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v0.1", new OpenApiInfo { Title = "BackendPatient API", Version = "v0.1" });
     c.IncludeXmlComments(Assembly.GetExecutingAssembly());
-     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
@@ -106,7 +105,6 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
-
 
 builder.Services.AddMvc();
 
@@ -143,6 +141,5 @@ app.MapGet("/", async context =>
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 await app.RunAsync();

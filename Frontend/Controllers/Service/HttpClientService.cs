@@ -1,8 +1,6 @@
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using Frontend.Models;
+using Newtonsoft.Json;
 
 namespace Frontend.Controllers.Service;
 
@@ -28,5 +26,3 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
         return await _httpClient.SendAsync(httpRequest);
     }
 }
-
-

@@ -19,7 +19,7 @@ public class JwtService(IConfiguration configuration) : IJwtService
     /// <returns>The generated JWT.</returns>
     public string GenerateToken(string userId, string userName, string[] roles)
     {
-        List<Claim> claims = new List<Claim>
+        List<Claim> claims = new()
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(ClaimTypes.Name, userName),
@@ -29,8 +29,8 @@ public class JwtService(IConfiguration configuration) : IJwtService
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         // Ajouter toutes les audiences en tant que claims 'aud'
-        var audiences = _configuration.GetSection("JwtSettings:Audience").Get<string[]>();
-        foreach (var audience in audiences)
+        string[]? audiences = _configuration.GetSection("JwtSettings:Audience").Get<string[]>();
+        foreach (string audience in audiences)
         {
             claims.Add(new Claim(JwtRegisteredClaimNames.Aud, audience));
         }
@@ -41,10 +41,10 @@ public class JwtService(IConfiguration configuration) : IJwtService
             throw new InvalidOperationException("The JWT secret key is not defined in the environment variables");
         }
 
-        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(secretKey));
+        SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
 
-        JwtSecurityToken token = new JwtSecurityToken(
+        JwtSecurityToken token = new(
             issuer: _configuration["JwtSettings:Issuer"],
             // Ne pas passer l'audience ici car elle est ajoutée en tant que claims
             claims: claims,
@@ -54,7 +54,6 @@ public class JwtService(IConfiguration configuration) : IJwtService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
 
     /// <summary>
     /// Generates a refresh token for the provided user ID.

@@ -180,7 +180,7 @@ public class AuthController(
         }
 
         // Find all refresh tokens associated with the user
-        var userTokens = await _context.RefreshTokens
+        List<RefreshToken> userTokens = await _context.RefreshTokens
                                        .Where(rt => rt.UserId == userId && !rt.IsRevoked)
                                        .ToListAsync();
 
@@ -190,8 +190,8 @@ public class AuthController(
             return false;
         }
 
-        // Revoke all refresh tokens 
-        foreach (var token in userTokens)
+        // Revoke all refresh tokens
+        foreach (RefreshToken? token in userTokens)
         {
             token.IsRevoked = true;
         }
@@ -202,5 +202,4 @@ public class AuthController(
 
         return true;
     }
-
 }

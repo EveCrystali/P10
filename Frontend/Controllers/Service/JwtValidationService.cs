@@ -1,4 +1,3 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -19,8 +18,6 @@ public class JwtValidationService
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
-
-
         string? secretKey = _configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
         if (string.IsNullOrEmpty(secretKey))
         {
@@ -28,7 +25,7 @@ public class JwtValidationService
         }
         try
         {
-            var tokenValidationParameters = new TokenValidationParameters
+            TokenValidationParameters tokenValidationParameters = new()
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
@@ -40,7 +37,7 @@ public class JwtValidationService
                 ClockSkew = TimeSpan.Zero,
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityTokenHandler tokenHandler = new();
             SecurityToken validatedToken;
 
             // Validate the token
@@ -53,5 +50,4 @@ public class JwtValidationService
             return null;
         }
     }
-
 }

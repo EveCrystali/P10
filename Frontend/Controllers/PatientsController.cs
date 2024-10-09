@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using Frontend.Controllers.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -158,7 +156,6 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
-
             _logger.LogInformation("Updating patient with id {PatientId} to {Patient}", patient.Id, patient);
 
             HttpRequestMessage request = new(HttpMethod.Put, $"{_patientServiceUrl}/{patient.Id}")

@@ -1,7 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using Frontend.Controllers.Service;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -142,7 +139,6 @@ public class AuthController : Controller
     //     return View(registerModel);
     // }
     // }
-
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()

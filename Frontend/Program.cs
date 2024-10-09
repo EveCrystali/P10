@@ -36,7 +36,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
     .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
@@ -74,12 +73,11 @@ builder.Services.AddHttpClient<HomeController>(client =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("https://localhost:7000") 
+        builder => builder.WithOrigins("https://localhost:7000")
                           .AllowAnyMethod()
                           .AllowAnyHeader()
-                          .AllowCredentials()); 
+                          .AllowCredentials());
 });
-
 
 WebApplication app = builder.Build();
 

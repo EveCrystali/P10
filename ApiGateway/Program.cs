@@ -1,9 +1,9 @@
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using Serilog;
-using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +21,9 @@ builder.Services.AddOcelot(builder.Configuration);
 
 IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
 ConfigurationManager configuration = builder.Configuration;
-string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
+string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
     ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
- 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -43,7 +43,6 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-
 // Add Authorization policies
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
@@ -54,10 +53,10 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("https://localhost:7000") 
+        builder => builder.WithOrigins("https://localhost:7000")
                           .AllowAnyMethod()
                           .AllowAnyHeader()
-                          .AllowCredentials()); 
+                          .AllowCredentials());
 });
 
 WebApplication app = builder.Build();

@@ -44,8 +44,6 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.SignIn.RequireConfirmedEmail = false;
 });
 
-
-
 builder.Services.AddControllers();
 
 // Configure Swagger
@@ -114,7 +112,6 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
     .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
     .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
-
 
 // Discover API endpoints
 builder.Services.AddEndpointsApiExplorer();

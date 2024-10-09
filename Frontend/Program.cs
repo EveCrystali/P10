@@ -1,6 +1,7 @@
 using System.Net.Security;
 using System.Text;
 using Frontend.Controllers;
+using Frontend.Controllers.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -45,6 +46,9 @@ builder.Services.AddAuthorizationBuilder()
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+
+builder.Services.AddHttpClient<HttpClientService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 // Note: Must be removed when not in development
 // Configure the HTTP request pipeline for avoiding self-signed certificates

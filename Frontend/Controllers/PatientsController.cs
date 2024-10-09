@@ -6,20 +6,20 @@ namespace Frontend.Controllers;
 [Route("patient")]
 public class PatientsController : Controller
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _patientServiceUrl;
 
-    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, IConfiguration configuration)
+    public PatientsController(ILogger<PatientsController> logger, HttpClientService httpClientService, IConfiguration configuration)
     {
         _logger = logger;
-        _httpClient = httpClient;
+        _httpClientService = httpClientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync(_patientServiceUrl);
+        HttpResponseMessage response = await _httpClientService.GetAsync(_patientServiceUrl);
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
@@ -48,7 +48,7 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -71,7 +71,7 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_patientServiceUrl, patient);
+            HttpResponseMessage response = await _httpClientService.PostAsJsonAsync(_patientServiceUrl, patient);
             if (response.IsSuccessStatusCode)
             {
                 Models.Patient? createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -111,7 +111,7 @@ public class PatientsController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+            HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
             if (response.IsSuccessStatusCode)
             {
                 Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -146,7 +146,7 @@ public class PatientsController : Controller
         if (ModelState.IsValid)
         {
             _logger.LogInformation("Updating patient with id {PatientId} to {Patient}", patient.Id, patient);
-            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{_patientServiceUrl}/{patient.Id}", patient);
+            HttpResponseMessage response = await _httpClientService.PutAsJsonAsync($"{_patientServiceUrl}/{patient.Id}", patient);
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Patient with id {PatientId} was successfully updated.", patient.Id);
@@ -180,7 +180,7 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClientService.GetAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
@@ -192,6 +192,7 @@ public class PatientsController : Controller
             _logger.LogError("Failed to load patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
             ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load patient for deletion.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController));
         }
     }
@@ -205,9 +206,10 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClient.DeleteAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage response = await _httpClientService.DeleteAsync($"{_patientServiceUrl}/{id}");
         if (response.IsSuccessStatusCode)
         {
+            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController));
         }
         else

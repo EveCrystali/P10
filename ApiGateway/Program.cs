@@ -3,6 +3,7 @@ using Ocelot.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,10 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 builder.Services.AddOcelot(builder.Configuration);
 
 IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
-
+ConfigurationManager configuration = builder.Configuration;
+string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY") 
+    ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+ 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -29,11 +33,13 @@ builder.Services.AddAuthentication(options =>
     {
         options.Authority = "https://localhost:7201";
         options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters.ValidateIssuer = true;
-        options.TokenValidationParameters.ValidIssuer = jwtSettings["Issuer"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            ValidateIssuer = true,
+            ValidateAudience = true,
             ValidAudiences = jwtSettings.GetSection("Audience").Get<string[]>(),
+            ValidIssuer = jwtSettings["Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         };
     });
 

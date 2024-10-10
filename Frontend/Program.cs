@@ -1,46 +1,19 @@
 using System.Net.Security;
-using System.Text;
 using Frontend.Controllers;
 using Frontend.Controllers.Service;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using SharedAuthLibrary;
+using SharedAuthorizationLibrary;
+using SharedCorsLibrary;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration Configuration = builder.Configuration;
 
-// Add Authorization policies and cookie authentification
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    ConfigurationManager configuration = builder.Configuration;
-    string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
-    if (string.IsNullOrEmpty(secretKey))
-    {
-        throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");
-    }
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero,
-    };
-});
+// Add Authorization policies and authentification
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
-    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+// Configure authorization policies
+builder.Services.AddAuthorizationPolicies();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -70,14 +43,8 @@ builder.Services.AddHttpClient<HomeController>(client =>
         }
     });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("https://localhost:7000")
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials());
-});
+// Add Cors configuration
+builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
 
 WebApplication app = builder.Build();
 

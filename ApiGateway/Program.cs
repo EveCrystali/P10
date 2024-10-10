@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Serilog;
+using SharedAuthorizationLibrary;
+using SharedCorsLibrary;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +23,7 @@ builder.Services.AddOcelot(builder.Configuration);
 
 IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
 ConfigurationManager configuration = builder.Configuration;
-string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
-    ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -43,21 +44,10 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-// Add Authorization policies
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"))
-    .AddPolicy("RequirePractitionerRole", policy => policy.RequireRole("Practitioner"))
-    .AddPolicy("RequireUserRole", policy => policy.RequireRole("User"))
-    .AddPolicy("RequirePractitionerRoleOrHigher", policy => policy.RequireRole("Practitioner", "Admin"));
+// Configure authorization policies
+builder.Services.AddAuthorizationPolicies();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        builder => builder.WithOrigins("https://localhost:7000")
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials());
-});
+builder.AddCorsConfiguration("AllowFrontend", "http://localhost:7000");
 
 WebApplication app = builder.Build();
 

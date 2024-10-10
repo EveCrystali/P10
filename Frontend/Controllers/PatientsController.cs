@@ -94,7 +94,7 @@ public class PatientsController : Controller
                     _logger.LogError("Failed to create patient.");
                     // FUTURE: Add TempData on the view
                     TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-                    return RedirectToAction(nameof(Index), nameof(HomeController));
+                    return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
                 }
             }
             else
@@ -102,7 +102,7 @@ public class PatientsController : Controller
                 ModelState.AddModelError(string.Empty, "Error from the server");
                 _logger.LogError("Error from the server : {ReasonPhrase}", response.ReasonPhrase);
                 TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-                return RedirectToAction(nameof(Index), nameof(HomeController));
+                return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
             }
         }
         else
@@ -212,7 +212,7 @@ public class PatientsController : Controller
             ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load patient for deletion.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             // FIXME: redirection is not working
-            return RedirectToAction(nameof(Index), nameof(HomeController));
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
 
@@ -231,7 +231,7 @@ public class PatientsController : Controller
         if (response.IsSuccessStatusCode)
         {
             // FIXME: redirection is not working
-            return RedirectToAction(nameof(Index), nameof(HomeController));
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
         else
         {
@@ -239,7 +239,7 @@ public class PatientsController : Controller
             _logger.LogError("Failed to delete patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
             ModelState.AddModelError(string.Empty, "Unable to delete patient.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-            return RedirectToAction(nameof(Index), nameof(HomeController));
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
 }

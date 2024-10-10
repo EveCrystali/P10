@@ -75,7 +75,7 @@ public class AuthController : Controller
 
             HttpContext.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(authToken), cookieOptions);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
         else
         {
@@ -155,7 +155,7 @@ public class AuthController : Controller
         if (response.IsSuccessStatusCode)
         {
             HttpContext.Response.Cookies.Delete("AuthTokens");
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
 
         return BadRequest("Erreur lors de la déconnexion.");

@@ -11,16 +11,23 @@ public class HomeController : Controller
     private readonly HttpClient _httpClient;
     private readonly string _homeServiceUrl;
 
+    private readonly string _patientServiceUrl;
+
     public HomeController(ILogger<HomeController> logger, HttpClient httpClient, IConfiguration configuration)
     {
         _logger = logger;
         _httpClient = httpClient;
         _homeServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Home");
+        _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 
+    [Route("")]
+    [Route("Home")]
+    [Route("Home/Index")]
+    [Route("Home/Index/{id?}")]
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_homeServiceUrl}patient/");
+        HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}");
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();

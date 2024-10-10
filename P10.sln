@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", ".\Auth\Auth.csproj"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "SharedLibrary\SharedLibrary.csproj", "{850E489F-5A2C-49E5-A81B-CE170FA1AF0D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackendNote", "BackendNote\BackendNote.csproj", "{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{850E489F-5A2C-49E5-A81B-CE170FA1AF0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{850E489F-5A2C-49E5-A81B-CE170FA1AF0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{850E489F-5A2C-49E5-A81B-CE170FA1AF0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

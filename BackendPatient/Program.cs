@@ -14,11 +14,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Add Cors configuration
-builder.AddCorsConfiguration("AllowApiGateway", "http://localhost:5000");
+builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
 
 builder.Services.AddControllers()
-    // Add XML annotations to swagger documentation
-    .AddXmlSerializerFormatters()
     .AddXmlDataContractSerializerFormatters()
     // Add Json DateOnly type support
     .AddJsonOptions(options =>
@@ -28,7 +26,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerDocumentation("BackendPatient API", "v0.1");
+builder.Services.AddSwaggerDocumentation();
 builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
 builder.Services.AddScoped<Patient>();
 builder.Services.AddScoped<DataSeeder>();
@@ -50,10 +48,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v0.1/swagger.json", "BackendPatient API v0.1");
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

@@ -22,8 +22,7 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 builder.Services.AddOcelot(builder.Configuration);
 
 IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
-ConfigurationManager configuration = builder.Configuration;
-string? secretKey = configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -47,7 +46,7 @@ builder.Services.AddAuthentication(options =>
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
 
-builder.AddCorsConfiguration("AllowFrontend", "http://localhost:7000");
+builder.AddCorsConfiguration("AllowFrontend", "https://localhost:7000");
 
 WebApplication app = builder.Build();
 

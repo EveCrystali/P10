@@ -18,7 +18,7 @@ public class JwtValidationService
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
-        string? secretKey = _configuration["JwtSettings:JWT_SECRET_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+        string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
         if (string.IsNullOrEmpty(secretKey))
         {
             throw new ArgumentNullException(secretKey, "JWT Key configuration is missing.");

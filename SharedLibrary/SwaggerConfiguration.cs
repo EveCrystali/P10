@@ -6,14 +6,11 @@ namespace SharedSwaggerLibrary;
 
 public static class SwaggerConfiguration
 {
-    public static void AddSwaggerDocumentation(this IServiceCollection services, string apiTitle, string apiVersion = "v1")
+    public static void AddSwaggerDocumentation(this IServiceCollection services)
     {
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc(apiVersion, new OpenApiInfo { Title = apiTitle, Version = apiVersion });
-            c.IncludeXmlComments(Assembly.GetExecutingAssembly().Location);
-
-            // Définition de sécurité pour JWT
+            // Security definition for JWT
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
@@ -21,10 +18,10 @@ public static class SwaggerConfiguration
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Veuillez entrer 'Bearer' suivi d'un espace puis du token JWT dans l'en-tête",
+                Description = "Please input 'Bearer' followed by a space and the JWT token in the header",
             });
 
-            // Configuration de la sécurité pour Swagger
+            // Swagger security configuration
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                     {
@@ -36,7 +33,7 @@ public static class SwaggerConfiguration
                                 Id = "Bearer"
                             }
                         },
-                        new string[] {}
+                        Array.Empty<string>()
                     }
             });
         });

@@ -13,11 +13,10 @@ namespace Auth.Controllers;
 [ApiController]
 public class AuthController(
     UserManager<User> userManager,
-    SignInManager<User> signInManager, IJwtService jwtService,
+    IJwtService jwtService,
     ILogger<AuthController> logger, ApplicationDbContext context) : ControllerBase
 {
     private readonly UserManager<User> _userManager = userManager;
-    private readonly SignInManager<User> _signInManager = signInManager;
     private readonly ILogger<AuthController> _logger = logger;
     private readonly IJwtService _jwtService = jwtService;
     private readonly ApplicationDbContext _context = context;
@@ -73,6 +72,7 @@ public class AuthController(
             return BadRequest("Model state is not valid.");
         }
 
+        _logger.LogInformation("Logout request received.");
         // Get User ID from JWT token
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))

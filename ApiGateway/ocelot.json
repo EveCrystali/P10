@@ -15,6 +15,20 @@
       ]
     },
     {
+      "DownstreamPathTemplate": "/note/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7202
+        }
+      ],
+      "UpstreamPathTemplate": "/note/{id}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ]
+    },
+    {
       "DownstreamPathTemplate": "/patient/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -24,6 +38,26 @@
         }
       ],
       "UpstreamPathTemplate": "/patient/{everything}",
+      "UpstreamHttpMethod": [
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/note/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7202
+        }
+      ],
+      "UpstreamPathTemplate": "/note/{everything}",
       "UpstreamHttpMethod": [
         "POST",
         "PUT",

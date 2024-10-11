@@ -15,8 +15,8 @@ public class Note : IValidatable
 
     [BsonRequired]
     [BsonRepresentation(BsonType.ObjectId)]
-    [MaxLength(36, ErrorMessage = "Title cannot be more than 36 characters")]
-    public required string UserId { get; set; }
+    [MaxLength(36, ErrorMessage = "PractitionerId cannot be more than 36 characters")]
+    public required string PractitionerId { get; set; }
 
     [BsonRequired]
     [BsonRepresentation(BsonType.ObjectId)]

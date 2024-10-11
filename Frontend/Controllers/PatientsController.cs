@@ -13,6 +13,7 @@ public class PatientsController : Controller
     private readonly ILogger<PatientsController> _logger;
     private readonly string _patientServiceUrl;
     private readonly PatientService _patientService;
+    private readonly string _noteServiceUrl;
 
     public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, 
     IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService, 
@@ -24,6 +25,7 @@ public class PatientsController : Controller
         _httpClientService = httpClientService;
         _patientService = patientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
+        _noteServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Note");
     }
 
     public async Task<IActionResult> Index()
@@ -58,7 +60,7 @@ public class PatientsController : Controller
         }
 
         HttpResponseMessage responseFromPatientService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/user/{id}");
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
@@ -67,7 +69,7 @@ public class PatientsController : Controller
             
             if (patient != null && notes != null)
             {
-                PatientNotesViewModel patientWithNotes = await _patientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
+                PatientNotesViewModel patientWithNotes = _patientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
                 return View(patientWithNotes);
             }
 

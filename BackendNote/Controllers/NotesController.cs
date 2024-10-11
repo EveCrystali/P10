@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BackendNote.Models;
 using BackendNote.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackendNote.Controllers
 {
@@ -15,6 +16,7 @@ namespace BackendNote.Controllers
             _notesService = notesService;
 
         [HttpGet]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<IEnumerable<Note>>> Get()
         {
             List<Note> note = await _notesService.GetAsync();
@@ -24,7 +26,8 @@ namespace BackendNote.Controllers
         }
 
         [HttpGet("{id:length(24)}")]
-        public async Task<ActionResult<Note>> Get(string id)
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<ActionResult<Note>> GetNote(string id)
         {
             Note? note = await _notesService.GetAsync(id);
 
@@ -37,7 +40,8 @@ namespace BackendNote.Controllers
         }
 
         [HttpGet("user/{userId:length(24)}")]
-        public async Task<ActionResult<Note>> GetFromUserId(string userId)
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<ActionResult<Note>> GetNotesFromUserId(string userId)
         {
             List<Note>? notes = await _notesService.GetFromUserIdAsync(userId);
 
@@ -50,7 +54,8 @@ namespace BackendNote.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Note newNotes)
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<IActionResult> PostNote(Note newNotes)
         {
             try
             {
@@ -67,7 +72,8 @@ namespace BackendNote.Controllers
         }
 
         [HttpPut("{id:length(24)}")]
-        public async Task<IActionResult> Update(string id, Note updatednote)
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<IActionResult> UpdateNote(string id, Note updatednote)
         {
             var note = await _notesService.GetAsync(id);
 
@@ -89,14 +95,12 @@ namespace BackendNote.Controllers
 
             await _notesService.UpdateAsync(id, updatednote);
 
-            ////   Ok() or NoContent() ? Is it necessary to return the updated note?
-            // NOTE: Generally, NoContent() should be used for PUT requests specially when
-            // the content of the view is not changed (like when we want to save without changing of view)
             return NoContent();
         }
 
         [HttpDelete("{id:length(24)}")]
-        public async Task<IActionResult> Delete(string id)
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<IActionResult> DeleteNote(string id)
         {
             var note = await _notesService.GetAsync(id);
 

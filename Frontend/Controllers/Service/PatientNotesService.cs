@@ -5,7 +5,7 @@ namespace Frontend.Controllers.Service;
 
 public class PatientService
 {
-    public async Task<PatientNotesViewModel> MapPatientNoteToPatientNotesViewModel(Patient patient, List<Note> notes)
+    public PatientNotesViewModel MapPatientNoteToPatientNotesViewModel(Patient patient, List<Note> notes)
     {
         PatientNotesViewModel patientNotesViewModel = new ()
         {

@@ -7,8 +7,8 @@ public class Note
     [MaxLength(36, ErrorMessage = "Id cannot be more than 36 characters")]
     public required string Id { get; set; }
 
-    [MaxLength(36, ErrorMessage = "Title cannot be more than 36 characters")]
-    public required string UserId { get; set; }
+    [MaxLength(36, ErrorMessage = "PractitionerId cannot be more than 36 characters")]
+    public required string PractitionerId { get; set; }
 
     [MaxLength(36, ErrorMessage = "PatientId cannot be more than 36 characters")]
     public required string PatientId { get; set; }

@@ -1,4 +1,5 @@
 using Frontend.Controllers.Service;
+using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
@@ -11,13 +12,17 @@ public class PatientsController : Controller
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _patientServiceUrl;
+    private readonly PatientService _patientService;
 
-    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService, IConfiguration configuration)
+    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, 
+    IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService, 
+    IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
         _httpClient = httpClient;
         _httpContextAccessor = httpContextAccessor;
         _httpClientService = httpClientService;
+        _patientService = patientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 
@@ -52,10 +57,20 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
-        if (response.IsSuccessStatusCode)
+        HttpResponseMessage responseFromPatientService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+
+        if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
-            Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
+            Frontend.Models.Patient? patient = await responseFromPatientService.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
+            List<Frontend.Models.Note>? notes = await responseFromNoteService.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
+            
+            if (patient != null && notes != null)
+            {
+                PatientNotesViewModel patientWithNotes = await _patientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
+                return View(patientWithNotes);
+            }
+
             return View(patient);
         }
         ModelState.AddModelError(string.Empty, "Patient not found.");

@@ -29,6 +29,7 @@ public class Note : IValidatable
     public DateTime CreatedDate { get; set; }
 
     [BsonRequired]
+    [DataType(DataType.DateTime)]
     [BsonRepresentation(BsonType.DateTime)]
     public DateTime? LastUpdatedDate { get; set; }
 

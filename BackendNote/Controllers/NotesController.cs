@@ -5,7 +5,7 @@ using BackendNote.Services;
 
 namespace BackendNote.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("note")]
     [ApiController]
     public class NotesController : ControllerBase
     {
@@ -33,7 +33,20 @@ namespace BackendNote.Controllers
                 return NotFound("Note not found");
             }
 
-            return note;
+            return Ok(note);
+        }
+
+        [HttpGet("user/{userId:length(24)}")]
+        public async Task<ActionResult<Note>> GetFromUserId(string userId)
+        {
+            List<Note>? notes = await _notesService.GetFromUserIdAsync(userId);
+
+            if (notes is null)
+            {
+                return NotFound("Note not found");
+            }
+
+            return Ok(notes);
         }
 
         [HttpPost]

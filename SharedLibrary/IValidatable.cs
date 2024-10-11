@@ -1,4 +1,6 @@
-namespace BackendPatient.Extensions;
+using System;
+
+namespace SharedLibrary.Extensions;
 
 public interface IValidatable
 {

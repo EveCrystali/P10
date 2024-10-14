@@ -9,23 +9,25 @@ namespace Frontend.Controllers;
 public class NotesController : Controller
 {
     private readonly HttpClient _httpClient;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<NotesController> _logger;
     private readonly string _noteServiceUrl;
 
 
+    // DONE: Add PatientService Dependcy injection
+
     public NotesController(ILogger<NotesController> logger, HttpClient httpClient,
-    IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService,
+     HttpClientService httpClientService,
     IConfiguration configuration)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _httpContextAccessor = httpContextAccessor;
+
         _httpClientService = httpClientService;
         _noteServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Note");
     }
 
+    [HttpGet("Index")]
     public async Task<IActionResult> Index()
     {
         HttpResponseMessage response = await _httpClient.GetAsync(_noteServiceUrl);
@@ -225,7 +227,6 @@ public class NotesController : Controller
             _logger.LogError("Failed to load note with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
             ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load note for deletion.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -244,7 +245,6 @@ public class NotesController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
         else
@@ -256,5 +256,33 @@ public class NotesController : Controller
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
+
+    [HttpGet("user/{patientId}")]
+    public async Task<IActionResult> GetNotesFromPatientId(string patientId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            List<Frontend.Models.Note> notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
+            return View(notes);
+        }
+
+        else
+        {
+            string errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError("Failed to load notes for patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", patientId, response.StatusCode, errorContent);
+            ModelState.AddModelError(string.Empty, "Unable to load notes for patient.");
+            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+        }
+    }
+
 }
 

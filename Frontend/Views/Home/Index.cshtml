@@ -53,6 +53,7 @@
                     <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-secondary">Editer</button></a>
                     <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-secondary">Details</button></a>
                     <a asp-controller="Patients" asp-action="Delete" asp-route-id="@item.Id"><button class="btn btn-secondary">Supprimer</button></a>
+                    <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id"><button class="btn btn-secondary">Notes du patient</button></a>
                     Console.WriteLine($"Patient requested is {item.Id}");
                 }
                 catch(Exception ex)

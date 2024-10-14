@@ -60,7 +60,7 @@ public class PatientsController : Controller
         }
 
         HttpResponseMessage responseFromPatientService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/user/{id}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/patient/{id}");
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
@@ -228,7 +228,6 @@ public class PatientsController : Controller
             _logger.LogError("Failed to load patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
             ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load patient for deletion.");
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
-            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -247,7 +246,6 @@ public class PatientsController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            // FIXME: redirection is not working
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
         else

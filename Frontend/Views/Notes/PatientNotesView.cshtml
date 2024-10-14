@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes du Patient</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Notes du Patient</h1>
+    <div id="notes-container"></div>
+
+    <script>
+        async function fetchNotes(userId) {
+            try {
+                const response = await fetch(`/note/user/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la récupération des notes');
+                }
+
+                const notes = await response.json();
+                displayNotes(notes);
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('notes-container').innerText = 'Erreur lors de la récupération des notes';
+            }
+        }
+
+        function displayNotes(notes) {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = '';
+
+            if (notes.length === 0) {
+                container.innerText = 'Aucune note trouvée';
+                return;
+            }
+
+            notes.forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'note';
+                noteElement.innerHTML = `
+                    <h2>${note.title}</h2>
+                    <p>${note.content}</p>
+                    <small>${new Date(note.createdAt).toLocaleString()}</small>
+                `;
+                container.appendChild(noteElement);
+            });
+        }
+
+        // Remplacez 'userId' par l'ID réel de l'utilisateur
+        const userId = 'exempleUserId';
+        fetchNotes(userId);
+    </script>
+</body>
+</html>

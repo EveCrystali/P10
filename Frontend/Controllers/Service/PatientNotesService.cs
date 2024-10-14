@@ -14,8 +14,8 @@ public class PatientService
             LastName = patient.LastName,
             DateOfBirth = patient.DateOfBirth,
             Gender = patient.Gender,
-            Address = patient.Address,
-            PhoneNumber = patient.PhoneNumber,
+            Address = patient.Address ?? "",
+            PhoneNumber = patient.PhoneNumber ?? "",
             Notes = notes
         };
         return patientNotesViewModel;

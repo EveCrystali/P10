@@ -1,0 +1,35 @@
+@* TODO: Improve View *@
+
+
+@model List<Frontend.Models.Note>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes du Patient</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Notes du Patient</h1>
+    
+    @if (Model != null && Model.Any())
+    {
+        <div id="notes-container">
+            @foreach (var note in Model)
+            {
+                <div class="note">
+                    <h2>@note.Title</h2>
+                    <p>@note.Body</p>
+                    <small>@note.CreatedDate.ToString()</small>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Aucune note trouvée</p>
+    }
+</body>
+</html>

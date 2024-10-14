@@ -8,6 +8,8 @@ namespace BackendNote.Controllers
 {
     [Route("note")]
     [ApiController]
+    // BUG : Handle authorization 
+    // The app is not able to even launch (frontend) when Authorize is used here
     // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public class NotesController : ControllerBase
     {
@@ -39,7 +41,7 @@ namespace BackendNote.Controllers
         }
 
         [HttpGet("patient/{patientId}")]
-        public async Task<ActionResult<Note>> GetNotesFromPatientId(string patientId)
+        public async Task<ActionResult<Note>> GetNotesFromPatientId(int patientId)
         {
             List<Note>? notes = await _notesService.GetFromPatientIdAsync(patientId);
 

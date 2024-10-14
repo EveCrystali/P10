@@ -59,8 +59,17 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
+        // NOTE : responseFromPatientService status code 200 OK
         HttpResponseMessage responseFromPatientService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/patient/{id}");
+
+        int patientId = id;
+
+        // DONE: BUG: reponseFromNoteService is status code 401 because unauthorized
+        // FUTURE: try to use the below line of code instead of the two above when Authorization is well implemented in the backend Note service
+        // HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/patient/{patientId}");
+
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
@@ -75,6 +84,8 @@ public class PatientsController : Controller
 
             return View(patient);
         }
+
+        // TODO : handle error from unauthorized if the user is not connected (401 Unauthorized) : should be redirected to login page
         ModelState.AddModelError(string.Empty, "Patient not found.");
         // FUTURE: Add TempData on the view
         TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;

@@ -257,8 +257,8 @@ public class NotesController : Controller
         }
     }
 
-    [HttpGet("user/{patientId}")]
-    public async Task<IActionResult> GetNotesFromPatientId(string patientId)
+    [HttpGet("patient/{patientId}")]
+    public async Task<IActionResult> GetNotesFromPatientId(int patientId)
     {
         if (!ModelState.IsValid)
         {

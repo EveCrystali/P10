@@ -27,7 +27,7 @@ public class NotesService
     public async Task<Note?> GetAsync(string id) =>
         await _notesCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    public async Task<List<Note>?> GetFromPatientIdAsync(string PatientId) =>
+    public async Task<List<Note>?> GetFromPatientIdAsync(int PatientId) =>
         await _notesCollection.Find(x => x.PatientId == PatientId).ToListAsync();
 
     public async Task CreateAsync(Note newNote) =>

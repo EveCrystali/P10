@@ -1,6 +1,24 @@
 {
   "Routes": [
     {
+      "DownstreamPathTemplate": "/note/patient/{patientId}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7202
+        }
+      ],
+      "UpstreamPathTemplate": "/note/patient/{patientId}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/patient/{id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [

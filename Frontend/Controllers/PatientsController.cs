@@ -1,3 +1,4 @@
+using System.Net;
 using Frontend.Controllers.Service;
 using Frontend.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -15,8 +16,8 @@ public class PatientsController : Controller
     private readonly PatientService _patientService;
     private readonly string _noteServiceUrl;
 
-    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient, 
-    IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService, 
+    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient,
+    IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService,
     IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
@@ -64,18 +65,22 @@ public class PatientsController : Controller
 
         int patientId = id;
 
-        // DONE: BUG: reponseFromNoteService is status code 401 because unauthorized
         // FUTURE: try to use the below line of code instead of the two above when Authorization is well implemented in the backend Note service
         // HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/patient/{patientId}");
 
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
         HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
 
+        if (responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized || responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+        }
+
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await responseFromPatientService.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
             List<Frontend.Models.Note>? notes = await responseFromNoteService.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
-            
+
             if (patient != null && notes != null)
             {
                 PatientNotesViewModel patientWithNotes = _patientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
@@ -85,7 +90,8 @@ public class PatientsController : Controller
             return View(patient);
         }
 
-        // TODO : handle error from unauthorized if the user is not connected (401 Unauthorized) : should be redirected to login page
+
+
         ModelState.AddModelError(string.Empty, "Patient not found.");
         // FUTURE: Add TempData on the view
         TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
@@ -109,7 +115,12 @@ public class PatientsController : Controller
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            }
+
+            else if (response.IsSuccessStatusCode)
             {
                 Models.Patient? createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
                 if (createdPatient != null)
@@ -151,7 +162,11 @@ public class PatientsController : Controller
             HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            }
+            else if (response.IsSuccessStatusCode)
             {
                 Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
                 return View(patient);
@@ -191,8 +206,11 @@ public class PatientsController : Controller
                 Content = JsonContent.Create(patient)
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            }
+            else if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Patient with id {PatientId} was successfully updated.", patient.Id);
                 return RedirectToAction(nameof(Details), new { id = patient.Id });
@@ -228,7 +246,11 @@ public class PatientsController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+        }
+        else if (response.IsSuccessStatusCode)
         {
             Frontend.Models.Patient? patient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();
             return View(patient);
@@ -255,7 +277,11 @@ public class PatientsController : Controller
         HttpRequestMessage request = new(HttpMethod.Delete, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+        }
+        else if (response.IsSuccessStatusCode)
         {
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }

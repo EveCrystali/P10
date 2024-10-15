@@ -13,6 +13,13 @@
     <title>Edit</title>
 </head>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <body>
 
     <h1>Note</h1>

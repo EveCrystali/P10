@@ -13,6 +13,13 @@
     <title>Delete</title>
 </head>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <body>
 
     <h3>Are you sure you want to delete this patient?</h3>

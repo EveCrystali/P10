@@ -13,6 +13,13 @@
     <title>Details</title>
 </head>
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <body>
 
     <div>
@@ -57,6 +64,7 @@
             </dd>
             @if (Model.Notes != null)
             {
+                @* ? I am not sure that the cast is mandatory **@
                 @foreach (Note? note in Model.Notes.Cast<Frontend.Models.Note>())
                 {
                     <dt class="col-sm-2">

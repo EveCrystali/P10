@@ -11,6 +11,14 @@
     <title>Notes du Patient</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <body>
     <h1>Notes du Patient</h1>
     

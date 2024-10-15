@@ -11,6 +11,14 @@
     <meta name="viewport" content="width=device-width" />
     <title>Details</title>
 </head>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <body>
 
 <div>

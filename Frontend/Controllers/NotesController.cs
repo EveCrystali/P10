@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Frontend.Controllers.Service;
 using Frontend.Models;
+using System.Net;
 
 
 namespace Frontend.Controllers;
@@ -45,7 +46,6 @@ public class NotesController : Controller
         }
 
         ModelState.AddModelError(string.Empty, "Unable to load notes.");
-        // FUTURE: Add TempData on the view
         TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
         return View(new List<Frontend.Models.Note>());
     }
@@ -74,7 +74,6 @@ public class NotesController : Controller
         }
 
         ModelState.AddModelError(string.Empty, "Note not found.");
-        // FUTURE: Add TempData on the view
         TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
         return View();
     }
@@ -120,7 +119,6 @@ public class NotesController : Controller
                 {
                     ModelState.AddModelError(string.Empty, "Failed to create note.");
                     _logger.LogError("Failed to create note.");
-                    // FUTURE: Add TempData on the view
                     TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
                     return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
                 }
@@ -137,7 +135,6 @@ public class NotesController : Controller
         {
             _logger.LogError("Model state is not valid.");
             ModelState.AddModelError(string.Empty, "Unable to create note.");
-            // FUTURE: Add TempData on the view
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             return View(note);
         }
@@ -160,12 +157,10 @@ public class NotesController : Controller
             {
                 ModelState.AddModelError(string.Empty, "Note not found.");
                 _logger.LogError("Note not found.");
-                // FUTURE: Add TempData on the view
                 TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
                 return View();
             }
             ModelState.AddModelError(string.Empty, "Unable to load note for edit.");
-            // FUTURE: Add TempData on the view
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             return View();
         }
@@ -173,7 +168,6 @@ public class NotesController : Controller
         {
             _logger.LogError("Model state is not valid.");
             ModelState.AddModelError(string.Empty, "Unable to load note for edit.");
-            // FUTURE: Add TempData on the view
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             return View();
         }
@@ -202,7 +196,6 @@ public class NotesController : Controller
                 _logger.LogError("Failed to update note with id {PatientId}. Status code: {StatusCode}", note.Id, response.StatusCode);
                 string errorContent = await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError(response.StatusCode.ToString(), "Unable to update note.");
-                // FUTURE: Add TempData on the view
                 TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
                 return View(note);
             }
@@ -211,7 +204,6 @@ public class NotesController : Controller
         {
             _logger.LogError("Model state is not valid.");
             ModelState.AddModelError(string.Empty, "Unable to update note.");
-            // FUTURE: Add TempData on the view
             TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
             return View(note);
         }
@@ -279,6 +271,11 @@ public class NotesController : Controller
 
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+        }
 
         if (response.IsSuccessStatusCode)
         {

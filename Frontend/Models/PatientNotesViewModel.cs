@@ -20,6 +20,6 @@ public class PatientNotesViewModel
 
     public string? PhoneNumber { get; set; }
 
-    public virtual ICollection<Note>? Notes { get; set; }
+    public virtual List<Note>? Notes { get; set; }
 
 }

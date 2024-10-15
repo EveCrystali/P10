@@ -4,7 +4,6 @@
     Layout = "_Layout";
 }
 
-
 <!DOCTYPE html>
 
 <html lang="fr" xml:lang="fr">
@@ -49,39 +48,49 @@
             </dt>
             <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.Address)
-            </dd>
+           </dd>
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.PhoneNumber)
             </dt>
             <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.PhoneNumber)
             </dd>
-            @foreach (Note note in Model.Notes)
+            @if (Model.Notes != null)
             {
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => note.Title)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => note.Title)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => note.Body)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => note.Body)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => note.LastUpdatedDate ?? note.CreatedDate)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => note.LastUpdatedDate ?? note.CreatedDate)
-                </dd>
-                <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => note.PractionnerId)
-                </dt>
-                <dd class="col-sm-10">
-                    @Html.DisplayFor(model => note.PractionnerId)
-                </dd>
+                @foreach (Note? note in Model.Notes.Cast<Frontend.Models.Note>())
+                {
+                    <dt class="col-sm-2">
+                        @Html.DisplayName("Title")
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(_ => note.Title)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayName("Body")
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(_ => note.Body)
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayName("LastUpdatedDate")
+                    </dt>
+                    <dd class="col-sm-10">
+                        @if (note.LastUpdatedDate != null)
+                        {
+                            @Html.DisplayFor(_ => note.LastUpdatedDate)
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(_ => note.CreatedDate)
+                        }
+                    </dd>
+                    <dt class="col-sm-2">
+                        @Html.DisplayName("PractionnerId")
+                    </dt>
+                    <dd class="col-sm-10">
+                        @Html.DisplayFor(_ => note.PractionnerId)
+                    </dd>
+                }
             }
         </dl>
     </div>

@@ -45,8 +45,7 @@ public class NotesController : Controller
             return View(notes);
         }
 
-        ModelState.AddModelError(string.Empty, "Unable to load notes.");
-        TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load notes", modelErrorMessage: "Unable to load notes.", response: response);
         return View(new List<Frontend.Models.Note>());
     }
 
@@ -72,9 +71,8 @@ public class NotesController : Controller
 
             return NotFound("Note not found.");
         }
-
-        ModelState.AddModelError(string.Empty, "Note not found.");
-        TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+        
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService, id: id.ToString());
         return View();
     }
 
@@ -117,25 +115,19 @@ public class NotesController : Controller
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Failed to create note.");
-                    _logger.LogError("Failed to create note.");
-                    TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                    await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note", modelErrorMessage: "Unable to create note.", response: response);
                     return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
                 }
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Error from the server");
-                _logger.LogError("Error from the server : {ReasonPhrase}", response.ReasonPhrase);
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note - Error from the server", modelErrorMessage: "Unable to create note.", response: response);
                 return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
             }
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to create note.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note", modelErrorMessage: "odel state is not valid.", response: null);
             return View(note);
         }
     }
@@ -155,20 +147,15 @@ public class NotesController : Controller
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                ModelState.AddModelError(string.Empty, "Note not found.");
-                _logger.LogError("Note not found.");
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Note not found", modelErrorMessage: "Note not found.", response: response, id: id.ToString());
                 return View();
             }
-            ModelState.AddModelError(string.Empty, "Unable to load note for edit.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response, id: id.ToString());
             return View();
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to load note for edit.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.", response: null, id: id.ToString());
             return View();
         }
     }
@@ -198,18 +185,13 @@ public class NotesController : Controller
             }
             else
             {
-                _logger.LogError("Failed to update note with id {PatientId}. Status code: {StatusCode}", note.Id, response.StatusCode);
-                await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(response.StatusCode.ToString(), "Unable to update note.");
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: response, id: note.Id);
                 return View(note);
             }
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to update note.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: null, id: note.Id);
             return View(note);
         }
     }
@@ -232,10 +214,7 @@ public class NotesController : Controller
         }
         else
         {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to load note with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
-            ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load note for deletion.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response, id: id.ToString());
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -258,10 +237,7 @@ public class NotesController : Controller
         }
         else
         {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to delete note with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
-            ModelState.AddModelError(string.Empty, "Unable to delete note.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response, id: id.ToString());
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -290,10 +266,7 @@ public class NotesController : Controller
 
         else
         {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to load notes for patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", patientId, response.StatusCode, errorContent);
-            ModelState.AddModelError(string.Empty, "Unable to load notes for patient.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load notes for patient.", response: response, id: patientId.ToString());
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

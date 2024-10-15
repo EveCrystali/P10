@@ -46,8 +46,8 @@ public class PatientsController : Controller
             return View(patients);
         }
 
-        ModelState.AddModelError(string.Empty, "Unable to load patients.");
-        TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patients", modelErrorMessage: "Unable to load patient");
+
         return View(new List<Frontend.Models.Patient>());
     }
 
@@ -89,8 +89,7 @@ public class PatientsController : Controller
             return View(patient);
         }
 
-        ModelState.AddModelError(string.Empty, "Patient not found.");
-        TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found", modelErrorMessage: "Unable to load patient details.");
         return View();
     }
 
@@ -125,25 +124,20 @@ public class PatientsController : Controller
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Failed to create patient.");
-                    _logger.LogError("Failed to create patient.");
-                    TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                    await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create patient", modelErrorMessage: "Unable to create patient");
                     return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
                 }
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Error from the server");
-                _logger.LogError("Error from the server : {ReasonPhrase}", response.ReasonPhrase);
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Error from the server : {response.ReasonPhrase}", modelErrorMessage: "Unable to create patient", response: response);
+
                 return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
             }
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to create patient.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to create patient");
             return View(patient);
         }
     }
@@ -167,20 +161,16 @@ public class PatientsController : Controller
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                ModelState.AddModelError(string.Empty, "Patient not found.");
-                _logger.LogError("Patient not found.");
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found.", modelErrorMessage: "Unable to load patient for edit.");
                 return View();
             }
-            ModelState.AddModelError(string.Empty, "Unable to load patient for edit.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patient", modelErrorMessage: "Unable to load patient for edit.");
+
             return View();
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to load patient for edit.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to load patient for edit.");
             return View();
         }
     }
@@ -208,18 +198,13 @@ public class PatientsController : Controller
             }
             else
             {
-                _logger.LogError("Failed to update patient with id {PatientId}. Status code: {StatusCode}", patient.Id, response.StatusCode);
-                string errorContent = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(response.StatusCode.ToString(), "Unable to update patient.");
-                TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to update patient", id: patient.Id.ToString());
                 return View(patient);
             }
         }
         else
         {
-            _logger.LogError("Model state is not valid.");
-            ModelState.AddModelError(string.Empty, "Unable to update patient.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to update patient", id: patient.Id.ToString());
             return View(patient);
         }
     }
@@ -246,10 +231,7 @@ public class PatientsController : Controller
         }
         else
         {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to load patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
-            ModelState.AddModelError(response.StatusCode.ToString(), "Unable to load patient for deletion.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load patient for deletion.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -276,10 +258,7 @@ public class PatientsController : Controller
         }
         else
         {
-            string errorContent = await response.Content.ReadAsStringAsync();
-            _logger.LogError("Failed to delete patient with id {PatientId}. Status code: {StatusCode}, Error: {Error}", id, response.StatusCode, errorContent);
-            ModelState.AddModelError(string.Empty, "Unable to delete patient.");
-            TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete patient", response: response, id: id.ToString());
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

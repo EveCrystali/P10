@@ -75,6 +75,8 @@ public class AuthController : Controller
 
             HttpContext.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(authToken), cookieOptions);
 
+            // FUTURE: Redirect to previous page (if Login was called from a method needing a authentification) or home
+
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
         else

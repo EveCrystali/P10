@@ -58,7 +58,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/{id}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -145,7 +145,7 @@ public class NotesController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{id}");
+            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
@@ -180,7 +180,12 @@ public class NotesController : Controller
         {
             _logger.LogInformation("Updating note with id {Id} to {NoteTitle}", note.Id, note.Title);
 
-            HttpRequestMessage request = new(HttpMethod.Put, $"{_noteServiceUrl}/{note.Id}")
+            UriBuilder uriBuilder = new(_noteServiceUrl)
+            {
+                Path = $"notes/{note.Id}"
+            };
+
+            HttpRequestMessage request = new(HttpMethod.Put, uriBuilder.Uri)
             {
                 Content = JsonContent.Create(note)
             };
@@ -194,7 +199,7 @@ public class NotesController : Controller
             else
             {
                 _logger.LogError("Failed to update note with id {PatientId}. Status code: {StatusCode}", note.Id, response.StatusCode);
-                string errorContent = await response.Content.ReadAsStringAsync();
+                await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError(response.StatusCode.ToString(), "Unable to update note.");
                 TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;
                 return View(note);
@@ -217,7 +222,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{id}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
@@ -244,7 +249,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/{id}");
+        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
@@ -269,7 +274,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/notes/patient/{Uri.EscapeDataString(patientId.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -279,7 +284,7 @@ public class NotesController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            List<Frontend.Models.Note> notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
+            List<Frontend.Models.Note>? notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
             return View(notes);
         }
 

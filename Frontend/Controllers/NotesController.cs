@@ -13,16 +13,15 @@ public class NotesController : Controller
     private readonly ILogger<NotesController> _logger;
     private readonly string _noteServiceUrl;
 
-
-    // DONE: Add PatientService Dependcy injection
+    private readonly PatientService _patientService;
 
     public NotesController(ILogger<NotesController> logger, HttpClient httpClient,
      HttpClientService httpClientService,
-    IConfiguration configuration)
+    IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
         _httpClient = httpClient;
-
+        _patientService = patientService;
         _httpClientService = httpClientService;
         _noteServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Note");
     }
@@ -38,7 +37,7 @@ public class NotesController : Controller
             {
                 foreach (Frontend.Models.Note note in notes)
                 {
-                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractitionerId}");
+                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractionnerId}");
                 }
             }
 
@@ -81,14 +80,27 @@ public class NotesController : Controller
     }
 
     [HttpGet("create")]
-    public IActionResult Create()
+    public IActionResult Create(int patientId)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        ViewBag.PatientId = patientId;
         return View();
     }
 
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
+        // NOW: Add needed information to the post request as practionnerId, patientid, createddate, lastupdateddate, title, body
+        // DONE: Replace with the actual practionnerId
+        // FUTURE: Should be impossible but GetUserIdFromAuthToken is null management should be done otherwise
+        note.PractionnerId = await _patientService.GetUserIdFromAuthToken() ?? "11a6aca3-618d-472a-82a7-db9b90f7e56f";
+
+        note.CreatedDate = DateTime.Now;
+        note.LastUpdatedDate = DateTime.Now;
+
         if (ModelState.IsValid)
         {
             HttpRequestMessage request = new(HttpMethod.Post, $"{_noteServiceUrl}/")

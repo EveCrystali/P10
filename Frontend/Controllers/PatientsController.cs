@@ -90,8 +90,6 @@ public class PatientsController : Controller
             return View(patient);
         }
 
-
-
         ModelState.AddModelError(string.Empty, "Patient not found.");
         // FUTURE: Add TempData on the view
         TempData["Error"] = ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage;

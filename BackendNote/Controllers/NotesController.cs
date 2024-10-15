@@ -54,44 +54,47 @@ namespace BackendNote.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostNote(Note newNotes)
+        public async Task<IActionResult> PostNote(Note newNote)
         {
             try
             {
-                newNotes.Validate();
+                newNote.Validate();
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
 
-            await _notesService.CreateAsync(newNotes);
+            newNote.CreatedDate = DateTime.UtcNow; 
 
-            return CreatedAtAction(nameof(Get), new { id = newNotes.Id }, newNotes);
+            await _notesService.CreateAsync(newNote);
+
+            return CreatedAtAction(nameof(Get), new { id = newNote.Id }, newNote);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateNote(string id, Note updatednote)
+        public async Task<IActionResult> UpdateNote(string id, Note updatedNote)
         {
             var note = await _notesService.GetAsync(id);
 
             if (note is null)
             {
-                return NotFound("Note not found");
+            return NotFound("Note not found");
             }
 
             try
             {
-                updatednote.Validate();
+            updatedNote.Validate();
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+            return BadRequest(ex.Message);
             }
 
-            updatednote.Id = note.Id;
+            updatedNote.Id = note.Id;
+            updatedNote.LastUpdatedDate = DateTime.UtcNow; 
 
-            await _notesService.UpdateAsync(id, updatednote);
+            await _notesService.UpdateAsync(id, updatedNote);
 
             return NoContent();
         }

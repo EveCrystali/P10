@@ -58,7 +58,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -145,7 +145,7 @@ public class NotesController : Controller
     {
         if (ModelState.IsValid)
         {
-            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
+            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
@@ -182,7 +182,7 @@ public class NotesController : Controller
 
             UriBuilder uriBuilder = new(_noteServiceUrl)
             {
-                Path = $"notes/{note.Id}"
+                Path = $"{note.Id}"
             };
 
             HttpRequestMessage request = new(HttpMethod.Put, uriBuilder.Uri)
@@ -249,7 +249,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/notes/{Uri.EscapeDataString(id.ToString())}");
+        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
@@ -274,7 +274,7 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/notes/patient/{Uri.EscapeDataString(patientId.ToString())}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{Uri.EscapeDataString(patientId.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)

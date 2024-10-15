@@ -40,10 +40,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     {
         List<Patient> patients = await _dbContext.Patients.ToListAsync();
 
-        // NOTE: The BadRequest method is used here to return a 400 Bad Request response.
-        //       This is because the GetPatients method is expected to return a list of patients,
-        //       and if no patients are found, it's considered a bad request.
-        return patients != null ? Ok(patients) : BadRequest("No patients found");
+        return patients != null ? Ok(patients) : NotFound("No patients found");
     }
 
     /// <summary>

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace BackendPatient.Extensions;
+namespace SharedLibrary.Extensions;
 
 public static class ValidationExtensions
 {

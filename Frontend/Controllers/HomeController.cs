@@ -31,6 +31,7 @@ public class HomeController : Controller
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
+
             return View(patients);
         }
 

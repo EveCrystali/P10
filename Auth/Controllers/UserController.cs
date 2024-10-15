@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Auth.Controllers;
 
-[Route("users")]
+[Route("user")]
 [ApiController]
 public class UserController : ControllerBase
 {
@@ -44,7 +44,21 @@ public class UserController : ControllerBase
             return NotFound("No User found with this Id");
         }
 
-        return Ok(user);
+        return Ok(user.Id);
+    }
+
+    [Authorize(Policy = "RequireUserRole")]
+    [HttpGet("username/{username}")]
+    public async Task<ActionResult<string>> GetUserIdFromUsername(string username)
+    {
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+
+        if (user == null)
+        {
+            return NotFound("No User found with this username");
+        }
+
+        return Ok(user.Id);
     }
 
     [HttpPut("{id}")]

@@ -34,8 +34,6 @@ builder.Services.AddScoped<DataSeeder>();
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
 
-builder.Services.AddMvc();
-
 WebApplication app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())

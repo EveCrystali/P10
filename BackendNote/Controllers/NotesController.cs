@@ -8,9 +8,7 @@ namespace BackendNote.Controllers
 {
     [Route("note")]
     [ApiController]
-    // BUG : Handle authorization 
-    // The app is not able to even launch (frontend) when Authorize is used here
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public class NotesController : ControllerBase
     {
         private readonly NotesService _notesService;
@@ -99,6 +97,7 @@ namespace BackendNote.Controllers
             return NoContent();
         }
 
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNote(string id)
         {

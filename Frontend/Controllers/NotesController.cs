@@ -30,7 +30,10 @@ public class NotesController : Controller
     [HttpGet("Index")]
     public async Task<IActionResult> Index()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync(_noteServiceUrl);
+        
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
         if (response.IsSuccessStatusCode)
         {
             List<Frontend.Models.Note>? notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
@@ -59,7 +62,6 @@ public class NotesController : Controller
 
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
-
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -95,10 +97,7 @@ public class NotesController : Controller
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
-        // DONE: Add needed information to the post request as practionnerId, createddate, lastupdateddate
-        // DONE: Replace with the actual practionnerId
-        // FUTURE: Should be impossible but GetUserIdFromAuthToken is null management should be done otherwise
-        note.PractitionerId = await _patientService.GetUserIdFromAuthToken() ?? "11a6aca3-618d-472a-82a7-db9b90f7e56f";
+        note.PractitionerId = await _patientService.GetUserIdFromAuthToken();
 
         note.CreatedDate = DateTime.Now;
         note.LastUpdatedDate = DateTime.Now;

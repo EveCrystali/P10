@@ -7,7 +7,7 @@ public class Note
     [MaxLength(36, ErrorMessage = "Id cannot be more than 36 characters")]
     public string? Id { get; set; }
 
-    public string? PractionnerId { get; set; }
+    public string? PractitionerId { get; set; }
 
     public required int PatientId { get; set; }
 

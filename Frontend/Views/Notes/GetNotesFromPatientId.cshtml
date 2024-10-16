@@ -30,7 +30,18 @@
                 <div class="note">
                     <h2>@note.Title</h2>
                     <p>@note.Body</p>
-                    <small>@note.CreatedDate.ToString()</small>
+                    @if (note.CreatedDate.HasValue)
+                    {
+                        <small>Date de création: @note.CreatedDate.Value.ToString()</small>
+                    }
+                    @if (note.LastUpdatedDate.HasValue)
+                    {
+                        <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
+                    }
+                    @if (note.PractitionerId != null)
+                    {
+                        <small>ID du practicien: @note.PractitionerId.ToString()</small>
+                    }
                 </div>
             }
         </div>

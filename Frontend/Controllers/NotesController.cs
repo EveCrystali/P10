@@ -38,7 +38,7 @@ public class NotesController : Controller
             {
                 foreach (Frontend.Models.Note note in notes)
                 {
-                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractionnerId}");
+                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractitionerId}");
                 }
             }
 
@@ -57,7 +57,9 @@ public class NotesController : Controller
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
+        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
+
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -71,7 +73,7 @@ public class NotesController : Controller
 
             return NotFound("Note not found.");
         }
-        
+
         await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService, id: id);
         return View();
     }
@@ -96,7 +98,7 @@ public class NotesController : Controller
         // DONE: Add needed information to the post request as practionnerId, createddate, lastupdateddate
         // DONE: Replace with the actual practionnerId
         // FUTURE: Should be impossible but GetUserIdFromAuthToken is null management should be done otherwise
-        note.PractionnerId = await _patientService.GetUserIdFromAuthToken() ?? "11a6aca3-618d-472a-82a7-db9b90f7e56f";
+        note.PractitionerId = await _patientService.GetUserIdFromAuthToken() ?? "11a6aca3-618d-472a-82a7-db9b90f7e56f";
 
         note.CreatedDate = DateTime.Now;
         note.LastUpdatedDate = DateTime.Now;

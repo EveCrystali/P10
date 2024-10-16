@@ -64,7 +64,7 @@ public class PatientService
             .Select(note => new Note
             {
                 Id = note.Id,
-                PractionnerId = note.PractionnerId,
+                PractitionerId = note.PractitionerId,
                 PatientId = patientNotesViewModel.PatientId,
                 CreatedDate = note.CreatedDate,
                 LastUpdatedDate = note.LastUpdatedDate,

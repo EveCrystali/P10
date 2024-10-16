@@ -1,38 +1,6 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/note/patient/{patientId}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7202
-        }
-      ],
-      "UpstreamPathTemplate": "/note/patient/{patientId}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "P10AuthProviderKey",
-        "AllowedScopes": []
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/patient/{id}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7200
-        }
-      ],
-      "UpstreamPathTemplate": "/patient/{id}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ]
-    },
-    {
       "DownstreamPathTemplate": "/note/{id}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -51,19 +19,17 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/patient/{everything}",
+      "DownstreamPathTemplate": "/note/patient/{patientId}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 7200
+          "Port": 7202
         }
       ],
-      "UpstreamPathTemplate": "/patient/{everything}",
+      "UpstreamPathTemplate": "/note/patient/{patientId}",
       "UpstreamHttpMethod": [
-        "POST",
-        "PUT",
-        "DELETE"
+        "GET"
       ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "P10AuthProviderKey",
@@ -102,6 +68,40 @@
       "UpstreamPathTemplate": "/note/",
       "UpstreamHttpMethod": [
         "GET"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/patient/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7200
+        }
+      ],
+      "UpstreamPathTemplate": "/patient/{id}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ]
+    },
+    {
+      "DownstreamPathTemplate": "/patient/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7200
+        }
+      ],
+      "UpstreamPathTemplate": "/patient/{everything}",
+      "UpstreamHttpMethod": [
+        "POST",
+        "PUT",
+        "DELETE"
       ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "P10AuthProviderKey",
@@ -244,7 +244,6 @@
         ]
       }
     },
-    
     {
       "UpstreamPathTemplate": "/",
       "DownstreamPathTemplate": "/",

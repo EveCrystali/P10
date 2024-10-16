@@ -76,7 +76,7 @@ public class NotesController : Controller
             return NotFound("Note not found.");
         }
 
-        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService, id: id);
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService);
         return View();
     }
 
@@ -156,15 +156,15 @@ public class NotesController : Controller
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Note not found", modelErrorMessage: "Note not found.", response: response, id: id.ToString());
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Note not found", modelErrorMessage: "Note not found.", response: response);
                 return View();
             }
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response, id: id);
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response);
             return View();
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.", response: null, id: id);
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.");
             return View();
         }
     }
@@ -194,13 +194,13 @@ public class NotesController : Controller
             }
             else
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: response, id: note.Id);
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: response);
                 return View(note);
             }
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: null, id: note.Id);
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.");
             return View(note);
         }
     }
@@ -223,7 +223,7 @@ public class NotesController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response, id: id);
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -246,7 +246,7 @@ public class NotesController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response, id: id);
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -275,7 +275,7 @@ public class NotesController : Controller
 
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load notes for patient.", response: response, id: patientId.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load notes for patient.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

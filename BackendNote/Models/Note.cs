@@ -19,7 +19,7 @@ public class Note : IValidatable
 
     [BsonRequired]
     [BsonRepresentation(BsonType.String)]
-    public int PatientId { get; set; }
+    public int? PatientId { get; set; }
 
     [DataType(DataType.DateTime)]
     [BsonRepresentation(BsonType.DateTime)]

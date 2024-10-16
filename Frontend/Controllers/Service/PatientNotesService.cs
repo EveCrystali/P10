@@ -19,6 +19,7 @@ public class PatientService
         _httpClient = httpClient;
         _httpContextAccessor = httpContextAccessor;
         _logger = logger;
+        _jwtValidationService = jwtValidationService;
         _authServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Auth");
     }
 
@@ -101,7 +102,13 @@ public class PatientService
     // DONE: Implement a new method returning the PractionnerId of the current user
     public async Task<string?> GetUserIdFromAuthToken()
     {
-        string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
+        if (_httpContextAccessor.HttpContext == null)
+        {
+            _logger.LogError("HttpContext is null.");
+            return null;
+        }
+
+        string? tokenSerialized = _httpContextAccessor.HttpContext.Request.Cookies["AuthTokens"];
 
         if (string.IsNullOrEmpty(tokenSerialized))
         {
@@ -124,6 +131,12 @@ public class PatientService
         }
 
         string username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value ?? "defaultNullUsername";
+
+        if (string.IsNullOrEmpty(username) || username == "defaultNullUsername")
+        {
+            _logger.LogError("Username is null or defaultNullUsername.");
+            return null;
+        }
 
         HttpRequestMessage request = new(HttpMethod.Get, $"https://localhost:7201/user/username/{username}");
 

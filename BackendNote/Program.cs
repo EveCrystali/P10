@@ -4,6 +4,7 @@ using SharedAuthLibrary;
 using SharedCorsLibrary;
 using SharedSwaggerLibrary;
 using SharedAuthorizationLibrary;
+using BackendPatient.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,14 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Add Cors configuration
 builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
+
+builder.Services.AddControllers()
+    .AddXmlDataContractSerializerFormatters()
+    // Add Json DateOnly type support
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    });
 
 
 builder.Services.AddControllers();

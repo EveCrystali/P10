@@ -19,7 +19,6 @@ public class Note : IValidatable
 
     [BsonRequired]
     [BsonRepresentation(BsonType.String)]
-    [MaxLength(36, ErrorMessage = "PatientId cannot be more than 36 characters")]
     public required int PatientId { get; set; }
 
     [DataType(DataType.DateTime)]

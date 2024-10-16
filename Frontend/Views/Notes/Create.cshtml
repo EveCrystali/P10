@@ -3,6 +3,7 @@
 @*  ? Maybe id should user PatientNotesViewModel *@
 @* BUG: Not working currently still WIP*@
 
+
 @{
     Layout = "_Layout";
 }
@@ -31,6 +32,11 @@
         <div class="col-md-4">
             <form asp-action="Create">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" name="PatientId" value="@ViewBag.PatientId" />
+                <div class="form-group">
+                    <label>Patient</label>
+                    <input type="text" value="@ViewBag.FirstName @ViewBag.LastName" class="form-control" readonly />
+                </div>
                 <div class="form-group">
                     <label asp-for="Title" class="control-label">Title</label>
                     <input asp-for="Title" class="form-control" />
@@ -38,18 +44,11 @@
                 </div>
                 @* NOW: Display First Name and Last Name of the Patient + the username of the Practitioner currently creating a note*@
                 <div class="form-group">
-                    <label id="patientNameLabel" class="control-label">Patient</label>
-                    <input id="patientNameInput" class="form-control" readonly="readonly" />
-                </div>
-                <div class="form-group">
-                    <label id="practitionerNameLabel" class="control-label">Practitioner</label>
-                    <input id="practitionerNameInput" class="form-control" readonly="readonly" />
-                </div>
-                <div class="form-group">
                     <label asp-for="Body" class="control-label">Content</label>
                     <textarea asp-for="Body" class="form-control"></textarea>
                     <span asp-validation-for="Body" class="text-danger"></span>
                 </div>
+                @* DONE : must also return the id of the patient for who the note was created*@
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-primary" />
                 </div>
@@ -62,33 +61,6 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $.ajax({
-                url: window.location.protocol + '//' + window.location.host + '/auth/status',
-                method: "GET",
-                success: function (data) {
-                    if (data.isAuthenticated) {
-                        $("#PractitionerId").val(data.username); // Assuming username is the PractitionerId
-                    }
-                },
-                error: function (err) {
-                    console.log("Error fetching user data from /status", err);
-                }
-            });
-        });
-        $.ajax({
-            url: "http://localhost:5000/patients/" + @ViewBag.PatientId,
-            method: "GET",
-            success: function (data) {
-                $("#patientNameInput").val(data.firstName + " " + data.lastName);
-            },
-            error: function (err) {
-                console.log("Error fetching patient data from BackendPatient microservice", err);
-            }
-        });
-    });
-    </script>
 
 </body>
 

@@ -50,14 +50,14 @@ public class NotesController : Controller
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(string id)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
+        HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -72,25 +72,28 @@ public class NotesController : Controller
             return NotFound("Note not found.");
         }
         
-        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService, id: id.ToString());
+        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService, id: id);
         return View();
     }
 
     [HttpGet("create")]
-    public IActionResult Create(int patientId)
+    public IActionResult Create(int patientId, string lastName, string firstName)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
         ViewBag.PatientId = patientId;
+        ViewBag.LastName = lastName;
+        ViewBag.FirstName = firstName;
+
         return View();
     }
 
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
-        // NOW: Add needed information to the post request as practionnerId, patientid, createddate, lastupdateddate, title, body
+        // DONE: Add needed information to the post request as practionnerId, createddate, lastupdateddate
         // DONE: Replace with the actual practionnerId
         // FUTURE: Should be impossible but GetUserIdFromAuthToken is null management should be done otherwise
         note.PractionnerId = await _patientService.GetUserIdFromAuthToken() ?? "11a6aca3-618d-472a-82a7-db9b90f7e56f";
@@ -105,6 +108,11 @@ public class NotesController : Controller
                 Content = JsonContent.Create(note)
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            }
 
             if (response.IsSuccessStatusCode)
             {
@@ -133,11 +141,11 @@ public class NotesController : Controller
     }
 
     [HttpGet("edit/{id}")]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(string id)
     {
         if (ModelState.IsValid)
         {
-            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
+            HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
@@ -150,12 +158,12 @@ public class NotesController : Controller
                 await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Note not found", modelErrorMessage: "Note not found.", response: response, id: id.ToString());
                 return View();
             }
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response, id: id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response, id: id);
             return View();
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.", response: null, id: id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.", response: null, id: id);
             return View();
         }
     }
@@ -197,14 +205,14 @@ public class NotesController : Controller
     }
 
     [HttpGet("delete/{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(string id)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
@@ -214,21 +222,21 @@ public class NotesController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response, id: id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response, id: id);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
 
     [HttpPost("delete/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(string id)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/{Uri.EscapeDataString(id.ToString())}");
+        HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
         if (response.IsSuccessStatusCode)
@@ -237,7 +245,7 @@ public class NotesController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response, id: id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response, id: id);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

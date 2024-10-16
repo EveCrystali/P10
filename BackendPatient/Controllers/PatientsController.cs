@@ -77,7 +77,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
         }
 
         // patient.Id must be set by the database automatically, so we set it to 0 to force it
-        patient.Id = 0;
+        // patient.Id = 0;
 
         // Add the patient to the database
         _dbContext.Patients.Add(patient);

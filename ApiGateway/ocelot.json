@@ -71,24 +71,6 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/note/",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 7202
-        }
-      ],
-      "UpstreamPathTemplate": "/note/",
-      "UpstreamHttpMethod": [
-        "GET"
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "P10AuthProviderKey",
-        "AllowedScopes": []
-      }
-    },
-    {
       "DownstreamPathTemplate": "/note/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
@@ -102,6 +84,24 @@
         "POST",
         "PUT",
         "DELETE"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/note/",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7202
+        }
+      ],
+      "UpstreamPathTemplate": "/note/",
+      "UpstreamHttpMethod": [
+        "GET"
       ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "P10AuthProviderKey",

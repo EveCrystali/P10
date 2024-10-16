@@ -12,5 +12,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Patient>().HasKey(p => p.Id);
+        modelBuilder.Entity<Patient>()
+            .Property(p => p.Id)
+            .ValueGeneratedOnAdd();
+
     }
 }

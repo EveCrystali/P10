@@ -46,7 +46,7 @@ public class PatientsController : Controller
             return View(patients);
         }
 
-        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patients", modelErrorMessage: "Unable to load patient");
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patients", modelErrorMessage: "Unable to load patient");
 
         return View(new List<Frontend.Models.Patient>());
     }
@@ -89,7 +89,7 @@ public class PatientsController : Controller
             return View(patient);
         }
 
-        await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found", modelErrorMessage: "Unable to load patient details.");
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found", modelErrorMessage: "Unable to load patient details.");
         return View();
     }
 
@@ -124,20 +124,20 @@ public class PatientsController : Controller
                 }
                 else
                 {
-                    await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create patient", modelErrorMessage: "Unable to create patient");
+                    ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create patient", modelErrorMessage: "Unable to create patient");
                     return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
                 }
             }
             else
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Error from the server : {response.ReasonPhrase}", modelErrorMessage: "Unable to create patient", response: response);
+                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Error from the server : {response.ReasonPhrase}", modelErrorMessage: "Unable to create patient", response: response);
 
                 return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
             }
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to create patient");
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to create patient");
             return View(patient);
         }
     }
@@ -161,16 +161,16 @@ public class PatientsController : Controller
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found.", modelErrorMessage: "Unable to load patient for edit.");
+                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Patient not found.", modelErrorMessage: "Unable to load patient for edit.");
                 return View();
             }
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patient", modelErrorMessage: "Unable to load patient for edit.");
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load patient", modelErrorMessage: "Unable to load patient for edit.");
 
             return View();
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to load patient for edit.");
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to load patient for edit.");
             return View();
         }
     }
@@ -198,13 +198,13 @@ public class PatientsController : Controller
             }
             else
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to update patient");
+                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to update patient");
                 return View(patient);
             }
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to update patient");
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to update patient");
             return View(patient);
         }
     }
@@ -231,7 +231,7 @@ public class PatientsController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load patient for deletion.", response: response);
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load patient for deletion.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
@@ -258,7 +258,7 @@ public class PatientsController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete patient", response: response);
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete patient", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

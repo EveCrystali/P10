@@ -9,7 +9,7 @@ namespace Frontend.Controllers;
 public class PatientsController : Controller
 {
     private readonly HttpClient _httpClient;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _patientServiceUrl;
@@ -17,12 +17,12 @@ public class PatientsController : Controller
     private readonly string _noteServiceUrl;
 
     public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient,
-    IHttpContextAccessor httpContextAccessor, HttpClientService httpClientService,
+    HttpClientService httpClientService,
     IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _httpContextAccessor = httpContextAccessor;
+  
         _httpClientService = httpClientService;
         _patientService = patientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
@@ -198,13 +198,13 @@ public class PatientsController : Controller
             }
             else
             {
-                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to update patient", id: patient.Id.ToString());
+                await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to update patient");
                 return View(patient);
             }
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to update patient", id: patient.Id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid.", modelErrorMessage: "Unable to update patient");
             return View(patient);
         }
     }
@@ -258,7 +258,7 @@ public class PatientsController : Controller
         }
         else
         {
-            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete patient", response: response, id: id.ToString());
+            await ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete patient with id {id}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete patient", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }

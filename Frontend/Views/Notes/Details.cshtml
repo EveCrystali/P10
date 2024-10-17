@@ -41,7 +41,7 @@
                 @Html.DisplayNameFor(model => model.Body)
             </dt>
             <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Body)
+                @Html.Raw(Model?.Body?.Replace("\n", "<br>"))
             </dd>
             <dt class = "col-sm-2">
                 @Html.DisplayNameFor(model => model.CreatedDate)

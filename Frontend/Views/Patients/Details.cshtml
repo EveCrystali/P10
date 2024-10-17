@@ -76,7 +76,7 @@
                         @Html.DisplayName("Body")
                     </dt>
                     <dd class="col-sm-10">
-                        @Html.DisplayFor(_ => note.Body)
+                        @Html.Raw(note?.Body?.Replace("\n", "<br>"))
                     </dd>
                     <dt class="col-sm-2">
                         @Html.DisplayName("LastUpdatedDate")

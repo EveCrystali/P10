@@ -27,7 +27,7 @@
             {
                 <div class="note">
                     <h2>@note.Title</h2>
-                    <p>@note.Body</p>
+                    <p>@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
                     @if (note.CreatedDate.HasValue)
                     {
                         <small>Date de création: @note.CreatedDate.Value.ToString()</small>

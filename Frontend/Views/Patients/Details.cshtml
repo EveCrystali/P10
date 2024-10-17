@@ -64,8 +64,7 @@
             </dd>
             @if (Model.Notes != null)
             {
-                @* ? I am not sure that the cast is mandatory **@
-                @foreach (Note? note in Model.Notes.Cast<Frontend.Models.Note>())
+                @foreach (Note? note in Model.Notes)
                 {
                     <dt class="col-sm-2">
                         @Html.DisplayName("Title")
@@ -102,11 +101,8 @@
                         }
                     </dd>
                     <div>
-                        @Html.ActionLink("Editer la note", "Edit", "Notes", new { id = note.Id }) |
+                        @Html.ActionLink("Editer la note", "Edit", "Notes", new { id = note.Id }) | @Html.ActionLink("Supprimer la note", "Delete", "Notes", new { id = note.Id })
                     </div>
-                    <div>
-                        @Html.ActionLink("Supprimer la note", "Delete", "Notes", new { id = note.Id })
-                </div>
                 }
             }
         </dl>

@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
 
 <body>
     <h1>Notes du Patient</h1>
-    
+
     @if (Model != null && Model.Any())
     {
         <div id="notes-container">
@@ -40,6 +41,9 @@
                         <small>ID du practicien: @note.PractitionerId.ToString()</small>
                     }
                 </div>
+                <div>
+                    @Html.ActionLink("Editer la note", "Edit", "Patients", new { id = note.Id }) |
+                </div>
             }
         </div>
     }
@@ -48,4 +52,5 @@
         <p>Aucune note trouvée</p>
     }
 </body>
+
 </html>

@@ -26,44 +26,43 @@
     <hr />
     <dl class="row">
         @if (Model == null)
-{
-    <p>Une erreur s'est produite. Impossible d'afficher le détail de la note.</p>
-}
-else 
-{
-    <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Body)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Body)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LastUpdatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LastUpdatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PractitionerId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PractitionerId)
-        </dd>
-}
-        
-    </dl>
+        {
+            <p>Une erreur s'est produite. Impossible d'afficher le détail de la note.</p>
+        }
+        else 
+        {
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Title)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Title)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Body)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Body)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.CreatedDate)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.CreatedDate)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.LastUpdatedDate)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.LastUpdatedDate)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.PractitionerId)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.PractitionerId)
+            </dd>
+        }
+    </dl>     
 </div>
 <div>
     @Html.ActionLink("Editer", "Edit", new { id = Model.Id }) |

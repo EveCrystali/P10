@@ -30,6 +30,7 @@
       "UpstreamPathTemplate": "/note/{id}",
       "UpstreamHttpMethod": [
         "GET",
+        "PUT",
         "DELETE"
       ],
       "AuthenticationOptions": {

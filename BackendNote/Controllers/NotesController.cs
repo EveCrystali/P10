@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using BackendNote.Models;
 using BackendNote.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace BackendNote.Controllers
 {
@@ -63,7 +64,10 @@ namespace BackendNote.Controllers
                 return BadRequest(ex.Message);
             }
 
-            newNote.CreatedDate = DateTime.UtcNow; 
+            if (newNote.CreatedDate == null) 
+            {
+                newNote.CreatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);; 
+            }
 
             await _notesService.CreateAsync(newNote);
 
@@ -90,8 +94,12 @@ namespace BackendNote.Controllers
             }
 
             updatedNote.Id = note.Id;
-            updatedNote.LastUpdatedDate = DateTime.UtcNow; 
 
+            if (updatedNote.LastUpdatedDate == null)
+            {
+                updatedNote.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            }
+            
             await _notesService.UpdateAsync(id, updatedNote);
 
             return NoContent();

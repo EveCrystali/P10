@@ -33,8 +33,15 @@ public class NotesService
     public async Task CreateAsync(Note newNote) =>
         await _notesCollection.InsertOneAsync(newNote);
 
-    public async Task UpdateAsync(string id, Note updatedNote) =>
-        await _notesCollection.ReplaceOneAsync(x => x.Id == id, updatedNote);
+    public async Task UpdateAsync(string id, Note updatedNote)
+    {
+        FilterDefinition<Note> filter = Builders<Note>.Filter.Eq(note => note.Id, id);
+        UpdateDefinition<Note> update = Builders<Note>.Update
+            .Set(note => note.Title, updatedNote.Title)
+            .Set(note => note.Body, updatedNote.Body)
+            .Set(note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
+        await _notesCollection.UpdateOneAsync(filter, update);
+    }
 
     public async Task RemoveAsync(string id) =>
         await _notesCollection.DeleteOneAsync(x => x.Id == id);

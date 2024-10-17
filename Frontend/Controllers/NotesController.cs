@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Frontend.Controllers.Service;
 using Frontend.Models;
 using System.Net;
+using System.Globalization;
 
 
 namespace Frontend.Controllers;
@@ -30,7 +31,7 @@ public class NotesController : Controller
     [HttpGet("Index")]
     public async Task<IActionResult> Index()
     {
-        
+
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
@@ -41,7 +42,7 @@ public class NotesController : Controller
             {
                 foreach (Frontend.Models.Note note in notes)
                 {
-                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractitionerId}");
+                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.Creator}");
                 }
             }
 
@@ -97,10 +98,11 @@ public class NotesController : Controller
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
-        note.PractitionerId = await _patientService.GetUserIdFromAuthToken();
+        note.Creator = await _patientService.GetUsernameFromAuthToken();
 
-        note.CreatedDate = DateTime.Now;
-        note.LastUpdatedDate = DateTime.Now;
+        var nowFormatted = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        note.CreatedDate = nowFormatted;
+        note.LastUpdatedDate = nowFormatted;
 
         if (ModelState.IsValid)
         {
@@ -172,6 +174,9 @@ public class NotesController : Controller
     [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Frontend.Models.Note note)
     {
+
+        note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+
         if (ModelState.IsValid)
         {
             _logger.LogInformation("Updating note with id {Id} to {NoteTitle}", note.Id, note.Title);
@@ -181,11 +186,14 @@ public class NotesController : Controller
                 Content = JsonContent.Create(note)
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            }
+            else if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Note with id {PatientId} was successfully updated.", note.Id);
-                return RedirectToAction(nameof(Details), new { id = note.Id });
+                return RedirectToAction(nameof(Details), nameof(NotesController).Replace("Controller", ""), new { id = note.Id });
             }
             else
             {

@@ -98,6 +98,7 @@ public class NotesController : Controller
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
+        // BUG: PatientID is null after create
         note.PractitionerId = await _patientService.GetUserIdFromAuthToken();
 
         var nowFormatted = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
@@ -172,9 +173,10 @@ public class NotesController : Controller
     }
 
     // NOW: handle edit confirmation
-    [HttpPut("edit/{id}")]
+    [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Frontend.Models.Note note)
     {
+        // DONE: BUG PatientID is 0 after edit
         note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
         if (ModelState.IsValid)

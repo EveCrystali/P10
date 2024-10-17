@@ -43,7 +43,6 @@ builder.Services.AddHttpClient<HomeController>(client =>
         }
     });
 
-// DONE: Add PatientService Dependcy injection
 builder.Services.AddScoped<PatientService>();
 
 // Add Cors configuration

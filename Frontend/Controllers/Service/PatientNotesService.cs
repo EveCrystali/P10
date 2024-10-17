@@ -40,7 +40,6 @@ public class PatientService
 
     }
 
-    // DONE: Implement a mapping method for PatientNotesViewModel to Patient
     public Patient MapPatientNotesViewModelToPatient(PatientNotesViewModel patientNotesViewModel)
     {
         Patient patient = new()
@@ -55,8 +54,6 @@ public class PatientService
         };
         return patient;
     }
-
-    // DONE: Implement a mapping method for PatientNotesViewModel to Note
 
     public List<Note> MapPatientNotesViewModelToNotes(PatientNotesViewModel patientNotesViewModel)
     {
@@ -75,31 +72,6 @@ public class PatientService
         return notes;
     }
 
-
-    // TODO: Include this method in Note Edition and Details views
-    // Note:  in creation it is not needed as the user name will be the current user 
-    public string? GetPractitionnerUserName()
-    {
-        // DONE: implement this
-        string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
-
-        if (tokenSerialized != null)
-        {
-            AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized);
-            if (authToken != null && !string.IsNullOrEmpty(authToken.Token))
-            {
-                ClaimsPrincipal? principal = _jwtValidationService.ValidateToken(authToken.Token);
-                if (principal != null)
-                {
-                    string username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value ?? "defaultNullUsername";
-                    return username;
-                }
-            }
-        }
-        return "defaultNullUsername";
-    }
-
-    // DONE: Implement a new method returning the PractionnerId of the current user
     public async Task<string?> GetUsernameFromAuthToken()
     {
         if (_httpContextAccessor.HttpContext == null)

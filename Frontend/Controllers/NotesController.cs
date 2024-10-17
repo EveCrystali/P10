@@ -171,11 +171,10 @@ public class NotesController : Controller
         }
     }
 
-    // NOW: handle edit confirmation
     [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Frontend.Models.Note note)
     {
-        // DONE: BUG PatientID is 0 after edit
+
         note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
         if (ModelState.IsValid)

@@ -55,7 +55,7 @@
             </dt>
             <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.Address)
-           </dd>
+            </dd>
             <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.PhoneNumber)
             </dt>
@@ -64,8 +64,7 @@
             </dd>
             @if (Model.Notes != null)
             {
-                @* ? I am not sure that the cast is mandatory **@
-                @foreach (Note? note in Model.Notes.Cast<Frontend.Models.Note>())
+                @foreach (Note? note in Model.Notes)
                 {
                     <dt class="col-sm-2">
                         @Html.DisplayName("Title")
@@ -93,17 +92,23 @@
                         }
                     </dd>
                     <dt class="col-sm-2">
-                        @Html.DisplayName("PractitionerId")
+                        @Html.DisplayName("Creator")
                     </dt>
                     <dd class="col-sm-10">
-                        @Html.DisplayFor(_ => note.PractitionerId)
+                        @if (note.Creator != null)
+                        {
+                            @Html.DisplayFor(_ => note.Creator)
+                        }
                     </dd>
+                    <div>
+                        @Html.ActionLink("Editer la note", "Edit", "Notes", new { id = note.Id }) | @Html.ActionLink("Supprimer la note", "Delete", "Notes", new { id = note.Id })
+                    </div>
                 }
             }
         </dl>
     </div>
     <div>
-        @Html.ActionLink("Editer", "Edit", new { id = Model.PatientId }) |
+        @Html.ActionLink("Editer le patient", "Edit", new { id = Model.PatientId }) |
         <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
     </div>
 </body>

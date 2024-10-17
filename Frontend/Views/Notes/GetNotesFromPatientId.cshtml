@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
 
 <body>
     <h1>Notes du Patient</h1>
-    
+
     @if (Model != null && Model.Any())
     {
         <div id="notes-container">
@@ -35,10 +36,16 @@
                     {
                         <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
                     }
-                    @if (note.PractitionerId != null)
+                    @if (note.Creator != null)
                     {
-                        <small>ID du practicien: @note.PractitionerId.ToString()</small>
+                        <small>Créateur : @note.Creator</small>
                     }
+                </div>
+                <div>
+                        @Html.ActionLink("Editer", "Edit", "Notes", new { id = note.Id }) |
+                </div>
+                <div>
+                        @Html.ActionLink("Supprimer", "Delete", "Notes", new { id = note.Id })
                 </div>
             }
         </div>
@@ -48,4 +55,5 @@
         <p>Aucune note trouvée</p>
     }
 </body>
+
 </html>

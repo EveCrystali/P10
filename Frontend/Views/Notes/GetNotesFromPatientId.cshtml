@@ -36,9 +36,9 @@
                     {
                         <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
                     }
-                    @if (note.PractitionerId != null)
+                    @if (note.Creator != null)
                     {
-                        <small>ID du practicien: @note.PractitionerId.ToString()</small>
+                        <small>Créateur : @note.Creator</small>
                     }
                 </div>
                 <div>

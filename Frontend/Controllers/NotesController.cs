@@ -42,7 +42,7 @@ public class NotesController : Controller
             {
                 foreach (Frontend.Models.Note note in notes)
                 {
-                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.PractitionerId}");
+                    Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.Creator}");
                 }
             }
 
@@ -98,8 +98,7 @@ public class NotesController : Controller
     [HttpPost("create")]
     public async Task<IActionResult> Create(Frontend.Models.Note note)
     {
-        // BUG: PatientID is null after create
-        note.PractitionerId = await _patientService.GetUserIdFromAuthToken();
+        note.Creator = await _patientService.GetUsernameFromAuthToken();
 
         var nowFormatted = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         note.CreatedDate = nowFormatted;

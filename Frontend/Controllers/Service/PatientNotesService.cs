@@ -64,7 +64,7 @@ public class PatientService
             .Select(note => new Note
             {
                 Id = note.Id,
-                PractitionerId = note.PractitionerId,
+                Creator = note.Creator,
                 PatientId = patientNotesViewModel.PatientId,
                 CreatedDate = note.CreatedDate,
                 LastUpdatedDate = note.LastUpdatedDate,
@@ -100,7 +100,7 @@ public class PatientService
     }
 
     // DONE: Implement a new method returning the PractionnerId of the current user
-    public async Task<string?> GetUserIdFromAuthToken()
+    public async Task<string?> GetUsernameFromAuthToken()
     {
         if (_httpContextAccessor.HttpContext == null)
         {
@@ -138,31 +138,7 @@ public class PatientService
             return null;
         }
 
-        HttpRequestMessage request = new(HttpMethod.Get, $"https://localhost:7201/user/username/{username}");
-
-        try
-        {
-            HttpResponseMessage response = await _httpClient.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError($"Failed to retrieve user ID. Status code: {response.StatusCode}");
-                return null;
-            }
-
-            string? userId = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(userId))
-            {
-                _logger.LogError("Received empty user ID.");
-                return null;
-            }
-
-            return userId;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error occurred while retrieving user ID: {ex.Message}");
-            return null;
-        }
+       return username;
     }
 
 }

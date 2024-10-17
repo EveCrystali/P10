@@ -93,10 +93,13 @@
                         }
                     </dd>
                     <dt class="col-sm-2">
-                        @Html.DisplayName("PractitionerId")
+                        @Html.DisplayName("Creator")
                     </dt>
                     <dd class="col-sm-10">
-                        @Html.DisplayFor(_ => note.PractitionerId)
+                        @if (note.Creator != null)
+                        {
+                            @Html.DisplayFor(_ => note.Creator)
+                        }
                     </dd>
                     <div>
                         @Html.ActionLink("Editer la note", "Edit", "Notes", new { id = note.Id }) |

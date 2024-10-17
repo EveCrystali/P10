@@ -14,8 +14,8 @@ public class Note : IValidatable
     public string? Id { get; set; }
 
     [BsonRepresentation(BsonType.String)]
-    [MaxLength(36, ErrorMessage = "PractitionerId cannot be more than 36 characters")]
-    public string? PractitionerId { get; set; }
+    [MaxLength(54, ErrorMessage = "Creator cannot be more than 54 characters")]
+    public string? Creator { get; set; }
 
     [BsonRequired]
     [BsonRepresentation(BsonType.String)]

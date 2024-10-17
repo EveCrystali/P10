@@ -42,7 +42,10 @@
                     }
                 </div>
                 <div>
-                        @Html.ActionLink("Editer la note", "Edit", "Notes", new { id = note.Id })
+                        @Html.ActionLink("Editer", "Edit", "Notes", new { id = note.Id }) |
+                </div>
+                <div>
+                        @Html.ActionLink("Supprimer", "Delete", "Notes", new { id = note.Id })
                 </div>
             }
         </div>

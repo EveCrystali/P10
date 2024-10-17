@@ -176,12 +176,7 @@ public class NotesController : Controller
         {
             _logger.LogInformation("Updating note with id {Id} to {NoteTitle}", note.Id, note.Title);
 
-            UriBuilder uriBuilder = new(_noteServiceUrl)
-            {
-                Path = $"{note.Id}"
-            };
-
-            HttpRequestMessage request = new(HttpMethod.Put, uriBuilder.Uri)
+            HttpRequestMessage request = new(HttpMethod.Put, $"{_noteServiceUrl}/{Uri.EscapeDataString(note.Id)}")
             {
                 Content = JsonContent.Create(note)
             };

@@ -37,6 +37,9 @@ public class Patient : IValidatable
     [RegularExpression(@"^[0-9]{3}[-]([0-9]{3})[-]([0-9]{4})$", ErrorMessage = "Not a valid phone number")]
     public string? PhoneNumber { get; set; }
 
+    [EnumDataType(typeof(DiabetesRisk))]
+    public DiabetesRisk? DiabetesRisk { get; set; }
+
     // NOTE: This method is responsible for converting raw patient data (unformatted)
     // into a strongly typed Patient object.
     // This conversion is primarily used in the data seeding process or other operations

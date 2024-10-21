@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using BackendNote.Models;
+using BackendNote.Services;
 
 namespace BackendNote.Services;
 
@@ -8,8 +9,11 @@ public class NotesService
 {
     private readonly IMongoCollection<Note> _notesCollection;
 
+    private readonly ElasticsearchService _elasticsearchService;
+
     public NotesService(
-        IOptions<NoteDatabaseSettings> noteDatabaseSettings)
+        IOptions<NoteDatabaseSettings> noteDatabaseSettings, 
+        ElasticsearchService elasticsearchService)
     {
         var mongoClient = new MongoClient(
             noteDatabaseSettings.Value.ConnectionString);
@@ -19,6 +23,10 @@ public class NotesService
 
         _notesCollection = mongoDatabase.GetCollection<Note>(
             noteDatabaseSettings.Value.NotesCollectionName);
+
+        _elasticsearchService = elasticsearchService;
+
+        CreateIndexes();
     }
 
     public async Task<List<Note>> GetAsync() =>
@@ -30,8 +38,11 @@ public class NotesService
     public async Task<List<Note>?> GetFromPatientIdAsync(int PatientId) =>
         await _notesCollection.Find(x => x.PatientId == PatientId).ToListAsync();
 
-    public async Task CreateAsync(Note newNote) =>
+    public async Task CreateAsync(Note newNote) 
+    {
         await _notesCollection.InsertOneAsync(newNote);
+        await _elasticsearchService.IndexNoteAsync(newNote);
+    }
 
     public async Task UpdateAsync(string id, Note updatedNote)
     {
@@ -41,9 +52,17 @@ public class NotesService
             .Set(note => note.Body, updatedNote.Body)
             .Set(note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
         await _notesCollection.UpdateOneAsync(filter, update);
+        await _elasticsearchService.IndexNoteAsync(updatedNote);
     }
 
     public async Task RemoveAsync(string id) =>
         await _notesCollection.DeleteOneAsync(x => x.Id == id);
+
+    private void CreateIndexes()
+    {
+        IndexKeysDefinition<Note> indexKeys = Builders<Note>.IndexKeys.Text(note => note.Title).Text(note => note.Body);
+        CreateIndexModel<Note> indexModel = new(indexKeys);
+        _notesCollection.Indexes.CreateOne(indexModel);
+    }
 }
 

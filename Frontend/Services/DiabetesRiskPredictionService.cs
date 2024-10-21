@@ -29,21 +29,6 @@ public class DiabetesRiskPredictionService
         return diabetesRisk;
     }
 
-    private int DiabetesRiskPredictionNotesAnalysis(List<Note> notes)
-    {
-        int triggersDiabetesRiskFromNotes = 0;
-
-        // TODO: implement diabetes risk prediction based on patient notes
-        // Note: use GroupBy from LINQ Library
-
-        foreach (Note note in notes)
-        {
-            // TODO: implement diabetes risk prediction based on patient note
-            triggersDiabetesRiskFromNotes += DiabetesRiskPredictionSingleNoteAnalysis(note);
-        }
-        return triggersDiabetesRiskFromNotes;
-    }
-
     private  static DiabetesRisk DiabetesRiskPredictionCalculator(PatientNotesViewModel patientNotesViewModel, int triggersDiabetesRiskFromNotes)
     {
         int age = PatientAgeCalculator(patientNotesViewModel);
@@ -119,7 +104,7 @@ public class DiabetesRiskPredictionService
             return DiabetesRisk.None;
         }
     }
-
+    
     private static int PatientAgeCalculator(PatientNotesViewModel patientNotesViewModel)
     {
         DateTime currentDate = DateTime.Now;
@@ -127,54 +112,4 @@ public class DiabetesRiskPredictionService
         int age = currentDate.Year - birthDate.Year;
         return age;
     }
-
-    private string DiabetesRiskPredictionSingleNoteTransform(Note note)
-    {
-        string titleLower = note.Title?.ToLower() ??  "";
-        string bodyLower = note.Body?.ToLower() ?? "";
-        return titleLower + " " + bodyLower;
-    }
-
-    private int DiabetesRiskPredictionSingleNoteAnalysis(Note note)
-    {
-        int triggersDiabetesRiskFromNote = 0;
-        DiabetesRiskPredictionSingleNoteTransform(note);
-
-        List<string> triggers = TriggerWordsMix(triggerWords);
-
-        // TODO: implement diabetes risk prediction based on patient single note
-
-        return triggersDiabetesRiskFromNote;
-    }
-
-    List<string> triggerWords = new List<string>
-    {
-        "Hémoglobine A1C",
-         "Microalbumine",
-         "Taille",
-         "Poids",
-         "Fumeur",
-         "Fumeuse",
-         "Anormal",
-         "Cholestérol",
-         "Vertiges",
-         "Rechute",
-         "Réaction",
-         "Anticorps"
-    };
-
-    private static List<string> TriggerWordsMix(List<string> triggerWords)
-    {
-        List<string> triggerWordsMix = [..triggerWords];
-        foreach (string triggerWord in triggerWordsMix)
-        {
-            triggerWordsMix.Add(triggerWord.ToLower());
-            
-
-
-        }
-
-        return triggerWordsMix;
-    }
-
 }

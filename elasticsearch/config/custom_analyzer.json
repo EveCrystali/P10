@@ -1,0 +1,12 @@
+{
+    "analysis": {
+      "analyzer": {
+        "custom_french_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "french_stem"]
+        }
+      }
+    }
+  }
+  

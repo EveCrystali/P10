@@ -35,7 +35,7 @@ builder.Services.Configure<NoteDatabaseSettings>(
     builder.Configuration.GetSection("NoteDatabase"));
 
 builder.Services.AddSingleton<NotesService>();
-
+builder.Services.AddSingleton<ElasticsearchService>();
 
 var app = builder.Build();
 

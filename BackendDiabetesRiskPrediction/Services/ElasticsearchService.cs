@@ -15,7 +15,7 @@ public class ElasticsearchService
         _httpClient = new HttpClient();
     }
 
-    public async Task IndexNoteAsync(Note note)
+    public async Task IndexNoteAsync(NoteRiskInfo note)
     {
         var requestBody = new
         {
@@ -25,7 +25,6 @@ public class ElasticsearchService
             {
                 note.Title,
                 note.Body,
-                note.LastUpdatedDate,
                 note.PatientId
             }
         };

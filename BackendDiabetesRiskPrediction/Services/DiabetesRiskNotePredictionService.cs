@@ -2,25 +2,28 @@ using BackendDiabetesRiskPrediction.Models;
 
 namespace BackendDiabetesRiskPrediction.Services;
 
-public class DiabetesRiskNotePredictionService
+public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictionService> logger)
 {
-    public int DiabetesRiskPredictionNotesAnalysis(List<Note> notes)
+
+    private readonly ILogger<DiabetesRiskNotePredictionService> _logger = logger;
+
+    public int DiabetesRiskPredictionNotesAnalysis(List<NoteRiskInfo> notes)
     {
         int triggersDiabetesRiskFromNotes = 0;
 
-        foreach (Note note in notes)
+        foreach (NoteRiskInfo note in notes)
         {
             triggersDiabetesRiskFromNotes += DiabetesRiskPredictionSingleNoteAnalysis(note);
         }
         return triggersDiabetesRiskFromNotes;
     }
 
-    private static string DiabetesRiskPredictionSingleNoteTransform(Note note)
+    private static string DiabetesRiskPredictionSingleNoteTransform(NoteRiskInfo note)
     {
         return note.Title?.ToLower() + note.Body?.ToLower();
     }
 
-    private int DiabetesRiskPredictionSingleNoteAnalysis(Note note)
+    private int DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note)
     {
         int triggersDiabetesRiskFromNote = 0;
         DiabetesRiskPredictionSingleNoteTransform(note);
@@ -59,34 +62,27 @@ public class DiabetesRiskNotePredictionService
         return triggerWordsMix;
     }
 
-    private readonly ILogger<DiabetesRiskPredictionService> _logger;
-
-    public DiabetesRiskPredictionService(ILogger<DiabetesRiskPredictionService> logger)
+    public DiabetesRisk DiabetesRiskPrediction(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
     {
-        _logger = logger;
+        DiabetesRisk diabetesRisk;
+
+        if (notes == null)
+        {
+            diabetesRisk = DiabetesRisk.None;
+            _logger.LogWarning("No notes found or an error occurred during prediction.");
+            return diabetesRisk;
+        }
+
+        int triggersDiabetesRiskFromNotes = DiabetesRiskPredictionNotesAnalysis(notes);
+
+        diabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
+
+        return diabetesRisk;
     }
 
-    // public DiabetesRisk DiabetesRiskPrediction(PatientNotesViewModel patientNotesViewModel)
-    // {
-    //     DiabetesRisk diabetesRisk;
-
-    //     if (patientNotesViewModel.Notes == null)
-    //     {
-    //         diabetesRisk = DiabetesRisk.None;
-    //         _logger.LogWarning("No notes found or an error occurred during prediction.");
-    //         return diabetesRisk;
-    //     }
-
-    //     // int triggersDiabetesRiskFromNotes = DiabetesRiskPredictionNotesAnalysis(patientNotesViewModel.Notes);
-
-    //     diabetesRisk = DiabetesRiskPredictionCalculator(patientNotesViewModel, triggersDiabetesRiskFromNotes);
-
-    //     return diabetesRisk;
-    // }
-
-    private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientNotesViewModel patientNotesViewModel, int triggersDiabetesRiskFromNotes)
+    private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {
-        int age = PatientAgeCalculator(patientNotesViewModel);
+        int age = PatientAgeCalculator(patientRiskInfo);
 
         // Do not need consider if Female or Male or Age
         if (triggersDiabetesRiskFromNotes == 0)
@@ -97,7 +93,7 @@ public class DiabetesRiskNotePredictionService
         // Patient is younger than 30 (exclusive)
         if (age < 30)
         {
-            return DiabetesRiskPredictionForUnder30(patientNotesViewModel, triggersDiabetesRiskFromNotes);
+            return DiabetesRiskPredictionForUnder30(patientRiskInfo, triggersDiabetesRiskFromNotes);
         }
         // Patient is older (or equal) than 30 (inclusive)
         else
@@ -106,10 +102,10 @@ public class DiabetesRiskNotePredictionService
         }
     }
 
-    private static DiabetesRisk DiabetesRiskPredictionForUnder30(PatientNotesViewModel patientNotesViewModel, int triggersDiabetesRiskFromNotes)
+    private static DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {
         // Patient is a male
-        if (patientNotesViewModel.Gender == "M")
+        if (patientRiskInfo.Gender == "M")
         {
             // Let's consider triggers from notes
             if (triggersDiabetesRiskFromNotes >= 5)
@@ -122,7 +118,7 @@ public class DiabetesRiskNotePredictionService
             }
         }
         // Patient is a female
-        else if (patientNotesViewModel.Gender == "F")
+        else if (patientRiskInfo.Gender == "F")
         {
             // Let's consider triggers from notes
             if (triggersDiabetesRiskFromNotes >= 7)
@@ -160,15 +156,11 @@ public class DiabetesRiskNotePredictionService
         }
     }
 
-    private static int PatientAgeCalculator(PatientNotesViewModel patientNotesViewModel)
+    private static int PatientAgeCalculator(PatientRiskInfo patientRiskInfo)
     {
         DateTime currentDate = DateTime.Now;
-        DateOnly birthDate = patientNotesViewModel.DateOfBirth;
+        DateOnly birthDate = patientRiskInfo.DateOfBirth;
         int age = currentDate.Year - birthDate.Year;
         return age;
     }
-
-
-
-
 }

@@ -4,21 +4,22 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BackendDiabetesRiskPrediction.Services;
 
-namespace BackendDiabetesRiskPrediction.Controllers
+namespace BackendDiabetesRiskPrediction.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+public class BackendDiabetesRiskPredictionsController(DiabetesRiskNotePredictionService diabetesRiskNotePredictionService) : ControllerBase
 {
+    private readonly DiabetesRiskNotePredictionService _diabetesRiskNotePredictionService = diabetesRiskNotePredictionService;
 
-    public class BackendDiabetesRiskPredictionController : ControllerBase
-    {
 
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public class DiabetesRiskPrediction : ControllerBase
+    [HttpGet]
+    public DiabetesRisk GetDiabetesRisk(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
     {
-        [HttpGet]
-        public DiabetesRisk GetDiabetesRisk(List<Note> notes)
-        {
-            return DiabetesRiskPredictionNotesAnalysis(notes);
-        }
+        DiabetesRisk diabetesRisk = _diabetesRiskNotePredictionService.DiabetesRiskPrediction(notes, patientRiskInfo);
+        return diabetesRisk;
     }
+
+
 }

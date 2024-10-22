@@ -59,16 +59,13 @@ public class PatientsController : Controller
             return BadRequest(ModelState);
         }
 
-        // NOTE : responseFromPatientService status code 200 OK
-        HttpResponseMessage responseFromPatientService = await _httpClient.GetAsync($"{_patientServiceUrl}/{id}");
+        HttpRequestMessage request1 = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
+        HttpResponseMessage responseFromPatientService = await _httpClientService.SendAsync(request1);
 
         int patientId = id;
-
-        // FUTURE: try to use the below line of code instead of the two above when Authorization is well implemented in the backend Note service
-        // HttpResponseMessage responseFromNoteService = await _httpClient.GetAsync($"{_noteServiceUrl}/patient/{patientId}");
-
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
-        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
+        
+        HttpRequestMessage request2 = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request2);
 
         if (responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized || responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized)
         {

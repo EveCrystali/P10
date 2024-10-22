@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using Frontend.Models;
 using Newtonsoft.Json;
@@ -14,6 +13,7 @@ public class PatientService
 
     private readonly JwtValidationService _jwtValidationService;
     private readonly ILogger<PatientService> _logger;
+
     public PatientService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger<PatientService> logger, JwtValidationService jwtValidationService)
     {
         _httpClient = httpClient;
@@ -37,7 +37,6 @@ public class PatientService
             Notes = notes
         };
         return patientNotesViewModel;
-
     }
 
     public Patient MapPatientNotesViewModelToPatient(PatientNotesViewModel patientNotesViewModel)
@@ -110,8 +109,6 @@ public class PatientService
             return null;
         }
 
-       return username;
+        return username;
     }
-
 }
-

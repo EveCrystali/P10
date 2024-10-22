@@ -1,15 +1,14 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using BackendNote.Models;
 using BackendNote.Services;
 using Microsoft.AspNetCore.Authorization;
-using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BackendNote.Controllers
 {
     [Route("note")]
     [ApiController]
-    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    
     public class NotesController : ControllerBase
     {
         private readonly NotesService _notesService;
@@ -18,15 +17,17 @@ namespace BackendNote.Controllers
             _notesService = notesService;
 
         [HttpGet]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<IEnumerable<Note>>> Get()
         {
             List<Note> notes = await _notesService.GetAsync();
 
             return notes != null ? Ok(notes) : NotFound("No notes found");
-
         }
+        
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<Note>> GetNote(string id)
         {
             Note? note = await _notesService.GetAsync(id);
@@ -39,7 +40,31 @@ namespace BackendNote.Controllers
             return Ok(note);
         }
 
+
+        [HttpGet("dto/{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<ActionResult<Note>> GetNoteDTODiabetesRiskPrediction(string id)
+        {
+            Note? note = await _notesService.GetAsync(id);
+
+            if (note is null)
+            {
+                return NotFound("Note not found");
+            }
+
+            NoteDtoDiabetesRiskPrediction noteDtoDiabetesRiskPrediction = new()
+            {
+                Id = note.Id,
+                PatientId = note.PatientId,
+                Title = note.Title,
+                Body = note.Body,
+            };
+            
+            return Ok(noteDtoDiabetesRiskPrediction);
+        }
+
         [HttpGet("patient/{patientId}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<Note>> GetNotesFromPatientId(int patientId)
         {
             List<Note>? notes = await _notesService.GetFromPatientIdAsync(patientId);
@@ -53,6 +78,7 @@ namespace BackendNote.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> PostNote(Note newNote)
         {
             try
@@ -64,9 +90,9 @@ namespace BackendNote.Controllers
                 return BadRequest(ex.Message);
             }
 
-            if (newNote.CreatedDate == null) 
+            if (newNote.CreatedDate == null)
             {
-                newNote.CreatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);; 
+                newNote.CreatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture); ;
             }
 
             await _notesService.CreateAsync(newNote);
@@ -75,22 +101,23 @@ namespace BackendNote.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> UpdateNote(string id, Note updatedNote)
         {
-            var note = await _notesService.GetAsync(id);
+            Note? note = await _notesService.GetAsync(id);
 
             if (note is null)
             {
-            return NotFound("Note not found");
+                return NotFound("Note not found");
             }
 
             try
             {
-            updatedNote.Validate();
+                updatedNote.Validate();
             }
             catch (Exception ex)
             {
-            return BadRequest(ex.Message);
+                return BadRequest(ex.Message);
             }
 
             updatedNote.Id = note.Id;
@@ -99,17 +126,17 @@ namespace BackendNote.Controllers
             {
                 updatedNote.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             }
-            
+
             await _notesService.UpdateAsync(id, updatedNote);
 
             return NoContent();
         }
 
-        
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> DeleteNote(string id)
         {
-            var note = await _notesService.GetAsync(id);
+            Note? note = await _notesService.GetAsync(id);
 
             if (note is null)
             {
@@ -119,7 +146,6 @@ namespace BackendNote.Controllers
             await _notesService.RemoveAsync(id);
 
             return Ok("Note deleted");
-
         }
     }
 }

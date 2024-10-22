@@ -15,6 +15,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Patient>()
             .Property(p => p.Id)
             .ValueGeneratedOnAdd();
-
     }
 }

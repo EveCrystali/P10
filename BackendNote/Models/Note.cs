@@ -31,7 +31,7 @@ public class Note : IValidatable
 
     [MaxLength(256, ErrorMessage = "Title cannot be more than 256 characters")]
     public string? Title { get; set; }
-    
+
     public string? Body { get; set; }
 
     public void Validate()

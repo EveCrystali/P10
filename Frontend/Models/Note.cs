@@ -14,8 +14,8 @@ public class Note
     [DataType(DataType.DateTime)]
     public DateTime? CreatedDate { get; set; }
 
-    [DataType(DataType.DateTime)] 
-     public DateTime? LastUpdatedDate { get; set; }
+    [DataType(DataType.DateTime)]
+    public DateTime? LastUpdatedDate { get; set; }
 
     [MaxLength(256, ErrorMessage = "Title cannot be more than 256 characters")]
     public string? Title { get; set; }

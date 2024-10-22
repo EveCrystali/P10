@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Frontend.Controllers.Service;
-using Frontend.Models;
-using System.Net;
 using System.Globalization;
-
+using System.Net;
+using Frontend.Controllers.Service;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;
 
@@ -31,7 +29,6 @@ public class NotesController : Controller
     [HttpGet("Index")]
     public async Task<IActionResult> Index()
     {
-
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
@@ -66,7 +63,6 @@ public class NotesController : Controller
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
-
             Frontend.Models.Note? note = await responseFromNoteService.Content.ReadFromJsonAsync<Frontend.Models.Note>();
 
             if (note != null)
@@ -100,7 +96,7 @@ public class NotesController : Controller
     {
         note.Creator = await _patientService.GetUsernameFromAuthToken();
 
-        var nowFormatted = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+        DateTime nowFormatted = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         note.CreatedDate = nowFormatted;
         note.LastUpdatedDate = nowFormatted;
 
@@ -174,7 +170,6 @@ public class NotesController : Controller
     [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Frontend.Models.Note note)
     {
-
         note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
         if (ModelState.IsValid)
@@ -275,13 +270,10 @@ public class NotesController : Controller
             List<Frontend.Models.Note>? notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
             return View(notes);
         }
-
         else
         {
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load notes for patient.", response: response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
     }
-
 }
-

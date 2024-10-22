@@ -19,6 +19,7 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     /// <param name="id">The identifier of the patient to retrieve.</param>
     /// <returns>The retrieved <see cref="Patient"/> object, or a 404 Not Found response if no such patient exists.</returns>
     [HttpGet("{id}")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> GetPatient(int id)
     {
         Patient? patient = await _dbContext.Patients.FindAsync(id);
@@ -29,6 +30,26 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
         }
 
         return Ok(patient);
+    }
+
+    [HttpGet("dto/{id}")]
+    public async Task<ActionResult<Patient>> GetPatientDTODiabetesRiskPrediction(int id)
+    {
+        Patient? patient = await _dbContext.Patients.FindAsync(id);
+
+        if (patient == null)
+        {
+            return NotFound("Patient not found");
+        }
+
+        PatientDtoDiabetesRiskPrediction patientDTODiabetesRiskPrediction = new()
+        {
+            Id = patient.Id,
+            DateOfBirth = patient.DateOfBirth,
+            Gender = patient.Gender,
+        };
+
+        return Ok(patientDTODiabetesRiskPrediction);
     }
 
     /// <summary>

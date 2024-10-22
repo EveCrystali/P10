@@ -1,12 +1,12 @@
 using BackendNote.Models;
 using BackendNote.Services;
+using BackendPatient.Extensions;
 using SharedAuthLibrary;
+using SharedAuthorizationLibrary;
 using SharedCorsLibrary;
 using SharedSwaggerLibrary;
-using SharedAuthorizationLibrary;
-using BackendPatient.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add Authorization policies and authentification
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -22,7 +22,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
 
-
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -36,8 +35,7 @@ builder.Services.Configure<NoteDatabaseSettings>(
 
 builder.Services.AddSingleton<NotesService>();
 
-
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -61,6 +59,5 @@ app.MapGet("/", async context =>
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 await app.RunAsync();

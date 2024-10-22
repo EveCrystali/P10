@@ -1,5 +1,3 @@
-using System;
-
 namespace BackendNote.Models;
 
 public class NoteDatabaseSettings

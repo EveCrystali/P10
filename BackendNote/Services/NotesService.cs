@@ -1,6 +1,6 @@
+using BackendNote.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using BackendNote.Models;
 
 namespace BackendNote.Services;
 
@@ -8,17 +8,21 @@ public class NotesService
 {
     private readonly IMongoCollection<Note> _notesCollection;
 
+
     public NotesService(
         IOptions<NoteDatabaseSettings> noteDatabaseSettings)
     {
-        var mongoClient = new MongoClient(
+        MongoClient mongoClient = new(
             noteDatabaseSettings.Value.ConnectionString);
 
-        var mongoDatabase = mongoClient.GetDatabase(
+        IMongoDatabase mongoDatabase = mongoClient.GetDatabase(
             noteDatabaseSettings.Value.DatabaseName);
 
         _notesCollection = mongoDatabase.GetCollection<Note>(
             noteDatabaseSettings.Value.NotesCollectionName);
+
+
+        CreateIndexes();
     }
 
     public async Task<List<Note>> GetAsync() =>
@@ -30,8 +34,10 @@ public class NotesService
     public async Task<List<Note>?> GetFromPatientIdAsync(int PatientId) =>
         await _notesCollection.Find(x => x.PatientId == PatientId).ToListAsync();
 
-    public async Task CreateAsync(Note newNote) =>
+    public async Task CreateAsync(Note newNote)
+    {
         await _notesCollection.InsertOneAsync(newNote);
+    }
 
     public async Task UpdateAsync(string id, Note updatedNote)
     {
@@ -45,5 +51,11 @@ public class NotesService
 
     public async Task RemoveAsync(string id) =>
         await _notesCollection.DeleteOneAsync(x => x.Id == id);
-}
 
+    private void CreateIndexes()
+    {
+        IndexKeysDefinition<Note> indexKeys = Builders<Note>.IndexKeys.Text(note => note.Title).Text(note => note.Body);
+        CreateIndexModel<Note> indexModel = new(indexKeys);
+        _notesCollection.Indexes.CreateOne(indexModel);
+    }
+}

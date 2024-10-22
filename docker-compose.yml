@@ -1,0 +1,11 @@
+services:
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+    ports:
+      - "7203:9200"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    volumes:
+      - ./elasticsearch/config:/usr/share/elasticsearch/config

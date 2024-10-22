@@ -1,4 +1,3 @@
-using System;
 using BackendNote.Models;
 
 namespace BackendNote.Services;
@@ -33,7 +32,7 @@ public class DiabetesRiskNotePredictionService
         return triggersDiabetesRiskFromNote;
     }
 
-    readonly HashSet<string> triggerWords =
+    private readonly HashSet<string> triggerWords =
     [
         "Hémoglobine A1C",
         "Microalbumine",

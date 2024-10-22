@@ -4,9 +4,8 @@ using Auth.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SharedAuthLibrary;
-using SharedSwaggerLibrary;
 using SharedAuthorizationLibrary;
-
+using SharedSwaggerLibrary;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

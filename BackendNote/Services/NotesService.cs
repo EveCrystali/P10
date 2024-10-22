@@ -1,7 +1,6 @@
+using BackendNote.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using BackendNote.Models;
-using BackendNote.Services;
 
 namespace BackendNote.Services;
 
@@ -12,13 +11,13 @@ public class NotesService
     private readonly ElasticsearchService _elasticsearchService;
 
     public NotesService(
-        IOptions<NoteDatabaseSettings> noteDatabaseSettings, 
+        IOptions<NoteDatabaseSettings> noteDatabaseSettings,
         ElasticsearchService elasticsearchService)
     {
-        var mongoClient = new MongoClient(
+        MongoClient mongoClient = new(
             noteDatabaseSettings.Value.ConnectionString);
 
-        var mongoDatabase = mongoClient.GetDatabase(
+        IMongoDatabase mongoDatabase = mongoClient.GetDatabase(
             noteDatabaseSettings.Value.DatabaseName);
 
         _notesCollection = mongoDatabase.GetCollection<Note>(
@@ -38,9 +37,10 @@ public class NotesService
     public async Task<List<Note>?> GetFromPatientIdAsync(int PatientId) =>
         await _notesCollection.Find(x => x.PatientId == PatientId).ToListAsync();
 
-    public async Task CreateAsync(Note newNote) 
+    public async Task CreateAsync(Note newNote)
     {
         await _notesCollection.InsertOneAsync(newNote);
+        // FIXME: Add Indexing service here (find the previous implementation version)
         await _elasticsearchService.IndexNoteAsync(newNote);
     }
 
@@ -65,4 +65,3 @@ public class NotesService
         _notesCollection.Indexes.CreateOne(indexModel);
     }
 }
-

@@ -35,5 +35,4 @@ public class Patient
 
     [EnumDataType(typeof(DiabetesRisk))]
     public DiabetesRisk? DiabetesRisk { get; set; }
-    
 }

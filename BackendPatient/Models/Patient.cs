@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using BackendPatient.Extensions;
 using SharedLibrary.Extensions;
 
 namespace BackendPatient.Models;

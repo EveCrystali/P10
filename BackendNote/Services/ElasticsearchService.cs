@@ -1,62 +1,73 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+
+namespace BackendNote.Services;
 
 public class ElasticsearchService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _elasticsearchUrl = "http://localhost:7203"; 
+    private readonly string _elasticsearchUrl = "http://localhost:7203";
 
     public ElasticsearchService()
     {
         _httpClient = new HttpClient();
     }
 
-    public async Task<long> CountWordsInNotes(string patientId, List<string> wordsToCount)
+    public async Task<int> CountWordsInNotes(string patientId, List<string> wordsToCount)
     {
-        var queryWords = string.Join(" ", wordsToCount);
+        // FUTURE: Add null check conditions
 
+        // Make a string of all the words to count
+        string? queryWords = string.Join(" ", wordsToCount);
+        // Initialize the word count
+        int wordCounts = 0;
+
+        // Build the query
         var requestBody = new
         {
             query = new
             {
+                // Needed to combine several condition
                 @bool = new
                 {
+                    // conditions must all be true
                     must = new object[]
                     {
+                        // Condition 1: search in the patient id
                         new { term = new { PatientId = patientId } },
+                        // Condition 2: search in the body
                         new { match = new { Body = new { query = queryWords, analyzer = "custom_french_analyzer" } } }
                     }
                 }
             },
+            // Aggregate to count word occurrences
             aggs = new
             {
+                // name of the aggregation
                 word_counts = new
                 {
+                    // Term type aggregation
                     terms = new
                     {
+                        // name of the field
                         field = "Body.keyword",
+                        // size of the aggregation : the maximum of terms that is returned
                         size = 10000
                     }
                 }
             }
         };
 
-        var response = await _httpClient.PostAsync(
-            $"{_elasticsearchUrl}/notes_index/_search",
-            new StringContent(JObject.FromObject(requestBody).ToString(), Encoding.UTF8, "application/json")
-        );
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes_index/_search",
+                new StringContent(JObject.FromObject(requestBody).ToString(), Encoding.UTF8, "application/json"));
 
         response.EnsureSuccessStatusCode();
 
-        var responseBody = await response.Content.ReadAsStringAsync();
-        var jsonResponse = JObject.Parse(responseBody);
+        string? responseBody = await response.Content.ReadAsStringAsync();
+        JObject? jsonResponse = JObject.Parse(responseBody);
 
-        var wordCounts = jsonResponse["aggregations"]["word_counts"]["buckets"]
-            .Sum(b => (long)b["doc_count"]);
+        wordCounts = jsonResponse["aggregations"]["word_counts"]["buckets"]
+            .Sum(b => (int)b["doc_count"]);
 
         return wordCounts;
     }

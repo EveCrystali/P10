@@ -1,4 +1,3 @@
-using System;
 using Frontend.Models;
 
 namespace Frontend.Services;
@@ -11,6 +10,7 @@ public class DiabetesRiskPredictionService
     {
         _logger = logger;
     }
+
     public DiabetesRisk DiabetesRiskPrediction(PatientNotesViewModel patientNotesViewModel)
     {
         DiabetesRisk diabetesRisk;
@@ -29,7 +29,7 @@ public class DiabetesRiskPredictionService
         return diabetesRisk;
     }
 
-    private  static DiabetesRisk DiabetesRiskPredictionCalculator(PatientNotesViewModel patientNotesViewModel, int triggersDiabetesRiskFromNotes)
+    private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientNotesViewModel patientNotesViewModel, int triggersDiabetesRiskFromNotes)
     {
         int age = PatientAgeCalculator(patientNotesViewModel);
 
@@ -104,7 +104,7 @@ public class DiabetesRiskPredictionService
             return DiabetesRisk.None;
         }
     }
-    
+
     private static int PatientAgeCalculator(PatientNotesViewModel patientNotesViewModel)
     {
         DateTime currentDate = DateTime.Now;

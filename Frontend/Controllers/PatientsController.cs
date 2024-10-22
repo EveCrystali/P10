@@ -22,7 +22,7 @@ public class PatientsController : Controller
     {
         _logger = logger;
         _httpClient = httpClient;
-  
+
         _httpClientService = httpClientService;
         _patientService = patientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
@@ -114,7 +114,6 @@ public class PatientsController : Controller
             {
                 return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
             }
-
             else if (response.IsSuccessStatusCode)
             {
                 Models.Patient? createdPatient = await response.Content.ReadFromJsonAsync<Frontend.Models.Patient>();

@@ -4,9 +4,9 @@ using BackendPatient.Models;
 using BackendPatient.Services;
 using Microsoft.EntityFrameworkCore;
 using SharedAuthLibrary;
-using SharedSwaggerLibrary;
 using SharedAuthorizationLibrary;
 using SharedCorsLibrary;
+using SharedSwaggerLibrary;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

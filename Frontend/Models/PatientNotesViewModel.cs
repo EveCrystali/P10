@@ -1,5 +1,3 @@
-using System;
-
 namespace Frontend.Models;
 
 public class PatientNotesViewModel
@@ -19,5 +17,4 @@ public class PatientNotesViewModel
     public string? PhoneNumber { get; set; }
 
     public virtual List<Note>? Notes { get; set; }
-
 }

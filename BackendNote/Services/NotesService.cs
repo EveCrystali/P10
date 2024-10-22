@@ -40,7 +40,6 @@ public class NotesService
     public async Task CreateAsync(Note newNote)
     {
         await _notesCollection.InsertOneAsync(newNote);
-        // FIXME: Add Indexing service here (find the previous implementation version)
         await _elasticsearchService.IndexNoteAsync(newNote);
     }
 

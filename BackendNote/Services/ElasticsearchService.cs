@@ -1,5 +1,7 @@
 using System.Text;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using BackendNote.Models;
 
 namespace BackendNote.Services;
 
@@ -11,6 +13,26 @@ public class ElasticsearchService
     public ElasticsearchService()
     {
         _httpClient = new HttpClient();
+    }
+
+    public async Task IndexNoteAsync(Note note)
+    {
+        var requestBody = new
+        {
+            index = "notes",
+            id = note.Id,
+            document = new
+            {
+                note.Title,
+                note.Body,
+                note.LastUpdatedDate,
+                note.PatientId
+            }
+        };
+
+        var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes/_doc/{note.Id}", content);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<int> CountWordsInNotes(string patientId, List<string> wordsToCount)

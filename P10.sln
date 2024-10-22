@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "elasticsearch", "elasticsea
 		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackendDiabetesRiskPrediction", "BackendDiabetesRiskPrediction\BackendDiabetesRiskPrediction.csproj", "{61B85C8A-68DD-47C2-8C5D-5DD1FD06F1F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E7F48AA-7853-40B9-A4A6-5671CAEC7E65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61B85C8A-68DD-47C2-8C5D-5DD1FD06F1F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61B85C8A-68DD-47C2-8C5D-5DD1FD06F1F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61B85C8A-68DD-47C2-8C5D-5DD1FD06F1F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61B85C8A-68DD-47C2-8C5D-5DD1FD06F1F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

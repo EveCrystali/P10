@@ -8,7 +8,7 @@ namespace BackendNote.Controllers
 {
     [Route("note")]
     [ApiController]
-    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    
     public class NotesController : ControllerBase
     {
         private readonly NotesService _notesService;
@@ -17,14 +17,17 @@ namespace BackendNote.Controllers
             _notesService = notesService;
 
         [HttpGet]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<IEnumerable<Note>>> Get()
         {
             List<Note> notes = await _notesService.GetAsync();
 
             return notes != null ? Ok(notes) : NotFound("No notes found");
         }
+        
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<Note>> GetNote(string id)
         {
             Note? note = await _notesService.GetAsync(id);
@@ -37,7 +40,31 @@ namespace BackendNote.Controllers
             return Ok(note);
         }
 
+
+        [HttpGet("dto/{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+        public async Task<ActionResult<Note>> GetNoteDTODiabetesRiskPrediction(string id)
+        {
+            Note? note = await _notesService.GetAsync(id);
+
+            if (note is null)
+            {
+                return NotFound("Note not found");
+            }
+
+            NoteDtoDiabetesRiskPrediction noteDtoDiabetesRiskPrediction = new()
+            {
+                Id = note.Id,
+                PatientId = note.PatientId,
+                Title = note.Title,
+                Body = note.Body,
+            };
+            
+            return Ok(noteDtoDiabetesRiskPrediction);
+        }
+
         [HttpGet("patient/{patientId}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<ActionResult<Note>> GetNotesFromPatientId(int patientId)
         {
             List<Note>? notes = await _notesService.GetFromPatientIdAsync(patientId);
@@ -51,6 +78,7 @@ namespace BackendNote.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> PostNote(Note newNote)
         {
             try
@@ -73,6 +101,7 @@ namespace BackendNote.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> UpdateNote(string id, Note updatedNote)
         {
             Note? note = await _notesService.GetAsync(id);
@@ -104,6 +133,7 @@ namespace BackendNote.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
         public async Task<IActionResult> DeleteNote(string id)
         {
             Note? note = await _notesService.GetAsync(id);

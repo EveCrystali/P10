@@ -8,11 +8,9 @@ public class NotesService
 {
     private readonly IMongoCollection<Note> _notesCollection;
 
-    private readonly ElasticsearchService _elasticsearchService;
 
     public NotesService(
-        IOptions<NoteDatabaseSettings> noteDatabaseSettings,
-        ElasticsearchService elasticsearchService)
+        IOptions<NoteDatabaseSettings> noteDatabaseSettings)
     {
         MongoClient mongoClient = new(
             noteDatabaseSettings.Value.ConnectionString);
@@ -23,7 +21,6 @@ public class NotesService
         _notesCollection = mongoDatabase.GetCollection<Note>(
             noteDatabaseSettings.Value.NotesCollectionName);
 
-        _elasticsearchService = elasticsearchService;
 
         CreateIndexes();
     }
@@ -40,7 +37,6 @@ public class NotesService
     public async Task CreateAsync(Note newNote)
     {
         await _notesCollection.InsertOneAsync(newNote);
-        await _elasticsearchService.IndexNoteAsync(newNote);
     }
 
     public async Task UpdateAsync(string id, Note updatedNote)
@@ -51,7 +47,6 @@ public class NotesService
             .Set(note => note.Body, updatedNote.Body)
             .Set(note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
         await _notesCollection.UpdateOneAsync(filter, update);
-        await _elasticsearchService.IndexNoteAsync(updatedNote);
     }
 
     public async Task RemoveAsync(string id) =>

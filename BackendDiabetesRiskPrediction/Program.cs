@@ -1,5 +1,5 @@
-using BackendNote.Models;
-using BackendNote.Services;
+using BackendDiabetesRiskPrediction.Models;
+using BackendDiabetesRiskPrediction.Services;
 using BackendPatient.Extensions;
 using SharedAuthLibrary;
 using SharedAuthorizationLibrary;
@@ -30,10 +30,8 @@ builder.Services.AddSwaggerDocumentation();
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
 
-builder.Services.Configure<NoteDatabaseSettings>(
-    builder.Configuration.GetSection("NoteDatabase"));
-
-builder.Services.AddSingleton<NotesService>();
+builder.Services.AddSingleton<ElasticsearchService>();
+builder.Services.AddSingleton<DiabetesRiskNotePredictionService>(); 
 
 WebApplication app = builder.Build();
 

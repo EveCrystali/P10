@@ -1,9 +1,64 @@
-using Frontend.Models;
+using BackendDiabetesRiskPrediction.Models;
 
-namespace Frontend.Services;
+namespace BackendDiabetesRiskPrediction.Services;
 
-public class DiabetesRiskPredictionService
+public class DiabetesRiskNotePredictionService
 {
+    public int DiabetesRiskPredictionNotesAnalysis(List<Note> notes)
+    {
+        int triggersDiabetesRiskFromNotes = 0;
+
+        foreach (Note note in notes)
+        {
+            triggersDiabetesRiskFromNotes += DiabetesRiskPredictionSingleNoteAnalysis(note);
+        }
+        return triggersDiabetesRiskFromNotes;
+    }
+
+    private static string DiabetesRiskPredictionSingleNoteTransform(Note note)
+    {
+        return note.Title?.ToLower() + note.Body?.ToLower();
+    }
+
+    private int DiabetesRiskPredictionSingleNoteAnalysis(Note note)
+    {
+        int triggersDiabetesRiskFromNote = 0;
+        DiabetesRiskPredictionSingleNoteTransform(note);
+
+        HashSet<string> triggers = TriggerWordsMix(triggerWords);
+
+        // TODO: implement diabetes risk prediction based on patient single note
+
+        return triggersDiabetesRiskFromNote;
+    }
+
+    private readonly HashSet<string> triggerWords =
+    [
+        "Hémoglobine A1C",
+        "Microalbumine",
+        "Taille",
+        "Poids",
+        "Fumeur",
+        "Fumeuse",
+        "Anormal",
+        "Cholestérol",
+        "Vertiges",
+        "Rechute",
+        "Réaction",
+        "Anticorps"
+    ];
+
+    private static HashSet<string> TriggerWordsMix(HashSet<string> triggerWords)
+    {
+        HashSet<string> triggerWordsMix = [.. triggerWords];
+        foreach (string triggerWord in triggerWordsMix)
+        {
+            triggerWordsMix.Add(triggerWord.ToLower());
+        }
+
+        return triggerWordsMix;
+    }
+
     private readonly ILogger<DiabetesRiskPredictionService> _logger;
 
     public DiabetesRiskPredictionService(ILogger<DiabetesRiskPredictionService> logger)
@@ -112,4 +167,8 @@ public class DiabetesRiskPredictionService
         int age = currentDate.Year - birthDate.Year;
         return age;
     }
+
+
+
+
 }

@@ -1,11 +1,75 @@
+version: '3.8'
+
 services:
-  elasticsearch:
+  mongodb:
     build:
-      context: ./elasticsearch
+      context: .
+      dockerfile: Dockerfile.mongodb
+    container_name: mongodb_container
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+    command: ["mongod", "--bind_ip_all"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - elastic
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    container_name: elasticsearch_container
     ports:
       - "7203:9200"
     environment:
-      discovery.type: single-node
-      xpack.security.enabled: "false"
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
-      - ./elasticsearch/config:/usr/share/elasticsearch/config
+      - elasticsearch_config:/usr/share/elasticsearch/config
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - elastic
+
+  logstash:
+    build:
+      context: ./logstash
+      dockerfile: Dockerfile.logstash
+    container_name: logstash_container
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+    env_file:
+      - .env
+    environment:
+      - xpack.monitoring.enabled=false
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
+
+volumes:
+  mongo_data:
+    driver: local
+  elasticsearch_config:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge

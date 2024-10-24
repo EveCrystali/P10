@@ -20,4 +20,4 @@ RUN apt-get update && apt-get install -y mongodb-mongosh
 RUN chmod +x /backup/restore.sh
 
 # Exécute le script de restauration au démarrage du conteneur
-CMD ["dockerize", "-wait", "tcp://mongodb_container:27017", "-timeout", "30s", "/backup/restore.sh"]
+CMD ["dockerize", "-wait", "tcp://mongodb_container:27017", "-timeout", "5s", "/backup/restore.sh"]

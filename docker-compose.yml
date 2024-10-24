@@ -1,9 +1,7 @@
 services:
   mongodb:
-    build:
-      context: ./mongodb
-      dockerfile: mongodb.Dockerfile
     container_name: mongodb_container
+    image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
@@ -14,6 +12,20 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - elastic
+  
+  restore:
+    build:
+      context: ./mongodb
+      dockerfile: mongodb.Dockerfile
+    volumes:
+      - ./mongodb/backup:/backup
+    environment:
+      - MONGO_HOST=mongodb_container
+    depends_on:
+      mongodb:
+        condition: service_healthy
     networks:
       - elastic
     
@@ -55,6 +67,27 @@ services:
     networks:
       - elastic
 
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    
+    build:
+      context: ./mongodb
+      dockerfile: mongo-express.Dockerfile
+    volumes:
+      - ./mongodb:/mongodb
+    ports:
+      - "8081:8081"
+    environment:
+      # - ME_CONFIG_MONGODB_SERVER=mongodb_container
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
+    command: ["sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh"]
+
 volumes:
   mongo_data:
     driver: local
@@ -62,6 +95,7 @@ volumes:
     driver: local
   elasticsearch_data:
     driver: local
+
 
 networks:
   elastic:

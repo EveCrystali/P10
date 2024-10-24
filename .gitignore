@@ -363,3 +363,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 logstash/pipeline/db/logstash_sqlite.db
+logstash/pipeline/db/logstash_sqlite.db

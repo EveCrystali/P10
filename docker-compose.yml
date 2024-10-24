@@ -1,4 +1,90 @@
 services:
+
+  sharedlibrary:
+    build:
+      context: ./SharedLibrary
+      dockerfile: sharedlibrary.Dockerfile
+    volumes:
+      - shared-output:/app/publish
+
+  frontend:
+    image: frontend-image
+    build:
+      context: ./Frontend
+      dockerfile: frontend.Dockerfile
+    ports:
+      - "7000:7000"
+    volumes:
+      - shared-output:/app/shared 
+    environment:
+      - Configuration=Docker
+    depends_on:
+      - sharedlibrary
+    #   - Auth
+    #   - BackendPatient
+    #   - BackendNote
+    #   - BackendDiabetesRiskPrediction
+    #   - ApiGateway
+    #   - mongodb
+    #   - mongo-express
+    #   - elasticsearch
+    #   - logstash
+    networks:
+      - elastic
+
+  auth:
+    build:
+      context: ./Auth
+      dockerfile: auth.Dockerfile
+    depends_on:
+      - sharedlibrary
+    volumes:
+      - shared-output:/app/shared
+    environment:
+      - Configuration=Docker
+    ports:
+      - "7200:7200"
+
+  backendpatient:
+    build:
+      context: ./BackendPatient
+      dockerfile: backendpatient.Dockerfile
+    depends_on:
+      - sharedlibrary
+    volumes:
+      - shared-output:/app/shared
+    environment:
+      - Configuration=Docker
+    ports:
+      - "7200:7200"
+
+  backendnote:
+    build:
+      context: ./BackendNote
+      dockerfile: backendnote.Dockerfile
+    depends_on:
+      - sharedlibrary
+    volumes:
+      - shared-output:/app/shared
+    environment:
+      - Configuration=Docker
+    ports:
+      - "7202:7202"
+
+  backenddiabetesriskprediction:
+    build:
+      context: ./BackendDiabetesRiskPrediction
+      dockerfile: backenddiabetesriskprediction.Dockerfile
+    depends_on:
+      - sharedlibrary
+    volumes:
+      - shared-output:/app/shared
+    environment:
+      - Configuration=Docker
+    ports:
+      - "7204:7204"
+
+
   mongodb:
     container_name: mongodb_container
     image: mongo:latest
@@ -95,6 +181,7 @@ volumes:
     driver: local
   elasticsearch_data:
     driver: local
+  shared-output:
 
 
 networks:

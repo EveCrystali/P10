@@ -36,8 +36,14 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Docker'">
+    <Reference Include="SharedLibrary">
+      <HintPath>/app/libs/SharedLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' != 'Docker'">
     <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj" />
   </ItemGroup>
+  
 
 </Project>

@@ -1,22 +1,25 @@
-# Étape 1 : Construire l'application
+# Étape 1 : Utiliser l'image SDK pour construire SharedLibrary et Frontend
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /source
 
 # Copier les fichiers projet et restaurer les dépendances
-COPY *.csproj ./
-RUN dotnet restore
+COPY SharedLibrary/*.csproj SharedLibrary/
+COPY Frontend/*.csproj Frontend/
 
-# Copier tous les fichiers et construire l'application
-COPY . ./
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet restore Frontend/Frontend.csproj
 
-# Étape 2 : Créer l'image finale
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Copier tous les fichiers source
+COPY . .
+
+# Construire SharedLibrary
+RUN dotnet build SharedLibrary/SharedLibrary.csproj -c Release -o /source/build
+
+# Construire Frontend
+RUN dotnet build Frontend/Frontend.csproj -c Release -o /source/build
+
+# Étape 2 : Utiliser l'image runtime pour exécuter l'application
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=build /source/build .
 
-# Exposer le port sur lequel ton Frontend écoute (port 7000 d'après tes infos)
-EXPOSE 7000
-
-# Démarrer l'application
 ENTRYPOINT ["dotnet", "Frontend.dll"]

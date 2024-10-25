@@ -1,17 +1,19 @@
 services:
 
-  sharedlibrary:
-    build:
-      context: ./SharedLibrary
-      dockerfile: sharedlibrary.Dockerfile
-    volumes:
-      - shared-output:/app/publish
+  # sharedlibrary:
+  #   build:
+  #     context: ./SharedLibrary
+  #     dockerfile: sharedlibrary.Dockerfile
+  #   volumes:
+  #     - shared-output:/app/publish
 
   frontend:
     image: frontend-image
     build:
-      context: ./Frontend
-      dockerfile: frontend.Dockerfile
+      context: .
+      dockerfile: Frontend/frontend.Dockerfile
+    env_file:
+      - .env
     ports:
       - "7000:7000"
     volumes:
@@ -19,40 +21,40 @@ services:
     environment:
       - Configuration=Docker
     depends_on:
-      - sharedlibrary
-    #   - Auth
-    #   - BackendPatient
-    #   - BackendNote
-    #   - BackendDiabetesRiskPrediction
-    #   - ApiGateway
-    #   - mongodb
-    #   - mongo-express
-    #   - elasticsearch
-    #   - logstash
+      - mongodb
+      - backendpatient
+      - apigateway
     networks:
       - elastic
 
-  auth:
+  apigateway:
     build:
-      context: ./Auth
-      dockerfile: auth.Dockerfile
-    depends_on:
-      - sharedlibrary
-    volumes:
-      - shared-output:/app/shared
+      context: .
+      dockerfile: ApiGateway/apigateway.Dockerfile
+    env_file:
+      - .env
     environment:
       - Configuration=Docker
     ports:
-      - "7200:7200"
+      - "5000:5000"
+
+  auth:
+    build:
+      context: .
+      dockerfile: Auth/auth.Dockerfile
+    env_file:
+      - .env
+    environment:
+      - Configuration=Docker
+    ports:
+      - "7201:7201"
 
   backendpatient:
     build:
-      context: ./BackendPatient
-      dockerfile: backendpatient.Dockerfile
-    depends_on:
-      - sharedlibrary
-    volumes:
-      - shared-output:/app/shared
+      context: .
+      dockerfile: BackendPatient/backendpatient.Dockerfile
+    env_file:
+      - .env
     environment:
       - Configuration=Docker
     ports:
@@ -60,12 +62,12 @@ services:
 
   backendnote:
     build:
-      context: ./BackendNote
-      dockerfile: backendnote.Dockerfile
+      context: .
+      dockerfile: BackendNote/backendnote.Dockerfile
+    env_file:
+      - .env
     depends_on:
-      - sharedlibrary
-    volumes:
-      - shared-output:/app/shared
+      - mongodb
     environment:
       - Configuration=Docker
     ports:
@@ -73,17 +75,18 @@ services:
 
   backenddiabetesriskprediction:
     build:
-      context: ./BackendDiabetesRiskPrediction
-      dockerfile: backenddiabetesriskprediction.Dockerfile
+      context: .
+      dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
+    env_file:
+      - .env
     depends_on:
-      - sharedlibrary
-    volumes:
-      - shared-output:/app/shared
+      - restore
+      - elasticsearch
+      - mongodb
     environment:
       - Configuration=Docker
     ports:
       - "7204:7204"
-
 
   mongodb:
     container_name: mongodb_container

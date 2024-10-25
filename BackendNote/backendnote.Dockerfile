@@ -1,30 +1,25 @@
-# Étape 1 : Construire l'application BackendNote
+# Étape 1 : Utiliser l'image SDK pour construire SharedLibrary et ApiGateway
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /source
 
 # Copier les fichiers projet et restaurer les dépendances
-COPY ./*.csproj ./
-RUN dotnet restore
+COPY SharedLibrary/*.csproj SharedLibrary/
+COPY ApiGateway/*.csproj ApiGateway/
 
-# Copier tous les fichiers source et les fichiers partagés
-COPY . ./
-COPY /app/shared/* /app/libs/
+RUN dotnet restore ApiGateway/ApiGateway.csproj
 
-# Construire le projet
-RUN dotnet publish -c Release -o /app/publish
+# Copier tous les fichiers source
+COPY . .
 
-# Étape 2 : Créer l'image finale
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Construire SharedLibrary
+RUN dotnet build SharedLibrary/SharedLibrary.csproj -c Release -o /source/build
+
+# Construire ApiGateway
+RUN dotnet build ApiGateway/ApiGateway.csproj -c Release -o /source/build
+
+# Étape 2 : Utiliser l'image runtime pour exécuter l'application
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
+COPY --from=build /source/build .
 
-# Copier les fichiers compilés du BackendNote
-COPY --from=build /app/publish .
-
-# Copier la bibliothèque partagée
-COPY /app/libs/SharedLibrary.dll /app/libs/
-
-# Exposer le port
-EXPOSE 7202
-
-# Démarrer l'application
-ENTRYPOINT ["dotnet", "BackendNote.dll"]
+ENTRYPOINT ["dotnet", "ApiGateway.dll"]

@@ -31,7 +31,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddJwtBearer("P10AuthProviderKey", options =>
     {
-        options.Authority = "https://localhost:7201";
+        options.Authority = "http://auth:7201";
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -46,7 +46,9 @@ builder.Services.AddAuthentication(options =>
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
 
-builder.AddCorsConfiguration("AllowFrontend", "https://localhost:7000");
+builder.AddCorsConfiguration("AllowFrontend", "https://frontend:7000");
+
+builder.WebHost.UseUrls("http://*:5000");
 
 WebApplication app = builder.Build();
 

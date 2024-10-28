@@ -11,7 +11,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Database configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerInternal")));
 
 // Identity configuration
 builder.Services.AddIdentity<User, IdentityRole>()
@@ -48,6 +48,8 @@ builder.Services.AddAuthorizationPolicies();
 // Discover API endpoints
 builder.Services.AddEndpointsApiExplorer();
 
+builder.WebHost.UseUrls("http://*:7201");
+
 WebApplication app = builder.Build();
 
 // Seed users and roles
@@ -69,7 +71,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

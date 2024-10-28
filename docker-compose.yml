@@ -1,14 +1,34 @@
 services:
 
-  # sharedlibrary:
-  #   build:
-  #     context: ./SharedLibrary
-  #     dockerfile: sharedlibrary.Dockerfile
+  # sqlserver_auth:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   container_name: sqlserver_auth
+  #   ports:
+  #     - "1433:1433"
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD="YourStrongPassword1!"
+  #   networks:
+  #     - elastic
   #   volumes:
-  #     - shared-output:/app/publish
+  #     - sqlserver_auth_data:/var/opt/mssql
+
+  # sqlserver_patients:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   container_name: sqlserver_patients
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD="YourStrongPassword1!"
+  #   ports:
+  #     - "1434:1433"
+  #   networks:
+  #     - elastic
+  #   volumes:
+  #     - sqlserver_patients_data:/var/opt/mssql
 
   frontend:
     image: frontend-image
+    container_name: frontend
     build:
       context: .
       dockerfile: Frontend/frontend.Dockerfile
@@ -20,6 +40,7 @@ services:
       - shared-output:/app/shared 
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7000
     depends_on:
       - mongodb
       - backendpatient
@@ -28,6 +49,7 @@ services:
       - elastic
 
   apigateway:
+    container_name: apigateway
     build:
       context: .
       dockerfile: ApiGateway/apigateway.Dockerfile
@@ -35,32 +57,58 @@ services:
       - .env
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:5000
     ports:
       - "5000:5000"
+    networks:
+      - elastic
 
   auth:
+    container_name: auth
     build:
       context: .
       dockerfile: Auth/auth.Dockerfile
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7201
+      # - SA_PASSWORD=Str0ng!Passw0rd#2024
+      # - ConnectionStrings__IdentityConnection=Server=sqlserver_auth;Database=AuthServiceDb;User Id=sa;Password=Str0ng!Passw0rd#2024;Trusted_Connection=True;MultipleActiveResultSets=true;
+    # depends_on:
+    #   - sqlserver_auth
+    volumes:
+      - data_protection_keys:/root/.aspnet/DataProtection-Keys
     ports:
       - "7201:7201"
+    networks:
+      - elastic
 
   backendpatient:
+    container_name: backendpatient
     build:
       context: .
       dockerfile: BackendPatient/backendpatient.Dockerfile
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7200
+      # - SA_PASSWORD=Str0ng!Passw0rd#2024
+      # - ConnectionStrings__IdentityConnection=Server=sqlserver_patients;Database=BackendPatientDb;User Id=sa;Password=Str0ng!Passw0rd#2024;Trusted_Connection=True;MultipleActiveResultSets=true;
+    # depends_on:
+    #   - sqlserver_patients
     ports:
       - "7200:7200"
+    networks:
+      - elastic
 
   backendnote:
+    container_name: backendnote
     build:
       context: .
       dockerfile: BackendNote/backendnote.Dockerfile
@@ -70,10 +118,14 @@ services:
       - mongodb
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7202
     ports:
       - "7202:7202"
+    networks:
+      - elastic
 
   backenddiabetesriskprediction:
+    container_name: backenddiabetesriskprediction
     build:
       context: .
       dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
@@ -85,8 +137,11 @@ services:
       - mongodb
     environment:
       - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7204
     ports:
       - "7204:7204"
+    networks:
+      - elastic
 
   mongodb:
     container_name: mongodb_container
@@ -185,6 +240,9 @@ volumes:
   elasticsearch_data:
     driver: local
   shared-output:
+  data_protection_keys:
+  # sqlserver_auth_data:
+  # sqlserver_patients_data:
 
 
 networks:

@@ -2,10 +2,10 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/note/patient/{patientId}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendnote",
           "Port": 7202
         }
       ],
@@ -20,10 +20,10 @@
     },
     {
       "DownstreamPathTemplate": "/note/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendnote",
           "Port": 7202
         }
       ],
@@ -40,10 +40,10 @@
     },
     {
       "DownstreamPathTemplate": "/note/",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendnote",
           "Port": 7202
         }
       ],
@@ -59,10 +59,10 @@
     },
     {
       "DownstreamPathTemplate": "/patient/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendpatient",
           "Port": 7200
         }
       ],
@@ -73,10 +73,10 @@
     },
     {
       "DownstreamPathTemplate": "/patient/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendpatient",
           "Port": 7200
         }
       ],
@@ -93,10 +93,10 @@
     },
     {
       "DownstreamPathTemplate": "/auth/username/{username}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "auth",
           "Port": 7201
         }
       ],
@@ -113,7 +113,7 @@
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
         "AllowedOrigins": [
-          "https://localhost:7000"
+          "http://frontend:7000"
         ],
         "AllowedMethods": [
           "GET"
@@ -125,10 +125,10 @@
     },
     {
       "DownstreamPathTemplate": "/auth/logout",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "auth",
           "Port": 7201
         }
       ],
@@ -144,7 +144,7 @@
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
         "AllowedOrigins": [
-          "https://localhost:7000"
+          "http://frontend:7000"
         ],
         "AllowedMethods": [
           "POST"
@@ -160,10 +160,10 @@
     },
     {
       "DownstreamPathTemplate": "/auth/login",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "auth",
           "Port": 7201
         }
       ],
@@ -183,7 +183,7 @@
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
         "AllowedOrigins": [
-          "https://localhost:7000"
+          "http://frontend:7000"
         ],
         "AllowedMethods": [
           "GET",
@@ -197,10 +197,10 @@
     },
     {
       "DownstreamPathTemplate": "/auth/status",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "auth",
           "Port": 7201
         }
       ],
@@ -217,7 +217,7 @@
         "AllowAnyOrigin": false,
         "AllowCredentials": true,
         "AllowedOrigins": [
-          "https://localhost:7000"
+          "http://frontend:7000"
         ],
         "AllowedMethods": [
           "GET"
@@ -230,16 +230,16 @@
     {
       "UpstreamPathTemplate": "/",
       "DownstreamPathTemplate": "/",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "backendpatient",
           "Port": 7200
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:5000"
+    "BaseUrl": "http://apigateway:5000"
   }
 }

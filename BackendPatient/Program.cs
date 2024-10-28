@@ -14,7 +14,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Add Cors configuration
-builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
+builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
 builder.Services.AddControllers()
     .AddXmlDataContractSerializerFormatters()
@@ -24,7 +24,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     });
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DockerInternal")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddScoped(typeof(IUpdateService<>), typeof(UpdateService<>));
@@ -33,6 +33,8 @@ builder.Services.AddScoped<DataSeeder>();
 
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
+
+builder.WebHost.UseUrls("http://*:7200");
 
 WebApplication app = builder.Build();
 
@@ -49,7 +51,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseRouting();
 

@@ -1,6 +1,7 @@
 # Étape 1 : Utiliser l'image SDK pour construire SharedLibrary et ApiGateway
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
+EXPOSE 5000
 
 # Copier les fichiers projet et restaurer les dépendances
 COPY SharedLibrary/*.csproj SharedLibrary/

@@ -48,42 +48,42 @@ services:
     networks:
       - elastic
 
-  # apigateway:
-  #   container_name: apigateway
-  #   build:
-  #     context: .
-  #     dockerfile: ApiGateway/apigateway.Dockerfile
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - Configuration=Docker
-  #     - ASPNETCORE_URLS=http://*:5000
-  #   ports:
-  #     - "5000:5000"
-  #   networks:
-  #     - elastic
+  apigateway:
+    container_name: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/apigateway.Dockerfile
+    env_file:
+      - .env
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:5000
+    ports:
+      - "5000:5000"
+    networks:
+      - elastic
 
-  # auth:
-  #   container_name: auth
-  #   build:
-  #     context: .
-  #     dockerfile: Auth/auth.Dockerfile
-  #   env_file:
-  #     - .env
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   environment:
-  #     - Configuration=Docker
-  #     - ASPNETCORE_URLS=http://*:7201
-  #     # - ConnectionStrings__DefaultConnection=${DB_DOCKER_INTERNAL_AUTH}
-  #   # depends_on:
-  #   #   - sqlserver_auth
-  #   volumes:
-  #     - data_protection_keys:/root/.aspnet/DataProtection-Keys
-  #   ports:
-  #     - "7201:7201"
-  #   networks:
-  #     - elastic
+  auth:
+    container_name: auth
+    build:
+      context: .
+      dockerfile: Auth/auth.Dockerfile
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7201
+      - ConnectionStrings__DockerInternal=Server=host.docker.internal,1433;Database=AuthServiceDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
+    # depends_on:
+    #   - sqlserver_auth
+    volumes:
+      - data_protection_keys:/root/.aspnet/DataProtection-Keys
+    ports:
+      - "7201:7201"
+    networks:
+      - elastic
 
   backendpatient:
     container_name: backendpatient
@@ -98,7 +98,6 @@ services:
       - Configuration=Docker
       - ASPNETCORE_URLS=http://*:7200
       - ConnectionStrings__DockerInternal=Server=host.docker.internal,1433;Database=PatientDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
-      # - ConnectionStrings__DockerInternal=${DB_DOCKER_INTERNAL_PATIENT};Database=PatientDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
     volumes:
       - data_protection_keys:/root/.aspnet/DataProtection-Keys
     ports:
@@ -107,130 +106,130 @@ services:
       - elastic
     
 
-  # backendnote:
-  #   container_name: backendnote
-  #   build:
-  #     context: .
-  #     dockerfile: BackendNote/backendnote.Dockerfile
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - mongodb
-  #   environment:
-  #     - Configuration=Docker
-  #     - ASPNETCORE_URLS=http://*:7202
-  #   ports:
-  #     - "7202:7202"
-  #   networks:
-  #     - elastic
+  backendnote:
+    container_name: backendnote
+    build:
+      context: .
+      dockerfile: BackendNote/backendnote.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7202
+    ports:
+      - "7202:7202"
+    networks:
+      - elastic
 
-  # backenddiabetesriskprediction:
-  #   container_name: backenddiabetesriskprediction
-  #   build:
-  #     context: .
-  #     dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - restore
-  #     - elasticsearch
-  #     - mongodb
-  #   environment:
-  #     - Configuration=Docker
-  #     - ASPNETCORE_URLS=http://*:7204
-  #   ports:
-  #     - "7204:7204"
-  #   networks:
-  #     - elastic
+  backenddiabetesriskprediction:
+    container_name: backenddiabetesriskprediction
+    build:
+      context: .
+      dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - restore
+      - elasticsearch
+      - mongodb
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7204
+    ports:
+      - "7204:7204"
+    networks:
+      - elastic
 
-  # mongodb:
-  #   container_name: mongodb_container
-  #   image: mongo:latest
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo_data:/data/db
-  #   restart: always
-  #   healthcheck:
-  #     test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #   networks:
-  #     - elastic
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - elastic
   
-  # restore:
-  #   build:
-  #     context: ./mongodb
-  #     dockerfile: mongodb.Dockerfile
-  #   volumes:
-  #     - ./mongodb/backup:/backup
-  #   environment:
-  #     - MONGO_HOST=mongodb_container
-  #   depends_on:
-  #     mongodb:
-  #       condition: service_healthy
-  #   networks:
-  #     - elastic
+  restore:
+    build:
+      context: ./mongodb
+      dockerfile: mongodb.Dockerfile
+    volumes:
+      - ./mongodb/backup:/backup
+    environment:
+      - MONGO_HOST=mongodb_container
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
     
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
-  #   container_name: elasticsearch_container
-  #   ports:
-  #     - "9200:9200"
-  #   volumes:
-  #     - elasticsearch_config:/usr/share/elasticsearch/config
-  #     - elasticsearch_data:/usr/share/elasticsearch/data
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:9200/_cat/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #   environment:
-  #     - discovery.type=single-node
-  #     - xpack.security.enabled=false
-  #   networks:
-  #     - elastic
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    container_name: elasticsearch_container
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_config:/usr/share/elasticsearch/config
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - elastic
 
-  # logstash:
-  #   build:
-  #     context: ./logstash
-  #     dockerfile: logstash.Dockerfile
-  #   container_name: logstash_container
-  #   volumes:
-  #     - ./logstash/pipeline:/usr/share/logstash/pipeline
-  #   ports:
-  #     - "5044:5044"
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #     mongodb:
-  #       condition: service_healthy
-  #   networks:
-  #     - elastic
+  logstash:
+    build:
+      context: ./logstash
+      dockerfile: logstash.Dockerfile
+    container_name: logstash_container
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+    env_file:
+      - .env
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
 
-  # mongo-express:
-  #   image: mongo-express
-  #   container_name: mongo_express
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
     
-  #   build:
-  #     context: ./mongodb
-  #     dockerfile: mongo-express.Dockerfile
-  #   volumes:
-  #     - ./mongodb:/mongodb
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     # - ME_CONFIG_MONGODB_SERVER=mongodb_container
-  #     - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
-  #   depends_on:
-  #     mongodb:
-  #       condition: service_healthy
-  #   networks:
-  #     - elastic
-  #   command: ["sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh"]
+    build:
+      context: ./mongodb
+      dockerfile: mongo-express.Dockerfile
+    volumes:
+      - ./mongodb:/mongodb
+    ports:
+      - "8081:8081"
+    environment:
+      # - ME_CONFIG_MONGODB_SERVER=mongodb_container
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
+    command: ["sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh"]
 
 volumes:
   mongo_data:

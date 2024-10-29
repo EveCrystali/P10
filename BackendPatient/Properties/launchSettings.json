@@ -8,7 +8,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:7200;"
+      "applicationUrl": "http://localhost:7200;",
+      "sqlDebugging": true
     },
     "Docker": {
       "commandName": "Docker",
@@ -18,5 +19,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
+  },
+  "iisSettings": {
+    "windowsAuthentication": true,
+    "anonymousAuthentication": true
   }
 }

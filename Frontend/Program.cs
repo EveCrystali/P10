@@ -48,11 +48,6 @@ builder.Services.AddScoped<PatientService>();
 // Add Cors configuration
 builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(7000); // Indiquez ici le port 7000 pour correspondre à votre `docker-compose`
-});
-
 builder.WebHost.UseUrls("http://*:7000");
 
 WebApplication app = builder.Build();
@@ -65,7 +60,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

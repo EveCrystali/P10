@@ -1,31 +1,5 @@
 services:
 
-  # sqlserver_auth:
-  #   image: mcr.microsoft.com/mssql/server:2019-latest
-  #   container_name: sqlserver_auth
-  #   ports:
-  #     - "1433:1433"
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD="YourStrongPassword1!"
-  #   networks:
-  #     - elastic
-  #   volumes:
-  #     - sqlserver_auth_data:/var/opt/mssql
-
-  # sqlserver_patients:
-  #   image: mcr.microsoft.com/mssql/server:2019-latest
-  #   container_name: sqlserver_patients
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD="YourStrongPassword1!"
-  #   ports:
-  #     - "1434:1433"
-  #   networks:
-  #     - elastic
-  #   volumes:
-  #     - sqlserver_patients_data:/var/opt/mssql
-
   frontend:
     image: frontend-image
     container_name: frontend
@@ -42,9 +16,8 @@ services:
       - Configuration=Docker
       - ASPNETCORE_URLS=http://*:7000
     depends_on:
-      # - mongodb
       - backendpatient
-      # - apigateway
+      - apigateway
     networks:
       - elastic
 
@@ -76,8 +49,6 @@ services:
       - Configuration=Docker
       - ASPNETCORE_URLS=http://*:7201
       - ConnectionStrings__DockerInternal=Server=host.docker.internal,1433;Database=AuthServiceDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
-    # depends_on:
-    #   - sqlserver_auth
     volumes:
       - data_protection_keys:/root/.aspnet/DataProtection-Keys
     ports:
@@ -105,7 +76,6 @@ services:
     networks:
       - elastic
     
-
   backendnote:
     container_name: backendnote
     build:
@@ -222,7 +192,6 @@ services:
     ports:
       - "8081:8081"
     environment:
-      # - ME_CONFIG_MONGODB_SERVER=mongodb_container
       - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
     depends_on:
       mongodb:
@@ -240,9 +209,6 @@ volumes:
     driver: local
   shared-output:
   data_protection_keys:
-  # sqlserver_auth_data:
-  # sqlserver_patients_data:
-
 
 networks:
   elastic:

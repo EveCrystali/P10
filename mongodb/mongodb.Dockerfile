@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y wget \
     && wget https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-linux-amd64-v0.6.1.tar.gz \
     && tar -C /usr/local/bin -xzf dockerize-linux-amd64-v0.6.1.tar.gz
 
-
 # Crée un répertoire pour stocker les fichiers de sauvegarde
 RUN mkdir -p /backup
 

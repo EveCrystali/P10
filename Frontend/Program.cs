@@ -46,7 +46,9 @@ builder.Services.AddHttpClient<HomeController>(client =>
 builder.Services.AddScoped<PatientService>();
 
 // Add Cors configuration
-builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
+builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
+
+builder.WebHost.UseUrls("http://*:7000");
 
 WebApplication app = builder.Build();
 
@@ -58,7 +60,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

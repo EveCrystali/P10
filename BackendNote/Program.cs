@@ -12,7 +12,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Add Cors configuration
-builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
+builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
 builder.Services.AddControllers()
     .AddXmlDataContractSerializerFormatters()
@@ -35,6 +35,8 @@ builder.Services.Configure<NoteDatabaseSettings>(
 
 builder.Services.AddSingleton<NotesService>();
 
+builder.WebHost.UseUrls("http://*:7202");
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,8 +45,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.UseRouting();
 

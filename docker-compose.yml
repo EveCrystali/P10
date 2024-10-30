@@ -1,4 +1,117 @@
 services:
+
+  frontend:
+    image: frontend-image
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: Frontend/frontend.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "7000:7000"
+    volumes:
+      - shared-output:/app/shared 
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7000
+    depends_on:
+      - backendpatient
+      - apigateway
+    networks:
+      - elastic
+
+  apigateway:
+    container_name: apigateway
+    build:
+      context: .
+      dockerfile: ApiGateway/apigateway.Dockerfile
+    env_file:
+      - .env
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:5000
+    ports:
+      - "5000:5000"
+    networks:
+      - elastic
+
+  auth:
+    container_name: auth
+    build:
+      context: .
+      dockerfile: Auth/auth.Dockerfile
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7201
+      - ConnectionStrings__DockerInternal=Server=host.docker.internal,1433;Database=AuthServiceDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
+    volumes:
+      - data_protection_keys:/root/.aspnet/DataProtection-Keys
+    ports:
+      - "7201:7201"
+    networks:
+      - elastic
+
+  backendpatient:
+    container_name: backendpatient
+    build:
+      context: .
+      dockerfile: BackendPatient/backendpatient.Dockerfile
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7200
+      - ConnectionStrings__DockerInternal=Server=host.docker.internal,1433;Database=PatientDb;User Id=${DB_USER};Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
+    volumes:
+      - data_protection_keys:/root/.aspnet/DataProtection-Keys
+    ports:
+      - "7200:7200"
+    networks:
+      - elastic
+    
+  backendnote:
+    container_name: backendnote
+    build:
+      context: .
+      dockerfile: BackendNote/backendnote.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7202
+    ports:
+      - "7202:7202"
+    networks:
+      - elastic
+
+  backenddiabetesriskprediction:
+    container_name: backenddiabetesriskprediction
+    build:
+      context: .
+      dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      - restore
+      - elasticsearch
+      - mongodb
+    environment:
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7204
+    ports:
+      - "7204:7204"
+    networks:
+      - elastic
+
   mongodb:
     container_name: mongodb_container
     image: mongo:latest
@@ -79,7 +192,6 @@ services:
     ports:
       - "8081:8081"
     environment:
-      # - ME_CONFIG_MONGODB_SERVER=mongodb_container
       - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
     depends_on:
       mongodb:
@@ -95,7 +207,8 @@ volumes:
     driver: local
   elasticsearch_data:
     driver: local
-
+  shared-output:
+  data_protection_keys:
 
 networks:
   elastic:

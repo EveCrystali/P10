@@ -12,7 +12,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Add Cors configuration
-builder.AddCorsConfiguration("AllowApiGateway", "https://localhost:5000");
+builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
 builder.Services.AddControllers()
     .AddXmlDataContractSerializerFormatters()
@@ -32,6 +32,8 @@ builder.Services.AddAuthorizationPolicies();
 
 builder.Services.AddSingleton<ElasticsearchService>();
 builder.Services.AddSingleton<DiabetesRiskNotePredictionService>(); 
+
+builder.WebHost.UseUrls("http://*:7204");
 
 WebApplication app = builder.Build();
 

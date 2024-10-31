@@ -1,6 +1,6 @@
 namespace Frontend.Models;
 
-public class PatientNotesViewModel
+public class PatientViewModel
 {
     public required int PatientId { get; set; }
 
@@ -16,5 +16,7 @@ public class PatientNotesViewModel
 
     public string? PhoneNumber { get; set; }
 
-    public virtual List<Note>? Notes { get; set; }
+    public virtual List<Note>? Notes { get; set; } = [];
+
+    public virtual DiabetesRiskPrediction? DiabetesRiskPrediction { get; set; }
 }

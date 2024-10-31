@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-
 namespace SharedSwaggerLibrary;
 
 public static class SwaggerConfiguration
@@ -17,23 +16,23 @@ public static class SwaggerConfiguration
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
-                Description = "Please input 'Bearer' followed by a space and the JWT token in the header",
+                Description = "Please input 'Bearer' followed by a space and the JWT token in the header"
             });
 
             // Swagger security configuration
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
+                {
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        Reference = new OpenApiReference
                         {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
             });
         });
     }

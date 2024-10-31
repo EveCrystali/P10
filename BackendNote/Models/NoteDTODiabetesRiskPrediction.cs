@@ -1,5 +1,3 @@
-using System;
-
 namespace BackendNote.Models;
 
 public class NoteDtoDiabetesRiskPrediction
@@ -11,5 +9,4 @@ public class NoteDtoDiabetesRiskPrediction
     public string? Title { get; set; }
 
     public string? Body { get; set; }
-
 }

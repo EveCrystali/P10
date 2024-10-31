@@ -1,8 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-
-@model IEnumerable<Frontend.Models.Patient>
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<Patient>
 
 <div class="text-center">
     <h1 class="display-4">Accueil Médecin</h1>
@@ -14,31 +14,34 @@
     </div>
 }
 <div class="table-header d-flex justify-content-between">
-  <h4>Patient</h4>
-  <a asp-controller="Patients" method="get" id="newPatient" asp-action="Create"><button class="btn btn-primary">Créer un nouveau patient</button></a>
+    <h4>Patient</h4>
+    <a asp-controller="Patients" method="get" id="newPatient" asp-action="Create">
+        <button class="btn btn-primary">Créer un nouveau patient</button>
+    </a>
 </div>
-<hr />
+<hr/>
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DateOfBirth)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.FirstName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.LastName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DateOfBirth)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+    @foreach (Patient item in Model)
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
-                
+
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastName)
@@ -50,20 +53,30 @@
             <td>
                 @try
                 {
-                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id"><button class="btn btn-secondary">Editer</button></a>
-                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id"><button class="btn btn-secondary">Details</button></a>
-                    <a asp-controller="Patients" asp-action="Delete" asp-route-id="@item.Id"><button class="btn btn-secondary">Supprimer</button></a>
-                    <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id"><button class="btn btn-secondary">Notes du patient</button></a>
-                   <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@item.Id" asp-route-lastName="@item.LastName" asp-route-firstName="@item.FirstName"><button class="btn btn-secondary">Créer une note</button></a>
+                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id">
+                        <button class="btn btn-secondary">Editer</button>
+                    </a>
+                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id">
+                        <button class="btn btn-secondary">Details</button>
+                    </a>
+                    <a asp-controller="Patients" asp-action="Delete" asp-route-id="@item.Id">
+                        <button class="btn btn-secondary">Supprimer</button>
+                    </a>
+                    <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id">
+                        <button class="btn btn-secondary">Notes du patient</button>
+                    </a>
+                    <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@item.Id"
+                       asp-route-lastName="@item.LastName" asp-route-firstName="@item.FirstName">
+                        <button class="btn btn-secondary">Créer une note</button>
+                    </a>
                     Console.WriteLine($"Patient requested is {item.Id}");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Error in Patients/Index.cshtml: {ex.Message}");
                 }
             </td>
         </tr>
-}
+    }
     </tbody>
 </table>
-

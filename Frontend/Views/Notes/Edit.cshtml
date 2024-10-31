@@ -1,5 +1,5 @@
-﻿@using Frontend.Models
-@model Frontend.Models.Note
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Note
 
 @{
     Layout = "_Layout";
@@ -9,7 +9,7 @@
 
 <html lang="fr" xml:lang="fr">
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Edit</title>
 </head>
 
@@ -22,34 +22,33 @@
 
 <body>
 
-    <h1>Note</h1>
-    <hr />
-    <h2>Edition d'une note</h2>
-    <div class="row">
-        <div class="col-md-4">
-            <form id="noteForm" class="form-control" method="POST" asp-controller="Notes" asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Title" class="control-label">Titre</label>
-                    <input class="form-control" asp-for="Title" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Body" class="control-label">Contenu</label>
-                    <textarea asp-for="Body" class="form-control"></textarea>
-                    <span asp-validation-for="Body" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Enregistrer" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
+<h1>Note</h1>
+<hr/>
+<h2>Edition d'une note</h2>
+<div class="row">
+    <div class="col-md-4">
+        <form id="noteForm" class="form-control" method="POST" asp-controller="Notes" asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label">Titre</label>
+                <input class="form-control" asp-for="Title"/>
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Body" class="control-label">Contenu</label>
+                <textarea asp-for="Body" class="form-control"></textarea>
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Enregistrer" class="btn btn-primary"/>
+            </div>
+        </form>
     </div>
-    <div>
-        <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
-    </div>
+</div>
+<div>
+    <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
+</div>
 
 </body>
 
 </html>
-

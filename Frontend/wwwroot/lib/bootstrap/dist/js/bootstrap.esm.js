@@ -181,7 +181,8 @@ const findShadowRoot = element => {
     return findShadowRoot(element.parentNode);
 };
 
-const noop = () => { };
+const noop = () => {
+};
 /**
  * Trick to restart an element's animation
  *
@@ -263,8 +264,8 @@ const executeAfterTransition = (callback, transitionElement, waitForTransition =
     let called = false;
 
     const handler = ({
-        target
-    }) => {
+                         target
+                     }) => {
         if (target !== transitionElement) {
             return;
         }
@@ -332,6 +333,7 @@ const customEvents = {
 };
 const customEventsRegex = /^(mouseenter|mouseleave)/i;
 const nativeEvents = new Set(['click', 'dblclick', 'mouseup', 'mousedown', 'contextmenu', 'mousewheel', 'DOMMouseScroll', 'mouseover', 'mouseout', 'mousemove', 'selectstart', 'selectend', 'keydown', 'keypress', 'keyup', 'orientationchange', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'pointerdown', 'pointermove', 'pointerup', 'pointerleave', 'pointercancel', 'gesturestart', 'gesturechange', 'gestureend', 'focus', 'blur', 'change', 'reset', 'select', 'submit', 'focusin', 'focusout', 'load', 'unload', 'beforeunload', 'resize', 'move', 'DOMContentLoaded', 'readystatechange', 'error', 'abort', 'scroll']);
+
 /**
  * ------------------------------------------------------------------------
  * Private methods
@@ -671,27 +673,6 @@ class BaseComponent {
         Data.set(this._element, this.constructor.DATA_KEY, this);
     }
 
-    dispose() {
-        Data.remove(this._element, this.constructor.DATA_KEY);
-        EventHandler.off(this._element, this.constructor.EVENT_KEY);
-        Object.getOwnPropertyNames(this).forEach(propertyName => {
-            this[propertyName] = null;
-        });
-    }
-
-    _queueCallback(callback, element, isAnimated = true) {
-        executeAfterTransition(callback, element, isAnimated);
-    }
-    /** Static */
-
-    static getInstance(element) {
-        return Data.get(getElement(element), this.DATA_KEY);
-    }
-
-    static getOrCreateInstance(element, config = {}) {
-        return this.getInstance(element) || new this(element, typeof config === 'object' ? config : null);
-    }
-
     static get VERSION() {
         return VERSION;
     }
@@ -706,6 +687,28 @@ class BaseComponent {
 
     static get EVENT_KEY() {
         return `.${this.DATA_KEY}`;
+    }
+
+    /** Static */
+
+    static getInstance(element) {
+        return Data.get(getElement(element), this.DATA_KEY);
+    }
+
+    static getOrCreateInstance(element, config = {}) {
+        return this.getInstance(element) || new this(element, typeof config === 'object' ? config : null);
+    }
+
+    dispose() {
+        Data.remove(this._element, this.constructor.DATA_KEY);
+        EventHandler.off(this._element, this.constructor.EVENT_KEY);
+        Object.getOwnPropertyNames(this).forEach(propertyName => {
+            this[propertyName] = null;
+        });
+    }
+
+    _queueCallback(callback, element, isAnimated = true) {
+        executeAfterTransition(callback, element, isAnimated);
     }
 }
 
@@ -754,6 +757,7 @@ const EVENT_CLOSE = `close${EVENT_KEY$c}`;
 const EVENT_CLOSED = `closed${EVENT_KEY$c}`;
 const CLASS_NAME_FADE$5 = 'fade';
 const CLASS_NAME_SHOW$8 = 'show';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -765,6 +769,22 @@ class Alert extends BaseComponent {
     static get NAME() {
         return NAME$d;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Alert.getOrCreateInstance(this);
+
+            if (typeof config !== 'string') {
+                return;
+            }
+
+            if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+                throw new TypeError(`No method named "${config}"`);
+            }
+
+            data[config](this);
+        });
+    }
 
     close() {
         const closeEvent = EventHandler.trigger(this._element, EVENT_CLOSE);
@@ -786,23 +806,8 @@ class Alert extends BaseComponent {
         EventHandler.trigger(this._element, EVENT_CLOSED);
         this.dispose();
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Alert.getOrCreateInstance(this);
-
-            if (typeof config !== 'string') {
-                return;
-            }
-
-            if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
-                throw new TypeError(`No method named "${config}"`);
-            }
-
-            data[config](this);
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -838,6 +843,7 @@ const DATA_API_KEY$7 = '.data-api';
 const CLASS_NAME_ACTIVE$3 = 'active';
 const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle="button"]';
 const EVENT_CLICK_DATA_API$6 = `click${EVENT_KEY$b}${DATA_API_KEY$7}`;
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -850,11 +856,6 @@ class Button extends BaseComponent {
         return NAME$c;
     } // Public
 
-    toggle() {
-        // Toggle class and sync the `aria-pressed` attribute with the return value of the `.toggle()` method
-        this._element.setAttribute('aria-pressed', this._element.classList.toggle(CLASS_NAME_ACTIVE$3));
-    } // Static
-
     static jQueryInterface(config) {
         return this.each(function () {
             const data = Button.getOrCreateInstance(this);
@@ -864,7 +865,13 @@ class Button extends BaseComponent {
             }
         });
     }
+
+    toggle() {
+        // Toggle class and sync the `aria-pressed` attribute with the return value of the `.toggle()` method
+        this._element.setAttribute('aria-pressed', this._element.classList.toggle(CLASS_NAME_ACTIVE$3));
+    } // Static
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -1105,6 +1112,7 @@ const SELECTOR_DATA_SLIDE = '[data-bs-slide], [data-bs-slide-to]';
 const SELECTOR_DATA_RIDE = '[data-bs-ride="carousel"]';
 const POINTER_TYPE_TOUCH = 'touch';
 const POINTER_TYPE_PEN = 'pen';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -1137,6 +1145,67 @@ class Carousel extends BaseComponent {
     static get NAME() {
         return NAME$b;
     } // Public
+
+    static carouselInterface(element, config) {
+        const data = Carousel.getOrCreateInstance(element, config);
+        let {
+            _config
+        } = data;
+
+        if (typeof config === 'object') {
+            _config = {
+                ..._config,
+                ...config
+            };
+        }
+
+        const action = typeof config === 'string' ? config : _config.slide;
+
+        if (typeof config === 'number') {
+            data.to(config);
+        } else if (typeof action === 'string') {
+            if (typeof data[action] === 'undefined') {
+                throw new TypeError(`No method named "${action}"`);
+            }
+
+            data[action]();
+        } else if (_config.interval && _config.ride) {
+            data.pause();
+            data.cycle();
+        }
+    }
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            Carousel.carouselInterface(this, config);
+        });
+    }
+
+    static dataApiClickHandler(event) {
+        const target = getElementFromSelector(this);
+
+        if (!target || !target.classList.contains(CLASS_NAME_CAROUSEL)) {
+            return;
+        }
+
+        const config = {
+            ...Manipulator.getDataAttributes(target),
+            ...Manipulator.getDataAttributes(this)
+        };
+        const slideIndex = this.getAttribute('data-bs-slide-to');
+
+        if (slideIndex) {
+            config.interval = false;
+        }
+
+        Carousel.carouselInterface(target, config);
+
+        if (slideIndex) {
+            Carousel.getInstance(target).to(slideIndex);
+        }
+
+        event.preventDefault();
+    }
 
     next() {
         this._slide(ORDER_NEXT);
@@ -1485,68 +1554,8 @@ class Carousel extends BaseComponent {
 
         return order === ORDER_PREV ? DIRECTION_RIGHT : DIRECTION_LEFT;
     } // Static
-
-    static carouselInterface(element, config) {
-        const data = Carousel.getOrCreateInstance(element, config);
-        let {
-            _config
-        } = data;
-
-        if (typeof config === 'object') {
-            _config = {
-                ..._config,
-                ...config
-            };
-        }
-
-        const action = typeof config === 'string' ? config : _config.slide;
-
-        if (typeof config === 'number') {
-            data.to(config);
-        } else if (typeof action === 'string') {
-            if (typeof data[action] === 'undefined') {
-                throw new TypeError(`No method named "${action}"`);
-            }
-
-            data[action]();
-        } else if (_config.interval && _config.ride) {
-            data.pause();
-            data.cycle();
-        }
-    }
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            Carousel.carouselInterface(this, config);
-        });
-    }
-
-    static dataApiClickHandler(event) {
-        const target = getElementFromSelector(this);
-
-        if (!target || !target.classList.contains(CLASS_NAME_CAROUSEL)) {
-            return;
-        }
-
-        const config = {
-            ...Manipulator.getDataAttributes(target),
-            ...Manipulator.getDataAttributes(this)
-        };
-        const slideIndex = this.getAttribute('data-bs-slide-to');
-
-        if (slideIndex) {
-            config.interval = false;
-        }
-
-        Carousel.carouselInterface(target, config);
-
-        if (slideIndex) {
-            Carousel.getInstance(target).to(slideIndex);
-        }
-
-        event.preventDefault();
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -1608,6 +1617,7 @@ const WIDTH = 'width';
 const HEIGHT = 'height';
 const SELECTOR_ACTIVES = '.show, .collapsing';
 const SELECTOR_DATA_TOGGLE$4 = '[data-bs-toggle="collapse"]';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -1652,6 +1662,26 @@ class Collapse extends BaseComponent {
     static get NAME() {
         return NAME$a;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const _config = {};
+
+            if (typeof config === 'string' && /show|hide/.test(config)) {
+                _config.toggle = false;
+            }
+
+            const data = Collapse.getOrCreateInstance(this, _config);
+
+            if (typeof config === 'string') {
+                if (typeof data[config] === 'undefined') {
+                    throw new TypeError(`No method named "${config}"`);
+                }
+
+                data[config]();
+            }
+        });
+    }
 
     toggle() {
         if (this._isShown()) {
@@ -1833,27 +1863,8 @@ class Collapse extends BaseComponent {
             elem.setAttribute('aria-expanded', isOpen);
         });
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const _config = {};
-
-            if (typeof config === 'string' && /show|hide/.test(config)) {
-                _config.toggle = false;
-            }
-
-            const data = Collapse.getOrCreateInstance(this, _config);
-
-            if (typeof config === 'string') {
-                if (typeof data[config] === 'undefined') {
-                    throw new TypeError(`No method named "${config}"`);
-                }
-
-                data[config]();
-            }
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -1945,6 +1956,7 @@ const DefaultType$8 = {
     popperConfig: '(null|object|function)',
     autoClose: '(boolean|string)'
 };
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -1971,6 +1983,117 @@ class Dropdown extends BaseComponent {
     static get NAME() {
         return NAME$9;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Dropdown.getOrCreateInstance(this, config);
+
+            if (typeof config !== 'string') {
+                return;
+            }
+
+            if (typeof data[config] === 'undefined') {
+                throw new TypeError(`No method named "${config}"`);
+            }
+
+            data[config]();
+        });
+    }
+
+    static clearMenus(event) {
+        if (event && (event.button === RIGHT_MOUSE_BUTTON || event.type === 'keyup' && event.key !== TAB_KEY$1)) {
+            return;
+        }
+
+        const toggles = SelectorEngine.find(SELECTOR_DATA_TOGGLE$3);
+
+        for (let i = 0, len = toggles.length; i < len; i++) {
+            const context = Dropdown.getInstance(toggles[i]);
+
+            if (!context || context._config.autoClose === false) {
+                continue;
+            }
+
+            if (!context._isShown()) {
+                continue;
+            }
+
+            const relatedTarget = {
+                relatedTarget: context._element
+            };
+
+            if (event) {
+                const composedPath = event.composedPath();
+                const isMenuTarget = composedPath.includes(context._menu);
+
+                if (composedPath.includes(context._element) || context._config.autoClose === 'inside' && !isMenuTarget || context._config.autoClose === 'outside' && isMenuTarget) {
+                    continue;
+                } // Tab navigation through the dropdown menu or events from contained inputs shouldn't close the menu
+
+                if (context._menu.contains(event.target) && (event.type === 'keyup' && event.key === TAB_KEY$1 || /input|select|option|textarea|form/i.test(event.target.tagName))) {
+                    continue;
+                }
+
+                if (event.type === 'click') {
+                    relatedTarget.clickEvent = event;
+                }
+            }
+
+            context._completeHide(relatedTarget);
+        }
+    }
+
+    static getParentFromElement(element) {
+        return getElementFromSelector(element) || element.parentNode;
+    }
+
+    static dataApiKeydownHandler(event) {
+        // If not input/textarea:
+        //  - And not a key in REGEXP_KEYDOWN => not a dropdown command
+        // If input/textarea:
+        //  - If space key => not a dropdown command
+        //  - If key is other than escape
+        //    - If key is not up or down => not a dropdown command
+        //    - If trigger inside the menu => not a dropdown command
+        if (/input|textarea/i.test(event.target.tagName) ? event.key === SPACE_KEY || event.key !== ESCAPE_KEY$2 && (event.key !== ARROW_DOWN_KEY && event.key !== ARROW_UP_KEY || event.target.closest(SELECTOR_MENU)) : !REGEXP_KEYDOWN.test(event.key)) {
+            return;
+        }
+
+        const isActive = this.classList.contains(CLASS_NAME_SHOW$6);
+
+        if (!isActive && event.key === ESCAPE_KEY$2) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (isDisabled(this)) {
+            return;
+        }
+
+        const getToggleButton = this.matches(SELECTOR_DATA_TOGGLE$3) ? this : SelectorEngine.prev(this, SELECTOR_DATA_TOGGLE$3)[0];
+        const instance = Dropdown.getOrCreateInstance(getToggleButton);
+
+        if (event.key === ESCAPE_KEY$2) {
+            instance.hide();
+            return;
+        }
+
+        if (event.key === ARROW_UP_KEY || event.key === ARROW_DOWN_KEY) {
+            if (!isActive) {
+                instance.show();
+            }
+
+            instance._selectMenuItem(event);
+
+            return;
+        }
+
+        if (!isActive || event.key === SPACE_KEY) {
+            Dropdown.clearMenus();
+        }
+    }
 
     toggle() {
         return this._isShown() ? this.hide() : this.show();
@@ -2189,9 +2312,9 @@ class Dropdown extends BaseComponent {
     }
 
     _selectMenuItem({
-        key,
-        target
-    }) {
+                        key,
+                        target
+                    }) {
         const items = SelectorEngine.find(SELECTOR_VISIBLE_ITEMS, this._menu).filter(isVisible);
 
         if (!items.length) {
@@ -2201,118 +2324,8 @@ class Dropdown extends BaseComponent {
 
         getNextActiveElement(items, target, key === ARROW_DOWN_KEY, !items.includes(target)).focus();
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Dropdown.getOrCreateInstance(this, config);
-
-            if (typeof config !== 'string') {
-                return;
-            }
-
-            if (typeof data[config] === 'undefined') {
-                throw new TypeError(`No method named "${config}"`);
-            }
-
-            data[config]();
-        });
-    }
-
-    static clearMenus(event) {
-        if (event && (event.button === RIGHT_MOUSE_BUTTON || event.type === 'keyup' && event.key !== TAB_KEY$1)) {
-            return;
-        }
-
-        const toggles = SelectorEngine.find(SELECTOR_DATA_TOGGLE$3);
-
-        for (let i = 0, len = toggles.length; i < len; i++) {
-            const context = Dropdown.getInstance(toggles[i]);
-
-            if (!context || context._config.autoClose === false) {
-                continue;
-            }
-
-            if (!context._isShown()) {
-                continue;
-            }
-
-            const relatedTarget = {
-                relatedTarget: context._element
-            };
-
-            if (event) {
-                const composedPath = event.composedPath();
-                const isMenuTarget = composedPath.includes(context._menu);
-
-                if (composedPath.includes(context._element) || context._config.autoClose === 'inside' && !isMenuTarget || context._config.autoClose === 'outside' && isMenuTarget) {
-                    continue;
-                } // Tab navigation through the dropdown menu or events from contained inputs shouldn't close the menu
-
-                if (context._menu.contains(event.target) && (event.type === 'keyup' && event.key === TAB_KEY$1 || /input|select|option|textarea|form/i.test(event.target.tagName))) {
-                    continue;
-                }
-
-                if (event.type === 'click') {
-                    relatedTarget.clickEvent = event;
-                }
-            }
-
-            context._completeHide(relatedTarget);
-        }
-    }
-
-    static getParentFromElement(element) {
-        return getElementFromSelector(element) || element.parentNode;
-    }
-
-    static dataApiKeydownHandler(event) {
-        // If not input/textarea:
-        //  - And not a key in REGEXP_KEYDOWN => not a dropdown command
-        // If input/textarea:
-        //  - If space key => not a dropdown command
-        //  - If key is other than escape
-        //    - If key is not up or down => not a dropdown command
-        //    - If trigger inside the menu => not a dropdown command
-        if (/input|textarea/i.test(event.target.tagName) ? event.key === SPACE_KEY || event.key !== ESCAPE_KEY$2 && (event.key !== ARROW_DOWN_KEY && event.key !== ARROW_UP_KEY || event.target.closest(SELECTOR_MENU)) : !REGEXP_KEYDOWN.test(event.key)) {
-            return;
-        }
-
-        const isActive = this.classList.contains(CLASS_NAME_SHOW$6);
-
-        if (!isActive && event.key === ESCAPE_KEY$2) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (isDisabled(this)) {
-            return;
-        }
-
-        const getToggleButton = this.matches(SELECTOR_DATA_TOGGLE$3) ? this : SelectorEngine.prev(this, SELECTOR_DATA_TOGGLE$3)[0];
-        const instance = Dropdown.getOrCreateInstance(getToggleButton);
-
-        if (event.key === ESCAPE_KEY$2) {
-            instance.hide();
-            return;
-        }
-
-        if (event.key === ARROW_UP_KEY || event.key === ARROW_DOWN_KEY) {
-            if (!isActive) {
-                instance.show();
-            }
-
-            instance._selectMenuItem(event);
-
-            return;
-        }
-
-        if (!isActive || event.key === SPACE_KEY) {
-            Dropdown.clearMenus();
-        }
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -2707,6 +2720,7 @@ const CLASS_NAME_STATIC = 'modal-static';
 const SELECTOR_DIALOG = '.modal-dialog';
 const SELECTOR_MODAL_BODY = '.modal-body';
 const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="modal"]';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -2733,6 +2747,22 @@ class Modal extends BaseComponent {
     static get NAME() {
         return NAME$6;
     } // Public
+
+    static jQueryInterface(config, relatedTarget) {
+        return this.each(function () {
+            const data = Modal.getOrCreateInstance(this, config);
+
+            if (typeof config !== 'string') {
+                return;
+            }
+
+            if (typeof data[config] === 'undefined') {
+                throw new TypeError(`No method named "${config}"`);
+            }
+
+            data[config](relatedTarget);
+        });
+    }
 
     toggle(relatedTarget) {
         return this._isShown ? this.hide() : this.show(relatedTarget);
@@ -2963,6 +2993,9 @@ class Modal extends BaseComponent {
         return this._element.classList.contains(CLASS_NAME_FADE$3);
     }
 
+    // the following methods are used to handle overflowing modals
+    // ----------------------------------------------------------------------
+
     _triggerBackdropTransition() {
         const hideEvent = EventHandler.trigger(this._element, EVENT_HIDE_PREVENTED);
 
@@ -2999,8 +3032,6 @@ class Modal extends BaseComponent {
 
         this._element.focus();
     } // ----------------------------------------------------------------------
-    // the following methods are used to handle overflowing modals
-    // ----------------------------------------------------------------------
 
     _adjustDialog() {
         const isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
@@ -3022,23 +3053,8 @@ class Modal extends BaseComponent {
         this._element.style.paddingLeft = '';
         this._element.style.paddingRight = '';
     } // Static
-
-    static jQueryInterface(config, relatedTarget) {
-        return this.each(function () {
-            const data = Modal.getOrCreateInstance(this, config);
-
-            if (typeof config !== 'string') {
-                return;
-            }
-
-            if (typeof data[config] === 'undefined') {
-                throw new TypeError(`No method named "${config}"`);
-            }
-
-            data[config](relatedTarget);
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -3115,6 +3131,7 @@ const EVENT_HIDDEN$2 = `hidden${EVENT_KEY$5}`;
 const EVENT_CLICK_DATA_API$1 = `click${EVENT_KEY$5}${DATA_API_KEY$2}`;
 const EVENT_KEYDOWN_DISMISS = `keydown.dismiss${EVENT_KEY$5}`;
 const SELECTOR_DATA_TOGGLE$1 = '[data-bs-toggle="offcanvas"]';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -3139,6 +3156,22 @@ class Offcanvas extends BaseComponent {
     static get Default() {
         return Default$4;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Offcanvas.getOrCreateInstance(this, config);
+
+            if (typeof config !== 'string') {
+                return;
+            }
+
+            if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
+                throw new TypeError(`No method named "${config}"`);
+            }
+
+            data[config](this);
+        });
+    }
 
     toggle(relatedTarget) {
         return this._isShown ? this.hide() : this.show(relatedTarget);
@@ -3268,23 +3301,8 @@ class Offcanvas extends BaseComponent {
             }
         });
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Offcanvas.getOrCreateInstance(this, config);
-
-            if (typeof config !== 'string') {
-                return;
-            }
-
-            if (data[config] === undefined || config.startsWith('_') || config === 'constructor') {
-                throw new TypeError(`No method named "${config}"`);
-            }
-
-            data[config](this);
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -3406,6 +3424,7 @@ const DefaultAllowlist = {
     u: [],
     ul: []
 };
+
 function sanitizeHtml(unsafeHtml, allowList, sanitizeFn) {
     if (!unsafeHtml.length) {
         return unsafeHtml;
@@ -3527,6 +3546,7 @@ const TRIGGER_HOVER = 'hover';
 const TRIGGER_FOCUS = 'focus';
 const TRIGGER_CLICK = 'click';
 const TRIGGER_MANUAL = 'manual';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -3568,6 +3588,20 @@ class Tooltip extends BaseComponent {
     static get DefaultType() {
         return DefaultType$3;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Tooltip.getOrCreateInstance(this, config);
+
+            if (typeof config === 'string') {
+                if (typeof data[config] === 'undefined') {
+                    throw new TypeError(`No method named "${config}"`);
+                }
+
+                data[config]();
+            }
+        });
+    }
 
     enable() {
         this._isEnabled = true;
@@ -4109,21 +4143,8 @@ class Tooltip extends BaseComponent {
 
         this._addAttachmentClass(this._getAttachment(state.placement));
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Tooltip.getOrCreateInstance(this, config);
-
-            if (typeof config === 'string') {
-                if (typeof data[config] === 'undefined') {
-                    throw new TypeError(`No method named "${config}"`);
-                }
-
-                data[config]();
-            }
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * jQuery
@@ -4175,6 +4196,7 @@ const Event$1 = {
 };
 const SELECTOR_TITLE = '.popover-header';
 const SELECTOR_CONTENT = '.popover-body';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -4199,6 +4221,20 @@ class Popover extends Tooltip {
         return DefaultType$2;
     } // Overrides
 
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Popover.getOrCreateInstance(this, config);
+
+            if (typeof config === 'string') {
+                if (typeof data[config] === 'undefined') {
+                    throw new TypeError(`No method named "${config}"`);
+                }
+
+                data[config]();
+            }
+        });
+    }
+
     isWithContent() {
         return this.getTitle() || this._getContent();
     }
@@ -4216,21 +4252,8 @@ class Popover extends Tooltip {
     _getBasicClassPrefix() {
         return CLASS_PREFIX;
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Popover.getOrCreateInstance(this, config);
-
-            if (typeof config === 'string') {
-                if (typeof data[config] === 'undefined') {
-                    throw new TypeError(`No method named "${config}"`);
-                }
-
-                data[config]();
-            }
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * jQuery
@@ -4281,6 +4304,7 @@ const SELECTOR_DROPDOWN$1 = '.dropdown';
 const SELECTOR_DROPDOWN_TOGGLE$1 = '.dropdown-toggle';
 const METHOD_OFFSET = 'offset';
 const METHOD_POSITION = 'position';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -4309,6 +4333,22 @@ class ScrollSpy extends BaseComponent {
     static get NAME() {
         return NAME$2;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = ScrollSpy.getOrCreateInstance(this, config);
+
+            if (typeof config !== 'string') {
+                return;
+            }
+
+            if (typeof data[config] === 'undefined') {
+                throw new TypeError(`No method named "${config}"`);
+            }
+
+            data[config]();
+        });
+    }
 
     refresh() {
         const autoMethod = this._scrollElement === this._scrollElement.window ? METHOD_OFFSET : METHOD_POSITION;
@@ -4435,23 +4475,8 @@ class ScrollSpy extends BaseComponent {
     _clear() {
         SelectorEngine.find(SELECTOR_LINK_ITEMS, this._config.target).filter(node => node.classList.contains(CLASS_NAME_ACTIVE$1)).forEach(node => node.classList.remove(CLASS_NAME_ACTIVE$1));
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = ScrollSpy.getOrCreateInstance(this, config);
-
-            if (typeof config !== 'string') {
-                return;
-            }
-
-            if (typeof data[config] === 'undefined') {
-                throw new TypeError(`No method named "${config}"`);
-            }
-
-            data[config]();
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -4502,6 +4527,7 @@ const SELECTOR_ACTIVE_UL = ':scope > li > .active';
 const SELECTOR_DATA_TOGGLE = '[data-bs-toggle="tab"], [data-bs-toggle="pill"], [data-bs-toggle="list"]';
 const SELECTOR_DROPDOWN_TOGGLE = '.dropdown-toggle';
 const SELECTOR_DROPDOWN_ACTIVE_CHILD = ':scope > .dropdown-menu .active';
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -4513,6 +4539,20 @@ class Tab extends BaseComponent {
     static get NAME() {
         return NAME$1;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Tab.getOrCreateInstance(this);
+
+            if (typeof config === 'string') {
+                if (typeof data[config] === 'undefined') {
+                    throw new TypeError(`No method named "${config}"`);
+                }
+
+                data[config]();
+            }
+        });
+    }
 
     show() {
         if (this._element.parentNode && this._element.parentNode.nodeType === Node.ELEMENT_NODE && this._element.classList.contains(CLASS_NAME_ACTIVE)) {
@@ -4621,21 +4661,8 @@ class Tab extends BaseComponent {
             callback();
         }
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Tab.getOrCreateInstance(this);
-
-            if (typeof config === 'string') {
-                if (typeof data[config] === 'undefined') {
-                    throw new TypeError(`No method named "${config}"`);
-                }
-
-                data[config]();
-            }
-        });
-    }
 }
+
 /**
  * ------------------------------------------------------------------------
  * Data Api implementation
@@ -4701,6 +4728,7 @@ const Default = {
     autohide: true,
     delay: 5000
 };
+
 /**
  * ------------------------------------------------------------------------
  * Class Definition
@@ -4729,6 +4757,20 @@ class Toast extends BaseComponent {
     static get NAME() {
         return NAME;
     } // Public
+
+    static jQueryInterface(config) {
+        return this.each(function () {
+            const data = Toast.getOrCreateInstance(this, config);
+
+            if (typeof config === 'string') {
+                if (typeof data[config] === 'undefined') {
+                    throw new TypeError(`No method named "${config}"`);
+                }
+
+                data[config](this);
+            }
+        });
+    }
 
     show() {
         const showEvent = EventHandler.trigger(this._element, EVENT_SHOW);
@@ -4861,20 +4903,6 @@ class Toast extends BaseComponent {
         clearTimeout(this._timeout);
         this._timeout = null;
     } // Static
-
-    static jQueryInterface(config) {
-        return this.each(function () {
-            const data = Toast.getOrCreateInstance(this, config);
-
-            if (typeof config === 'string') {
-                if (typeof data[config] === 'undefined') {
-                    throw new TypeError(`No method named "${config}"`);
-                }
-
-                data[config](this);
-            }
-        });
-    }
 }
 
 enableDismissTrigger(Toast);
@@ -4887,5 +4915,5 @@ enableDismissTrigger(Toast);
 
 defineJQueryPlugin(Toast);
 
-export { Alert, Button, Carousel, Collapse, Dropdown, Modal, Offcanvas, Popover, ScrollSpy, Tab, Toast, Tooltip };
+export {Alert, Button, Carousel, Collapse, Dropdown, Modal, Offcanvas, Popover, ScrollSpy, Tab, Toast, Tooltip};
 //# sourceMappingURL=bootstrap.esm.js.map

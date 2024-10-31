@@ -1,4 +1,5 @@
-﻿@model Frontend.Models.Note
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Note
 
 @{
     Layout = "_Layout";
@@ -6,9 +7,9 @@
 
 <!DOCTYPE html>
 
-<html lang="fr" xml:lang="fr">      
+<html lang="fr" xml:lang="fr">
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Details</title>
 </head>
 
@@ -23,46 +24,46 @@
 
 <div>
     <h4>Note</h4>
-    <hr />
+    <hr/>
     <dl class="row">
         @if (Model == null)
         {
             <p>Une erreur s'est produite. Impossible d'afficher le détail de la note.</p>
         }
-        else 
+        else
         {
-            <dt class = "col-sm-2">
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Title)
             </dt>
-            <dd class = "col-sm-10">
+            <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.Title)
             </dd>
-            <dt class = "col-sm-2">
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Body)
             </dt>
-            <dd class = "col-sm-10">
+            <dd class="col-sm-10">
                 @Html.Raw(Model?.Body?.Replace("\n", "<br>"))
             </dd>
-            <dt class = "col-sm-2">
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.CreatedDate)
             </dt>
-            <dd class = "col-sm-10">
+            <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.CreatedDate)
             </dd>
-            <dt class = "col-sm-2">
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.LastUpdatedDate)
             </dt>
-            <dd class = "col-sm-10">
+            <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.LastUpdatedDate)
             </dd>
-            <dt class = "col-sm-2">
+            <dt class="col-sm-2">
                 @Html.DisplayNameFor(model => model.Creator)
             </dt>
-            <dd class = "col-sm-10">
+            <dd class="col-sm-10">
                 @Html.DisplayFor(model => model.Creator)
             </dd>
         }
-    </dl>     
+    </dl>
 </div>
 <div>
     @Html.ActionLink("Editer", "Edit", new { id = Model.Id }) |

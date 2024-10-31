@@ -1,14 +1,13 @@
 using System.Text;
+using BackendDiabetesRiskPrediction.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using BackendDiabetesRiskPrediction.Models;
-
 namespace BackendDiabetesRiskPrediction.Services;
 
 public class ElasticsearchService
 {
+    private readonly string _elasticsearchUrl = "http://elasticsearch:7203";
     private readonly HttpClient _httpClient;
-    private readonly string _elasticsearchUrl = "http://localhost:7203";
 
     public ElasticsearchService()
     {
@@ -29,12 +28,12 @@ public class ElasticsearchService
             }
         };
 
-        var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes/_doc/{note.Id}", content);
+        StringContent content = new(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes/_doc/{note.Id}", content);
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task<int> CountWordsInNotes(string patientId, List<string> wordsToCount)
+    public async Task<int> CountWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
         // FUTURE: Add null check conditions
 
@@ -81,7 +80,7 @@ public class ElasticsearchService
         };
 
         HttpResponseMessage response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes_index/_search",
-                new StringContent(JObject.FromObject(requestBody).ToString(), Encoding.UTF8, "application/json"));
+                                                                   new StringContent(JObject.FromObject(requestBody).ToString(), Encoding.UTF8, "application/json"));
 
         response.EnsureSuccessStatusCode();
 

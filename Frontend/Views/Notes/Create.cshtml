@@ -1,4 +1,5 @@
-﻿@model Frontend.Models.Note
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Note
 
 
 @{
@@ -10,7 +11,7 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Create Note</title>
 </head>
 
@@ -23,39 +24,39 @@
 
 <body>
 
-    <h4>Note</h4>
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" name="PatientId" value="@ViewBag.PatientId" />
-                <div class="form-group">
-                    <label>Patient</label>
-                    <input type="text" value="@ViewBag.FirstName @ViewBag.LastName" class="form-control" readonly />
-                </div>
-                <div class="form-group">
-                    <label asp-for="Title" class="control-label">Title</label>
-                    <input asp-for="Title" class="form-control" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Body" class="control-label">Content</label>
-                    <textarea asp-for="Body" class="form-control"></textarea>
-                    <span asp-validation-for="Body" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                </div>
-            </form>
-        </div>
+<h4>Note</h4>
+<hr/>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
+            <div class="form-group">
+                <label>Patient</label>
+                <input type="text" value="@ViewBag.FirstName @ViewBag.LastName" class="form-control" readonly/>
+            </div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label">Title</label>
+                <input asp-for="Title" class="form-control"/>
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Body" class="control-label">Content</label>
+                <textarea asp-for="Body" class="form-control"></textarea>
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary"/>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div>
-        <a asp-controller="Home" asp-action="Index">Back to List</a>
-    </div>
+<div>
+    <a asp-controller="Home" asp-action="Index">Back to List</a>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 </body>
 

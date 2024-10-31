@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Frontend.Models.Note>
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model IEnumerable<Note>
 
 @{
     ViewData["Title"] = "Notes";
@@ -15,18 +16,18 @@
 
 <table class="table">
     <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Body)
-            </th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Title)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Body)
+        </th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model)
+    @foreach (Note item in Model)
     {
         <tr>
             <td>

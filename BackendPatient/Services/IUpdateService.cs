@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-
 namespace BackendPatient.Services;
 
 public interface IUpdateService<T> where T : class

@@ -1,39 +1,10 @@
 using BackendDiabetesRiskPrediction.Models;
-
 namespace BackendDiabetesRiskPrediction.Services;
 
-public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictionService> logger)
+public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictionService> logger, ElasticsearchService elasticsearchService)
 {
 
     private readonly ILogger<DiabetesRiskNotePredictionService> _logger = logger;
-
-    public int DiabetesRiskPredictionNotesAnalysis(List<NoteRiskInfo> notes)
-    {
-        int triggersDiabetesRiskFromNotes = 0;
-
-        foreach (NoteRiskInfo note in notes)
-        {
-            triggersDiabetesRiskFromNotes += DiabetesRiskPredictionSingleNoteAnalysis(note);
-        }
-        return triggersDiabetesRiskFromNotes;
-    }
-
-    private static string DiabetesRiskPredictionSingleNoteTransform(NoteRiskInfo note)
-    {
-        return note.Title?.ToLower() + note.Body?.ToLower();
-    }
-
-    private int DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note)
-    {
-        int triggersDiabetesRiskFromNote = 0;
-        DiabetesRiskPredictionSingleNoteTransform(note);
-
-        HashSet<string> triggers = TriggerWordsMix(triggerWords);
-
-        // TODO: implement diabetes risk prediction based on patient single note
-
-        return triggersDiabetesRiskFromNote;
-    }
 
     private readonly HashSet<string> triggerWords =
     [
@@ -51,18 +22,7 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
         "Anticorps"
     ];
 
-    private static HashSet<string> TriggerWordsMix(HashSet<string> triggerWords)
-    {
-        HashSet<string> triggerWordsMix = [.. triggerWords];
-        foreach (string triggerWord in triggerWordsMix)
-        {
-            triggerWordsMix.Add(triggerWord.ToLower());
-        }
-
-        return triggerWordsMix;
-    }
-
-    public DiabetesRisk DiabetesRiskPrediction(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
+    public async Task<DiabetesRisk> DiabetesRiskPrediction(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
     {
         DiabetesRisk diabetesRisk;
 
@@ -73,11 +33,46 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             return diabetesRisk;
         }
 
-        int triggersDiabetesRiskFromNotes = DiabetesRiskPredictionNotesAnalysis(notes);
+        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(notes);
 
         diabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
 
         return diabetesRisk;
+    }
+
+    public async Task<int> DiabetesRiskPredictionNotesAnalysis(List<NoteRiskInfo> notes)
+    {
+        int triggersDiabetesRiskFromNotes = 0;
+
+        foreach (NoteRiskInfo note in notes)
+        {
+            triggersDiabetesRiskFromNotes += await DiabetesRiskPredictionSingleNoteAnalysis(note);
+        }
+        return triggersDiabetesRiskFromNotes;
+    }
+
+    private async Task<int> DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note)
+    {
+        int triggersDiabetesRiskFromNote = 0;
+
+        HashSet<string> triggers = TriggerWordsMix(triggerWords);
+
+        // TODO: implement diabetes risk prediction based on patient single note
+
+        await elasticsearchService.CountWordsInNotes(note.PatientId, triggers);
+
+        return triggersDiabetesRiskFromNote;
+    }
+
+    private static HashSet<string> TriggerWordsMix(HashSet<string> triggerWords)
+    {
+        HashSet<string> triggerWordsMix = [.. triggerWords];
+        foreach (string triggerWord in triggerWordsMix)
+        {
+            triggerWordsMix.Add(triggerWord.ToLower());
+        }
+
+        return triggerWordsMix;
     }
 
     private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
@@ -96,10 +91,7 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             return DiabetesRiskPredictionForUnder30(patientRiskInfo, triggersDiabetesRiskFromNotes);
         }
         // Patient is older (or equal) than 30 (inclusive)
-        else
-        {
-            return DiabetesRiskPredictionFor30AndOlder(triggersDiabetesRiskFromNotes);
-        }
+        return DiabetesRiskPredictionFor30AndOlder(triggersDiabetesRiskFromNotes);
     }
 
     private static DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
@@ -112,7 +104,7 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             {
                 return DiabetesRisk.EarlyOnset;
             }
-            else if (triggersDiabetesRiskFromNotes >= 3)
+            if (triggersDiabetesRiskFromNotes >= 3)
             {
                 return DiabetesRisk.InDanger;
             }
@@ -125,7 +117,7 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             {
                 return DiabetesRisk.EarlyOnset;
             }
-            else if (triggersDiabetesRiskFromNotes >= 4)
+            if (triggersDiabetesRiskFromNotes >= 4)
             {
                 return DiabetesRisk.InDanger;
             }
@@ -140,20 +132,17 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             return DiabetesRisk.EarlyOnset;
         }
         // Equivalent to trigger >= 6 && trigger <= 7 due to the order of the if statements
-        else if (triggersDiabetesRiskFromNotes >= 6)
+        if (triggersDiabetesRiskFromNotes >= 6)
         {
             return DiabetesRisk.InDanger;
         }
         // Equivalent to trigger >= 2 && trigger <= 5 due to the order of the if statements
-        else if (triggersDiabetesRiskFromNotes >= 2)
+        if (triggersDiabetesRiskFromNotes >= 2)
         {
             return DiabetesRisk.Borderline;
         }
         // Equivalent to trigger >= 0 && trigger <= 1 due to the order of the if statements
-        else
-        {
-            return DiabetesRisk.None;
-        }
+        return DiabetesRisk.None;
     }
 
     private static int PatientAgeCalculator(PatientRiskInfo patientRiskInfo)

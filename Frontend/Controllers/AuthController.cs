@@ -1,20 +1,19 @@
 using System.Security.Claims;
-using Frontend.Controllers.Service;
 using Frontend.Models;
+using Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-
 namespace Frontend.Controllers;
 
 [Route("Auth")]
 public class AuthController : Controller
 {
-    private readonly ILogger<AuthController> _logger;
-    private readonly HttpClient _httpClient;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly HttpClientService _httpClientService;
     private readonly string _authServiceUrl;
+    private readonly HttpClient _httpClient;
+    private readonly HttpClientService _httpClientService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JwtValidationService _jwtValidationService;
+    private readonly ILogger<AuthController> _logger;
 
     public AuthController(ILogger<AuthController> logger, IConfiguration configuration, HttpClientService httpClientService, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, JwtValidationService jwtValidationService)
     {
@@ -27,10 +26,7 @@ public class AuthController : Controller
     }
 
     [HttpGet("login")]
-    public IActionResult Login()
-    {
-        return View();
-    }
+    public IActionResult Login() => View();
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginModel loginModel)
@@ -51,7 +47,7 @@ public class AuthController : Controller
             AuthResponseModel? authResponseDeserialized = await response.Content.ReadFromJsonAsync<AuthResponseModel>();
 
             if (authResponseDeserialized == null || string.IsNullOrEmpty(authResponseDeserialized.Token)
-                    || string.IsNullOrEmpty(authResponseDeserialized.RefreshToken))
+                                                 || string.IsNullOrEmpty(authResponseDeserialized.RefreshToken))
             {
                 _logger.LogError("Token or refresh token is null or empty.");
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -79,19 +75,13 @@ public class AuthController : Controller
 
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
-        else
-        {
-            _logger.LogError("Response is not Success Status Code.");
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return View(loginModel);
-        }
+        _logger.LogError("Response is not Success Status Code.");
+        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        return View(loginModel);
     }
 
     [HttpGet("register")]
-    public IActionResult Register()
-    {
-        return View();
-    }
+    public IActionResult Register() => View();
 
     // [HttpPost("register")]
     // public async Task<IActionResult> Register(RegisterModel registerModel)
@@ -177,7 +167,11 @@ public class AuthController : Controller
                 if (principal != null)
                 {
                     string? username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
-                    return Ok(new { isAuthenticated = true, username = username });
+                    return Ok(new
+                    {
+                        isAuthenticated = true,
+                        username
+                    });
                 }
             }
         }

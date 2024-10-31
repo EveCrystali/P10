@@ -1,4 +1,5 @@
-@model Frontend.Models.Patient
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Patient
 
 @{
     Layout = "_Layout";
@@ -8,7 +9,7 @@
 
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Create</title>
 </head>
 <body>
@@ -20,50 +21,50 @@
         @TempData["Error"]
     </div>
 }
-<hr />
+<hr/>
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName" for="FirstName" class="control-label">Prénom</label>
-                    <input asp-for="FirstName" class="form-control" />
-                    <span asp-validation-for="FirstName" class="text-danger"></span>   
+                <input asp-for="FirstName" class="form-control"/>
+                <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                
+
                 <label asp-for="LastName" for="LastName" class="control-label">Nom</label>
-                    <input asp-for="LastName" class="form-control" />
-                    <span asp-validation-for="LastName" class="text-danger"></span>       
+                <input asp-for="LastName" class="form-control"/>
+                <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div>
-                
-                <label asp-for="DateOfBirth" for="DateOfBirth"  class="control-label">Date de naissance</label>
-                <input asp-for="DateOfBirth" class="form-control" />
+
+                <label asp-for="DateOfBirth" for="DateOfBirth" class="control-label">Date de naissance</label>
+                <input asp-for="DateOfBirth" class="form-control"/>
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
             <div class="form-group">
-                
+
                 <label asp-for="Gender" for="Gender" class="control-label">Sexe</label>
-                    <select asp-for="Gender" class="form-control">
-                        <option value="M">Masculin</option>
-                        <option value="F">Feminin</option>
-                    </select>
-                    <span asp-validation-for="Gender" class="text-danger"></span>
+                <select asp-for="Gender" class="form-control">
+                    <option value="M">Masculin</option>
+                    <option value="F">Feminin</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
             </div>
             <div class="form-group">
-                
+
                 <label asp-for="Address" for="Address" class="control-label">Adresse</label>
-                    <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
+                <input asp-for="Address" class="form-control"/>
+                <span asp-validation-for="Address" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="PhoneNumber" for="PhoneNumber" class="control-label">Téléphone</label>
-                    <input asp-for="PhoneNumber" class="form-control" />
-                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                <input asp-for="PhoneNumber" class="form-control"/>
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary"/>
             </div>
         </form>
     </div>

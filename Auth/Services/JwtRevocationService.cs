@@ -1,5 +1,5 @@
 using Auth.Data;
-
+using Auth.Models;
 namespace Auth.Services;
 
 public class JwtRevocationService(ApplicationDbContext context) : IJwtRevocationService
@@ -8,8 +8,8 @@ public class JwtRevocationService(ApplicationDbContext context) : IJwtRevocation
 
     public async Task RevokeUserTokensAsync(string userId)
     {
-        List<Models.RefreshToken> refreshTokens = [.. _context.RefreshTokens.Where(rt => rt.UserId == userId)];
-        foreach (Models.RefreshToken? token in refreshTokens)
+        List<RefreshToken> refreshTokens = [.. _context.RefreshTokens.Where(rt => rt.UserId == userId)];
+        foreach (RefreshToken? token in refreshTokens)
         {
             token.IsRevoked = true;
         }

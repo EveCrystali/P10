@@ -1,7 +1,6 @@
 using BackendNote.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-
 namespace BackendNote.Services;
 
 public class NotesService
@@ -13,13 +12,13 @@ public class NotesService
         IOptions<NoteDatabaseSettings> noteDatabaseSettings)
     {
         MongoClient mongoClient = new(
-            noteDatabaseSettings.Value.ConnectionString);
+                                      noteDatabaseSettings.Value.ConnectionString);
 
         IMongoDatabase mongoDatabase = mongoClient.GetDatabase(
-            noteDatabaseSettings.Value.DatabaseName);
+                                                               noteDatabaseSettings.Value.DatabaseName);
 
         _notesCollection = mongoDatabase.GetCollection<Note>(
-            noteDatabaseSettings.Value.NotesCollectionName);
+                                                             noteDatabaseSettings.Value.NotesCollectionName);
 
 
         CreateIndexes();
@@ -41,11 +40,11 @@ public class NotesService
 
     public async Task UpdateAsync(string id, Note updatedNote)
     {
-        FilterDefinition<Note> filter = Builders<Note>.Filter.Eq(note => note.Id, id);
+        FilterDefinition<Note> filter = Builders<Note>.Filter.Eq(field: note => note.Id, id);
         UpdateDefinition<Note> update = Builders<Note>.Update
-            .Set(note => note.Title, updatedNote.Title)
-            .Set(note => note.Body, updatedNote.Body)
-            .Set(note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
+                                                      .Set(field: note => note.Title, updatedNote.Title)
+                                                      .Set(field: note => note.Body, updatedNote.Body)
+                                                      .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
         await _notesCollection.UpdateOneAsync(filter, update);
     }
 

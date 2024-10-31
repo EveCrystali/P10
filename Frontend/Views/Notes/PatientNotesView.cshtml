@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Notes du Patient</h1>
-    <div id="notes-container"></div>
+<h1>Notes du Patient</h1>
+<div id="notes-container"></div>
 
-    <script>
+<script>
         async function fetchNotes(userId) {
             try {
                 const response = await fetch(`/note/user/${userId}`, {

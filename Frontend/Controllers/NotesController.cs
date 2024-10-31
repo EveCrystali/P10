@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Net;
-using Frontend.Controllers.Service;
+using Frontend.Models;
+using Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
-
 namespace Frontend.Controllers;
 
 [Route("note")]
@@ -16,8 +16,8 @@ public class NotesController : Controller
     private readonly PatientService _patientService;
 
     public NotesController(ILogger<NotesController> logger, HttpClient httpClient,
-     HttpClientService httpClientService,
-    IConfiguration configuration, PatientService patientService)
+                           HttpClientService httpClientService,
+                           IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
         _httpClient = httpClient;
@@ -34,10 +34,10 @@ public class NotesController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            List<Frontend.Models.Note>? notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
+            List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
             if (notes != null)
             {
-                foreach (Frontend.Models.Note note in notes)
+                foreach (Note note in notes)
                 {
                     Console.WriteLine($"Notes: {note.Id} {note.PatientId} {note.Title} by {note.Creator}");
                 }
@@ -46,8 +46,8 @@ public class NotesController : Controller
             return View(notes);
         }
 
-        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load notes", modelErrorMessage: "Unable to load notes.", response: response);
-        return View(new List<Frontend.Models.Note>());
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to load notes", "Unable to load notes.", response);
+        return View(new List<Note>());
     }
 
     [HttpGet("{id}")]
@@ -63,7 +63,7 @@ public class NotesController : Controller
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
-            Frontend.Models.Note? note = await responseFromNoteService.Content.ReadFromJsonAsync<Frontend.Models.Note>();
+            Note? note = await responseFromNoteService.Content.ReadFromJsonAsync<Note>();
 
             if (note != null)
             {
@@ -73,7 +73,7 @@ public class NotesController : Controller
             return NotFound("Note not found.");
         }
 
-        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note", modelErrorMessage: "Unable to load note.", response: responseFromNoteService);
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to load note", "Unable to load note.", responseFromNoteService);
         return View();
     }
 
@@ -92,7 +92,7 @@ public class NotesController : Controller
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> Create(Frontend.Models.Note note)
+    public async Task<IActionResult> Create(Note note)
     {
         note.Creator = await _patientService.GetUsernameFromAuthToken();
 
@@ -115,28 +115,19 @@ public class NotesController : Controller
 
             if (response.IsSuccessStatusCode)
             {
-                Models.Note? createdNote = await response.Content.ReadFromJsonAsync<Frontend.Models.Note>();
+                Note? createdNote = await response.Content.ReadFromJsonAsync<Note>();
                 if (createdNote != null)
                 {
                     return RedirectToAction(nameof(Details), new { id = createdNote.Id });
                 }
-                else
-                {
-                    ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note", modelErrorMessage: "Unable to create note.", response: response);
-                    return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-                }
-            }
-            else
-            {
-                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note - Error from the server", modelErrorMessage: "Unable to create note.", response: response);
+                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "Unable to create note.", response);
                 return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
             }
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note - Error from the server", "Unable to create note.", response);
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to create note", modelErrorMessage: "odel state is not valid.", response: null);
-            return View(note);
-        }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "odel state is not valid.");
+        return View(note);
     }
 
     [HttpGet("edit/{id}")]
@@ -149,26 +140,23 @@ public class NotesController : Controller
 
             if (response.IsSuccessStatusCode)
             {
-                Frontend.Models.Note? note = await response.Content.ReadFromJsonAsync<Frontend.Models.Note>();
+                Note? note = await response.Content.ReadFromJsonAsync<Note>();
                 return View(note);
             }
-            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Note not found", modelErrorMessage: "Note not found.", response: response);
+                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Note not found", "Note not found.", response);
                 return View();
             }
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to load note for edit", modelErrorMessage: "Unable to load note for edit.", response: response);
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to load note for edit", "Unable to load note for edit.", response);
             return View();
         }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Model state is not valid", modelErrorMessage: "Model state is not valid.");
-            return View();
-        }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Model state is not valid", "Model state is not valid.");
+        return View();
     }
 
     [HttpPost("edit/{id}")]
-    public async Task<IActionResult> Edit(Frontend.Models.Note note)
+    public async Task<IActionResult> Edit(Note note)
     {
         note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
@@ -185,22 +173,16 @@ public class NotesController : Controller
             {
                 return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
             }
-            else if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Note with id {PatientId} was successfully updated.", note.Id);
                 return RedirectToAction(nameof(Details), nameof(NotesController).Replace("Controller", ""), new { id = note.Id });
             }
-            else
-            {
-                ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.", response: response);
-                return View(note);
-            }
-        }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: "Failed to update note", modelErrorMessage: "Unable to update note.");
+            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to update note", "Unable to update note.", response);
             return View(note);
         }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to update note", "Unable to update note.");
+        return View(note);
     }
 
     [HttpGet("delete/{id}")]
@@ -216,14 +198,11 @@ public class NotesController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            Frontend.Models.Note? note = await response.Content.ReadFromJsonAsync<Frontend.Models.Note>();
+            Note? note = await response.Content.ReadFromJsonAsync<Note>();
             return View(note);
         }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load note. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load note for deletion.", response: response);
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-        }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, $"Failed to load note. Status code: {response.StatusCode}", "Unable to load note for deletion.", response);
+        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }
 
     [HttpPost("delete/{id}")]
@@ -242,11 +221,8 @@ public class NotesController : Controller
         {
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to delete note. Status code: {response.StatusCode}", modelErrorMessage: "Unable to delete note.", response: response);
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-        }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, $"Failed to delete note. Status code: {response.StatusCode}", "Unable to delete note.", response);
+        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }
 
     [HttpGet("patient/{patientId}")]
@@ -267,13 +243,10 @@ public class NotesController : Controller
 
         if (response.IsSuccessStatusCode)
         {
-            List<Frontend.Models.Note>? notes = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Note>>();
+            List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
             return View(notes);
         }
-        else
-        {
-            ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, logErrorMessage: $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", modelErrorMessage: "Unable to load notes for patient.", response: response);
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-        }
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", "Unable to load notes for patient.", response);
+        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }
 }

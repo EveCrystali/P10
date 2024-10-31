@@ -7,7 +7,6 @@ using SharedAuthLibrary;
 using SharedAuthorizationLibrary;
 using SharedCorsLibrary;
 using SharedSwaggerLibrary;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add Authorization policies and authentification
@@ -17,12 +16,12 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
 builder.Services.AddControllers()
-    .AddXmlDataContractSerializerFormatters()
-    // Add Json DateOnly type support
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-    });
+       .AddXmlDataContractSerializerFormatters()
+       // Add Json DateOnly type support
+       .AddJsonOptions(options =>
+       {
+           options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+       });
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DockerInternal")));
 builder.Services.AddEndpointsApiExplorer();
@@ -57,7 +56,7 @@ app.UseCors("AllowApiGateway");
 
 app.MapControllers();
 
-app.MapGet("/", async context =>
+app.MapGet("/", requestDelegate: async context =>
 {
     await context.Response.WriteAsync("BackendPatient is well running.");
 });

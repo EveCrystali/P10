@@ -1,8 +1,7 @@
 using System.Net.Http.Headers;
 using Frontend.Models;
 using Newtonsoft.Json;
-
-namespace Frontend.Controllers.Service;
+namespace Frontend.Services;
 
 public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
 {

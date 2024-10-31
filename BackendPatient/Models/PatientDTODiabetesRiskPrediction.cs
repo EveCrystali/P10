@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 namespace BackendPatient.Models;
 
@@ -17,4 +16,3 @@ public class PatientDtoDiabetesRiskPrediction
     [RegularExpression(@"^[MF]$", ErrorMessage = "Gender should be either M or F")]
     public required string Gender { get; set; }
 }
-

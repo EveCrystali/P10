@@ -1,4 +1,4 @@
-namespace BackendDiabetesRiskPrediction.Models;
+namespace Frontend.Models;
 
 public class NoteRiskInfo
 {

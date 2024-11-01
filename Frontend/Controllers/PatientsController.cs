@@ -87,7 +87,7 @@ public class PatientsController : Controller
 
             if (patient != null && notes != null)
             {
-                // Time To to Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
+                // Time To Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
 
                 // First let's construct our needs
                 PatientViewModel patientViewModel = PatientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
@@ -145,7 +145,10 @@ public class PatientsController : Controller
                 Patient? createdPatient = await response.Content.ReadFromJsonAsync<Patient>();
                 if (createdPatient != null)
                 {
-                    return RedirectToAction(nameof(Details), new { id = createdPatient.Id });
+                    return RedirectToAction(nameof(Details), new
+                    {
+                        id = createdPatient.Id
+                    });
                 }
                 ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                        "Failed to create patient", "Unable to create patient");
@@ -215,7 +218,10 @@ public class PatientsController : Controller
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Patient with id {PatientId} was successfully updated.", patient.Id);
-                return RedirectToAction(nameof(Details), new { id = patient.Id });
+                return RedirectToAction(nameof(Details), new
+                {
+                    id = patient.Id
+                });
             }
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                    $"Failed to update patient with id {patient.Id}. Status code: {response.StatusCode}",

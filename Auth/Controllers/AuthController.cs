@@ -41,7 +41,11 @@ public class AuthController(
 
             _logger.LogInformation("Login successful, returning tokens.");
 
-            return Ok(new { Token = token, RefreshToken = refreshToken.Token });
+            return Ok(new
+            {
+                Token = token,
+                RefreshToken = refreshToken.Token
+            });
         }
         if (user == null)
         {
@@ -83,7 +87,10 @@ public class AuthController(
             _logger.LogWarning("No tokens found or an error occurred during revocation.");
         }
 
-        return Ok(new { Message = "Logout successful" });
+        return Ok(new
+        {
+            Message = "Logout successful"
+        });
     }
 
     [HttpPost]
@@ -92,13 +99,21 @@ public class AuthController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        User user = new() { UserName = model.Username, Email = model.Email, PasswordHash = model.Password };
+        User user = new()
+        {
+            UserName = model.Username,
+            Email = model.Email,
+            PasswordHash = model.Password
+        };
         IdentityResult result = await _userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(user, "User");
-            return Ok(new { Message = "User registered successfully" });
+            return Ok(new
+            {
+                Message = "User registered successfully"
+            });
         }
         return BadRequest(result.Errors);
     }
@@ -137,7 +152,11 @@ public class AuthController(
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { Token = newToken, RefreshToken = newRefreshToken.Token });
+        return Ok(new
+        {
+            Token = newToken,
+            RefreshToken = newRefreshToken.Token
+        });
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -180,7 +199,7 @@ public class AuthController(
                                                       .Where(rt => rt.UserId == userId && !rt.IsRevoked)
                                                       .ToListAsync();
 
-        if (userTokens == null || userTokens.Count == 0)
+        if (userTokens.Count == 0)
         {
             _logger.LogWarning("No active refresh tokens found for the user.");
             return false;

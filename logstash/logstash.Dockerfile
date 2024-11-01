@@ -1,10 +1,21 @@
 FROM docker.elastic.co/logstash/logstash:8.5.1
 
-# Copie du fichier de configuration de Logstash
-COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
+# Passer à l'utilisateur root pour exécuter les commandes d'installation
+USER root
 
 # Installation du plugin MongoDB pour Logstash
 RUN logstash-plugin install logstash-input-mongodb
+
+# Installer netbase pour obtenir /etc/protocols
+RUN apt-get update && \
+    apt-get install -y netbase && \
+    rm -rf /var/lib/apt/lists/* 
+
+# Revenir à l'utilisateur logstash
+USER logstash
+
+# Copie du fichier de configuration de Logstash
+COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
 
 # Crée le répertoire pour les fichiers de base de données SQLite
 RUN mkdir -p /usr/share/logstash/pipeline/db

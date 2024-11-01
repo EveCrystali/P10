@@ -13,7 +13,7 @@ public class BackendDiabetesRiskPredictionsController(DiabetesRiskNotePrediction
 
 
     [HttpGet]
-    public async Task<DiabetesRisk> GetDiabetesRisk(DiabetesRiskRequest diabetesRiskRequest)
+    public async Task<DiabetesRisk> GetDiabetesRisk([FromBody] DiabetesRiskRequest diabetesRiskRequest)
     {
         DiabetesRisk diabetesRisk = await _diabetesRiskNotePredictionService.DiabetesRiskPrediction(diabetesRiskRequest.NotesRiskInfo, diabetesRiskRequest.PatientRiskInfo);
         return diabetesRisk;

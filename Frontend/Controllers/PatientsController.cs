@@ -7,56 +7,25 @@ namespace Frontend.Controllers;
 [Route("patient")]
 public class PatientsController : Controller
 {
-    private readonly DiabetesRiskPredictionService _diabetesRiskPredictionService;
     private readonly string _diabetesRiskPredictionServiceUrl;
-    private readonly HttpClient _httpClient;
-
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _noteServiceUrl;
-    private readonly PatientService _patientService;
     private readonly string _patientServiceUrl;
 
-    public PatientsController(ILogger<PatientsController> logger, HttpClient httpClient,
+    public PatientsController(ILogger<PatientsController> logger,
                               HttpClientService httpClientService,
-                              IConfiguration configuration, PatientService patientService, DiabetesRiskPredictionService diabetesRiskPredictionService)
+                              IConfiguration configuration)
     {
         _logger = logger;
-        _httpClient = httpClient;
-
         _httpClientService = httpClientService;
-        _patientService = patientService;
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
         _noteServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Note");
         _diabetesRiskPredictionServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("DiabetesRiskPrediction");
-        _diabetesRiskPredictionService = diabetesRiskPredictionService;
     }
 
-    public async Task<IActionResult> Index()
-    {
-        HttpResponseMessage response = await _httpClient.GetAsync(_patientServiceUrl);
-        if (response.IsSuccessStatusCode)
-        {
-            List<Patient>? patients =
-                await response.Content.ReadFromJsonAsync<List<Patient>>();
-            if (patients != null)
-            {
-                foreach (Patient patient in patients)
-                {
-                    Console.WriteLine($"Patients: {patient.Id} {patient.FirstName} {patient.LastName}");
-                }
-            }
 
-            return View(patients);
-        }
-
-        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
-                                               "Failed to load patients", "Unable to load patient");
-
-        return View(new List<Patient>());
-    }
-
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> Details(int id)
     {
         if (!ModelState.IsValid)
@@ -68,10 +37,8 @@ public class PatientsController : Controller
         HttpRequestMessage request1 = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage responseFromPatientService = await _httpClientService.SendAsync(request1);
 
-        int patientId = id;
-
         // Get Notes from BackendNote for the patient Id
-        HttpRequestMessage request2 = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpRequestMessage request2 = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{id}");
         HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request2);
 
         if (responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized ||
@@ -85,36 +52,33 @@ public class PatientsController : Controller
             Patient? patient = await responseFromPatientService.Content.ReadFromJsonAsync<Patient>();
             List<Note>? notes = await responseFromNoteService.Content.ReadFromJsonAsync<List<Note>>();
 
-            if (patient != null && notes != null)
+            if (patient == null || notes == null) return View();
+
+            // Time To Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
+
+            // First let's construct our needs
+            PatientViewModel patientViewModel = PatientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
+            DiabetesRiskRequestModel diabetesRiskRequestModel = DiabetesRiskPredictionService.MapPatientViewModelAndNoteToDiabetesRiskRequestModel(patientViewModel);
+
+            // Secondly let's ask DiabetesRiskPredictionService
+            HttpRequestMessage request3 = new(HttpMethod.Get, $"{_diabetesRiskPredictionServiceUrl}/")
             {
-                // Time To Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
+                Content = JsonContent.Create(diabetesRiskRequestModel)
+            };
 
-                // First let's construct our needs
-                PatientViewModel patientViewModel = PatientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
-                DiabetesRiskRequestModel diabetesRiskRequestModel = _diabetesRiskPredictionService.MapPatientViewModelAndNoteToDiabetesRiskRequestModel(patientViewModel);
+            // Finally let's manage the answer for DiabetesRiskPredictionService
+            HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(request3);
 
-                // Secondly let's ask DiabetesRiskPredictionService
-                HttpRequestMessage request3 = new(HttpMethod.Get, $"{_diabetesRiskPredictionServiceUrl}/")
-                {
-                    Content = JsonContent.Create(diabetesRiskRequestModel)
-                };
-
-                // Finally let's manage the answer for DiabetesRiskPredictionService
-                HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(request3);
-
-                if (responseFromDiabetesRiskService.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    return RedirectToAction(nameof(AuthController.Login),
-                                            nameof(AuthController).Replace("Controller", ""));
-                }
-
-                patientViewModel.DiabetesRiskPrediction = await responseFromDiabetesRiskService.Content.ReadFromJsonAsync<DiabetesRiskPrediction>();
-
-
-                return View(patientViewModel);
-
+            if (responseFromDiabetesRiskService.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction(nameof(AuthController.Login),
+                                        nameof(AuthController).Replace("Controller", ""));
             }
-            return View();
+
+            patientViewModel.DiabetesRiskPrediction = await responseFromDiabetesRiskService.Content.ReadFromJsonAsync<DiabetesRiskPrediction>();
+
+
+            return View(patientViewModel);
         }
 
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Patient not found",
@@ -165,7 +129,7 @@ public class PatientsController : Controller
         return View(patient);
     }
 
-    [HttpGet("edit/{id}")]
+    [HttpGet("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id)
     {
         if (ModelState.IsValid)
@@ -199,7 +163,7 @@ public class PatientsController : Controller
         return View();
     }
 
-    [HttpPost("edit/{id}")]
+    [HttpPost("edit")]
     public async Task<IActionResult> Edit(Patient patient)
     {
         if (ModelState.IsValid)
@@ -233,7 +197,7 @@ public class PatientsController : Controller
         return View(patient);
     }
 
-    [HttpGet("delete/{id}")]
+    [HttpGet("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         if (!ModelState.IsValid)
@@ -259,7 +223,7 @@ public class PatientsController : Controller
         return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }
 
-    [HttpPost("delete/{id}")]
+    [HttpPost("delete/{id:int}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {

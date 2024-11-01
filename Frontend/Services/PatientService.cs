@@ -42,18 +42,20 @@ public class PatientService(IHttpContextAccessor httpContextAccessor, ILogger<Pa
 
     public List<Note> MapPatientNotesViewModelToNotes(PatientViewModel patientViewModel)
     {
-        List<Note> notes = patientViewModel.Notes
-                                           .Select(note => new Note
-                                           {
-                                               Id = note.Id,
-                                               Creator = note.Creator,
-                                               PatientId = patientViewModel.PatientId,
-                                               CreatedDate = note.CreatedDate,
-                                               LastUpdatedDate = note.LastUpdatedDate,
-                                               Title = note.Title,
-                                               Body = note.Body
-                                           })
-                                           .ToList();
+        if (patientViewModel.Notes == null) return [];
+
+        List<Note>? notes = patientViewModel?.Notes
+                                            .Select(note => new Note
+                                            {
+                                                Id = note.Id,
+                                                Creator = note.Creator,
+                                                PatientId = patientViewModel.PatientId,
+                                                CreatedDate = note.CreatedDate,
+                                                LastUpdatedDate = note.LastUpdatedDate,
+                                                Title = note.Title,
+                                                Body = note.Body
+                                            })
+                                            .ToList();
         return notes;
     }
 

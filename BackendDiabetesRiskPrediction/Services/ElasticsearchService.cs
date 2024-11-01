@@ -54,10 +54,26 @@ public class ElasticsearchService
                     must = new object[]
                     {
                         // Condition 1: search in the patient id
-                        new { term = new { PatientId = patientId } },
+                        new
+                        {
+                            term = new
+                            {
+                                PatientId = patientId
+                            }
+                        },
                         // Condition 2: search in the body
                         // ? What is exactly custom_french_analyzer ? It refers to create_index.json and custom_analyzer.json
-                        new { match = new { Body = new { query = queryWords, analyzer = "custom_french_analyzer" } } }
+                        new
+                        {
+                            match = new
+                            {
+                                Body = new
+                                {
+                                    query = queryWords,
+                                    analyzer = "custom_french_analyzer"
+                                }
+                            }
+                        }
                     }
                 }
             },

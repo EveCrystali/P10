@@ -1,9 +1,9 @@
 using Frontend.Models;
 namespace Frontend.Services;
 
-public class DiabetesRiskPredictionService
+public static class DiabetesRiskPredictionService
 {
-    public NoteRiskInfo MapPatientViewModelToNoteRiskInfo(Note note) => new()
+    private static NoteRiskInfo MapPatientViewModelToNoteRiskInfo(Note note) => new()
     {
         Id = note.Id,
         PatientId = note.PatientId,
@@ -11,22 +11,26 @@ public class DiabetesRiskPredictionService
         Body = note.Body
     };
 
-    public PatientRiskInfo MapPatientViewModelToPatientRiskInfo(PatientViewModel patientViewModel) => new()
+    private static PatientRiskInfo MapPatientViewModelToPatientRiskInfo(PatientViewModel patientViewModel) => new()
     {
         Id = patientViewModel.PatientId,
         DateOfBirth = patientViewModel.DateOfBirth,
         Gender = patientViewModel.Gender
     };
 
-    public DiabetesRiskRequestModel MapPatientViewModelAndNoteToDiabetesRiskRequestModel(PatientViewModel patientViewModel)
+    public static DiabetesRiskRequestModel MapPatientViewModelAndNoteToDiabetesRiskRequestModel(PatientViewModel patientViewModel)
     {
         PatientRiskInfo patientRiskInfo = MapPatientViewModelToPatientRiskInfo(patientViewModel);
-        List<NoteRiskInfo> noteRiskInfos = [];
-        foreach (Note note in patientViewModel.Notes)
+        if (patientViewModel.Notes == null)
         {
-            noteRiskInfos.Add(MapPatientViewModelToNoteRiskInfo(note));
+            return new DiabetesRiskRequestModel
+            {
+                PatientRiskInfo = patientRiskInfo
+            };
         }
-
+        List<NoteRiskInfo> noteRiskInfos = patientViewModel.Notes
+                                                           .Select(MapPatientViewModelToNoteRiskInfo)
+                                                           .ToList();
         return new DiabetesRiskRequestModel
         {
             NotesRiskInfo = noteRiskInfos,

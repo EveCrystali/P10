@@ -9,16 +9,15 @@ RUN logstash-plugin install logstash-input-mongodb
 # Installer netbase pour obtenir /etc/protocols
 RUN apt-get update && \
     apt-get install -y netbase && \
-    rm -rf /var/lib/apt/lists/* 
+    rm -rf /var/lib/apt/lists/*
+
+# Crée le répertoire pour les fichiers de base de données SQLite
+RUN mkdir -p /usr/share/logstash/pipeline/db && chmod 777 /usr/share/logstash/pipeline/db
+
+COPY .pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
 
 # Revenir à l'utilisateur logstash
 USER logstash
-
-# Copie du fichier de configuration de Logstash
-COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
-
-# Crée le répertoire pour les fichiers de base de données SQLite
-RUN mkdir -p /usr/share/logstash/pipeline/db
 
 ENV xpack.monitoring.enabled=false
 ENV ELASTICSEARCH_HOST=http://elasticsearch:9200

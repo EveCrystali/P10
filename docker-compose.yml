@@ -158,6 +158,7 @@ services:
      environment:
        - discovery.type=single-node
        - xpack.security.enabled=false
+       - ingest.geoip.downloader.enabled=false
      networks:
        - elastic
 
@@ -167,7 +168,7 @@ services:
        dockerfile: logstash.Dockerfile
      container_name: logstash_container
      volumes:
-       - ./logstash/pipeline:/usr/share/logstash/pipeline
+         - ./logstash/pipeline:/usr/share/logstash/pipeline
      ports:
        - "5044:5044"
      env_file:

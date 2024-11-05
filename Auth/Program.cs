@@ -6,17 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using SharedAuthLibrary;
 using SharedAuthorizationLibrary;
 using SharedSwaggerLibrary;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Database configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerInternal")));
+                                                        options.UseSqlServer(builder.Configuration.GetConnectionString("DockerInternal")));
 
 // Identity configuration
 builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+       .AddEntityFrameworkStores<ApplicationDbContext>()
+       .AddDefaultTokenProviders();
 
 // Configure Identity options
 builder.Services.Configure<IdentityOptions>(options =>

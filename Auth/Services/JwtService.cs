@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Auth.Models;
 using Microsoft.IdentityModel.Tokens;
-
 namespace Auth.Services;
 
 public class JwtService(IConfiguration configuration) : IJwtService
@@ -11,7 +10,7 @@ public class JwtService(IConfiguration configuration) : IJwtService
     private readonly IConfiguration _configuration = configuration;
 
     /// <summary>
-    /// Generates a JSON Web Token (JWT) for the given user ID, username, and roles.
+    ///     Generates a JSON Web Token (JWT) for the given user ID, username, and roles.
     /// </summary>
     /// <param name="userId">The unique identifier of the user.</param>
     /// <param name="userName">The username of the user.</param>
@@ -22,7 +21,7 @@ public class JwtService(IConfiguration configuration) : IJwtService
         List<Claim> claims = new()
         {
             new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Name, userName),
+            new Claim(ClaimTypes.Name, userName)
         };
 
         // Ajouter les rôles en tant que claims
@@ -45,28 +44,28 @@ public class JwtService(IConfiguration configuration) : IJwtService
         SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken token = new(
-            issuer: _configuration["JwtSettings:Issuer"],
-            // Ne pas passer l'audience ici car elle est ajoutée en tant que claims
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JwtSettings:TokenLifetimeMinutes"])),
-            signingCredentials: creds
-        );
+                                     _configuration["JwtSettings:Issuer"],
+                                     // Ne pas passer l'audience ici car elle est ajoutée en tant que claims
+                                     claims: claims,
+                                     expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JwtSettings:TokenLifetimeMinutes"])),
+                                     signingCredentials: creds
+                                    );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     /// <summary>
-    /// Generates a refresh token for the provided user ID.
+    ///     Generates a refresh token for the provided user ID.
     /// </summary>
     /// <param name="userId">The ID of the user.</param>
     /// <returns>The generated refresh token.</returns>
     /// <remarks>
-    /// This method creates a new instance of the <see cref="RefreshToken"/> class and sets its properties
-    /// to the values generated or provided. It generates a unique token using <see cref="Guid.NewGuid"/>
-    /// and converts it to a string using <see cref="Guid.ToString"/>. It sets the <see cref="RefreshToken.UserId"/>
-    /// property to the provided user ID. It sets the <see cref="RefreshToken.ExpiryDate"/> property to the current
-    /// date and time plus the number of days specified in the configuration for Jwt:RefreshTokenLifetimeDays.
-    /// It sets the <see cref="RefreshToken.IsRevoked"/> property to false.
+    ///     This method creates a new instance of the <see cref="RefreshToken" /> class and sets its properties
+    ///     to the values generated or provided. It generates a unique token using <see cref="Guid.NewGuid" />
+    ///     and converts it to a string using <see cref="Guid.ToString" />. It sets the <see cref="RefreshToken.UserId" />
+    ///     property to the provided user ID. It sets the <see cref="RefreshToken.ExpiryDate" /> property to the current
+    ///     date and time plus the number of days specified in the configuration for Jwt:RefreshTokenLifetimeDays.
+    ///     It sets the <see cref="RefreshToken.IsRevoked" /> property to false.
     /// </remarks>
     public RefreshToken GenerateRefreshToken(string userId)
     {

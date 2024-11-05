@@ -1,15 +1,14 @@
 using System.Diagnostics;
-using Frontend.Controllers.Service;
 using Frontend.Models;
+using Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
-
 namespace Frontend.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly HttpClient _httpClient;
     private readonly string _homeServiceUrl;
+    private readonly HttpClient _httpClient;
+    private readonly ILogger<HomeController> _logger;
 
     private readonly string _patientServiceUrl;
 
@@ -30,18 +29,15 @@ public class HomeController : Controller
         HttpResponseMessage response = await _httpClient.GetAsync($"{_patientServiceUrl}");
         if (response.IsSuccessStatusCode)
         {
-            List<Frontend.Models.Patient>? patients = await response.Content.ReadFromJsonAsync<List<Frontend.Models.Patient>>();
+            List<Patient>? patients = await response.Content.ReadFromJsonAsync<List<Patient>>();
 
             return View(patients);
         }
 
         _logger.LogError("Failed to load patients from backend. Status Code: {0}", response.StatusCode);
-        return View(new List<Frontend.Models.Patient>());
+        return View(new List<Patient>());
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+    public IActionResult Error() => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

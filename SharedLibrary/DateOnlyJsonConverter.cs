@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
 namespace BackendPatient.Extensions;
 
 // TODO: verify it is needed
@@ -10,7 +10,7 @@ public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 
     public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (DateOnly.TryParseExact(reader.GetString(), Format, null, System.Globalization.DateTimeStyles.None, out DateOnly date))
+        if (DateOnly.TryParseExact(reader.GetString(), Format, null, DateTimeStyles.None, out DateOnly date))
         {
             return date;
         }

@@ -1,6 +1,5 @@
 using BackendPatient.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace BackendPatient.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
@@ -13,7 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<Patient>().HasKey(p => p.Id);
         modelBuilder.Entity<Patient>()
-            .Property(p => p.Id)
-            .ValueGeneratedOnAdd();
+                    .Property(p => p.Id)
+                    .ValueGeneratedOnAdd();
     }
 }

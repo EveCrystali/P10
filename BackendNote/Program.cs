@@ -5,7 +5,6 @@ using SharedAuthLibrary;
 using SharedAuthorizationLibrary;
 using SharedCorsLibrary;
 using SharedSwaggerLibrary;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add Authorization policies and authentification
@@ -15,12 +14,12 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.AddCorsConfiguration("AllowApiGateway", "http://apigateway:5000");
 
 builder.Services.AddControllers()
-    .AddXmlDataContractSerializerFormatters()
-    // Add Json DateOnly type support
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-    });
+       .AddXmlDataContractSerializerFormatters()
+       // Add Json DateOnly type support
+       .AddJsonOptions(options =>
+       {
+           options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+       });
 
 builder.Services.AddControllers();
 
@@ -31,7 +30,7 @@ builder.Services.AddSwaggerDocumentation();
 builder.Services.AddAuthorizationPolicies();
 
 builder.Services.Configure<NoteDatabaseSettings>(
-    builder.Configuration.GetSection("NoteDatabase"));
+                                                 builder.Configuration.GetSection("NoteDatabase"));
 
 builder.Services.AddSingleton<NotesService>();
 
@@ -52,7 +51,7 @@ app.UseCors("AllowApiGateway");
 
 app.MapControllers();
 
-app.MapGet("/", async context =>
+app.MapGet("/", requestDelegate: async context =>
 {
     await context.Response.WriteAsync("BackendNote is well running.");
 });

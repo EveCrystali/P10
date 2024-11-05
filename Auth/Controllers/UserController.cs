@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace Auth.Controllers;
 
 [Route("user")]
@@ -15,9 +14,9 @@ public class UserController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    private readonly UserManager<User> _userManager;
-
     private readonly IJwtRevocationService _jwtRevocationService;
+
+    private readonly UserManager<User> _userManager;
 
     public UserController(ApplicationDbContext context, UserManager<User> userManager, IJwtRevocationService jwtRevocationService)
     {

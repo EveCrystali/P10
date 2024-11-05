@@ -1,4 +1,4 @@
-namespace Frontend.Controllers.Service;
+namespace Frontend.Services;
 
 public class ServiceUrl(IConfiguration configuration, ILogger logger)
 {

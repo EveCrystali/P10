@@ -2,8 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-
-namespace Frontend.Controllers.Service;
+namespace Frontend.Services;
 
 public class JwtValidationService
 {
@@ -34,7 +33,7 @@ public class JwtValidationService
                 ValidIssuer = _configuration["JwtSettings:Issuer"],
                 ValidAudiences = _configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                ClockSkew = TimeSpan.Zero,
+                ClockSkew = TimeSpan.Zero
             };
 
             JwtSecurityTokenHandler tokenHandler = new();

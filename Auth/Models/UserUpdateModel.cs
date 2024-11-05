@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-
 namespace Auth.Models;
 
 public class UserUpdateModel

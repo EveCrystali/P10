@@ -1,19 +1,18 @@
 using Auth.Models;
 using Microsoft.AspNetCore.Identity;
-
 namespace Auth.Data;
 
 public static class DataSeeder
 {
     private static readonly Dictionary<string, string[]> usersRolesPasswords = new()
     {
-        { "Admin", ["admin@email.com",  "0vBZBB.QH83GeE."]},
+        { "Admin", ["admin@email.com", "0vBZBB.QH83GeE."] },
         { "Practitioner", ["practitioner@email.com", "1vBZBB.QH83GeE."] },
-        { "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."]}
+        { "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."] }
     };
 
     /// <summary>
-    /// Seeds the users in the database.
+    ///     Seeds the users in the database.
     /// </summary>
     /// <param name="userManager">The user manager.</param>
     /// <param name="logger">The logger.</param>
@@ -40,7 +39,7 @@ public static class DataSeeder
     }
 
     /// <summary>
-    /// Seeds the roles in the database.
+    ///     Seeds the roles in the database.
     /// </summary>
     /// <param name="roleManager">The role manager.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
@@ -66,16 +65,16 @@ public static class DataSeeder
     }
 
     /// <summary>
-    /// Seeds the affectations of roles to users.
+    ///     Seeds the affectations of roles to users.
     /// </summary>
     /// <param name="userManager">The user manager.</param>
     /// <param name="roleManager">The role manager.</param>
     /// <param name="logger">The logger.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     /// <remarks>
-    /// This method goes through each user and their corresponding roles
-    /// and adds the user to the role if it does not already exist.
-    /// If the user is not found, it logs an error.
+    ///     This method goes through each user and their corresponding roles
+    ///     and adds the user to the role if it does not already exist.
+    ///     If the user is not found, it logs an error.
     /// </remarks>
     public static async Task SeedAffectationsRolesToUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
     {

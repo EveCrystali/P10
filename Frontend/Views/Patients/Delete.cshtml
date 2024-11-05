@@ -1,4 +1,5 @@
-@model Frontend.Models.Patient
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Patient
 
 @{
     Layout = "_Layout";
@@ -9,7 +10,7 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Delete</title>
 </head>
 
@@ -22,56 +23,56 @@
 
 <body>
 
-    <h3>Are you sure you want to delete this patient?</h3>
-    <div>
-        <hr />
+<h3>Are you sure you want to delete this patient?</h3>
+<div>
+    <hr/>
 
-        <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Id)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Id)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.FirstName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.FirstName)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.LastName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.LastName)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Gender)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Gender)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Address)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Address)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.PhoneNumber)
-            </dd>
-        </dl>
-        
-        <form method="post" asp-controller="Patients" asp-action="Delete">
-            <input type="hidden" name="id" value="@Model.Id" />
-            <input type="submit" value="Delete" class="btn btn-danger" />
-        </form>
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Gender)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Gender)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Address)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Address)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PhoneNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PhoneNumber)
+        </dd>
+    </dl>
 
-        <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
-    </div>
+    <form method="post" asp-controller="Patients" asp-action="Delete">
+        <input type="hidden" name="id" value="@Model.Id"/>
+        <input type="submit" value="Delete" class="btn btn-danger"/>
+    </form>
+
+    <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
+</div>
 </body>
 
 </html>

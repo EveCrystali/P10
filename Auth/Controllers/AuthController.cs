@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace Auth.Controllers;
 
 [Route("auth")]
@@ -16,10 +15,10 @@ public class AuthController(
     IJwtService jwtService,
     ILogger<AuthController> logger, ApplicationDbContext context) : ControllerBase
 {
-    private readonly UserManager<User> _userManager = userManager;
-    private readonly ILogger<AuthController> _logger = logger;
-    private readonly IJwtService _jwtService = jwtService;
     private readonly ApplicationDbContext _context = context;
+    private readonly IJwtService _jwtService = jwtService;
+    private readonly ILogger<AuthController> _logger = logger;
+    private readonly UserManager<User> _userManager = userManager;
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -42,23 +41,24 @@ public class AuthController(
 
             _logger.LogInformation("Login successful, returning tokens.");
 
-            return Ok(new { Token = token, RefreshToken = refreshToken.Token });
+            return Ok(new
+            {
+                Token = token,
+                RefreshToken = refreshToken.Token
+            });
         }
-        else if (user == null)
+        if (user == null)
         {
-            _logger.LogError($"User not found");
+            _logger.LogError("User not found");
             return NotFound("User not found");
         }
-        else if (!await _userManager.CheckPasswordAsync(user, model.Password))
+        if (!await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            _logger.LogError($"User found but password is incorrect");
+            _logger.LogError("User found but password is incorrect");
             return Unauthorized("Invalid username or password");
         }
-        else
-        {
-            _logger.LogError("Something went wrong");
-            return StatusCode(500, "Something went wrong");
-        }
+        _logger.LogError("Something went wrong");
+        return StatusCode(500, "Something went wrong");
     }
 
     [HttpPost]
@@ -87,7 +87,10 @@ public class AuthController(
             _logger.LogWarning("No tokens found or an error occurred during revocation.");
         }
 
-        return Ok(new { Message = "Logout successful" });
+        return Ok(new
+        {
+            Message = "Logout successful"
+        });
     }
 
     [HttpPost]
@@ -96,19 +99,27 @@ public class AuthController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        User user = new() { UserName = model.Username, Email = model.Email, PasswordHash = model.Password };
+        User user = new()
+        {
+            UserName = model.Username,
+            Email = model.Email,
+            PasswordHash = model.Password
+        };
         IdentityResult result = await _userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)
         {
             await _userManager.AddToRoleAsync(user, "User");
-            return Ok(new { Message = "User registered successfully" });
+            return Ok(new
+            {
+                Message = "User registered successfully"
+            });
         }
         return BadRequest(result.Errors);
     }
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] Auth.Models.RefreshRequest model)
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest model)
     {
         RefreshToken? refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == model.RefreshToken);
         if (refreshToken == null || refreshToken.ExpiryDate < DateTime.UtcNow || refreshToken.IsRevoked)
@@ -135,13 +146,17 @@ public class AuthController(
 
         // Delete old refresh tokens
         List<RefreshToken> oldTokens = await _context.RefreshTokens
-            .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
-            .ToListAsync();
+                                                     .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
+                                                     .ToListAsync();
         _context.RefreshTokens.RemoveRange(oldTokens);
 
         await _context.SaveChangesAsync();
 
-        return Ok(new { Token = newToken, RefreshToken = newRefreshToken.Token });
+        return Ok(new
+        {
+            Token = newToken,
+            RefreshToken = newRefreshToken.Token
+        });
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -165,9 +180,9 @@ public class AuthController(
     private async Task<RefreshToken> GetCurrentRefreshTokenAsync(string userId)
     {
         RefreshToken? refreshToken = await _context.RefreshTokens
-            .Where(rt => rt.UserId == userId && !rt.IsRevoked)
-            .OrderByDescending(rt => rt.ExpiryDate)
-            .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No valid refresh token found for the user.");
+                                                   .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                                                   .OrderByDescending(rt => rt.ExpiryDate)
+                                                   .FirstOrDefaultAsync() ?? throw new InvalidOperationException("No valid refresh token found for the user.");
         return refreshToken;
     }
 
@@ -181,10 +196,10 @@ public class AuthController(
 
         // Find all refresh tokens associated with the user
         List<RefreshToken> userTokens = await _context.RefreshTokens
-                                       .Where(rt => rt.UserId == userId && !rt.IsRevoked)
-                                       .ToListAsync();
+                                                      .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                                                      .ToListAsync();
 
-        if (userTokens == null || userTokens.Count == 0)
+        if (userTokens.Count == 0)
         {
             _logger.LogWarning("No active refresh tokens found for the user.");
             return false;
@@ -198,7 +213,7 @@ public class AuthController(
 
         _context.RefreshTokens.UpdateRange(userTokens);
         await _context.SaveChangesAsync();
-        _logger.LogInformation($"All refresh tokens for user have been revoked.");
+        _logger.LogInformation("All refresh tokens for user have been revoked.");
 
         return true;
     }

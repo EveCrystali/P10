@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace BackendDiabetesRiskPrediction.Models;
 
 public class NoteRiskInfo

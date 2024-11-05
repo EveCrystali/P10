@@ -1,23 +1,23 @@
+using BackendPatient.Data;
 using BackendPatient.Models;
 using BackendPatient.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 namespace BackendPatient.Controllers;
 
 [ApiController]
 [Route("patient")]
-public class PatientsController(BackendPatient.Data.ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
+public class PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
 {
-    private readonly BackendPatient.Data.ApplicationDbContext _dbContext = dbContext;
+    private readonly ApplicationDbContext _dbContext = dbContext;
     private readonly IUpdateService<Patient> _updateService = updateService;
 
     /// <summary>
-    /// Retrieves a <see cref="Patient"/> from the database by its identifier.
+    ///     Retrieves a <see cref="Patient" /> from the database by its identifier.
     /// </summary>
     /// <param name="id">The identifier of the patient to retrieve.</param>
-    /// <returns>The retrieved <see cref="Patient"/> object, or a 404 Not Found response if no such patient exists.</returns>
+    /// <returns>The retrieved <see cref="Patient" /> object, or a 404 Not Found response if no such patient exists.</returns>
     [HttpGet("{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> GetPatient(int id)
@@ -46,16 +46,16 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
         {
             Id = patient.Id,
             DateOfBirth = patient.DateOfBirth,
-            Gender = patient.Gender,
+            Gender = patient.Gender
         };
 
         return Ok(patientDTODiabetesRiskPrediction);
     }
 
     /// <summary>
-    /// Retrieves a list of all patients from the database.
+    ///     Retrieves a list of all patients from the database.
     /// </summary>
-    /// <returns>A list of <see cref="Patient"/> objects.</returns>
+    /// <returns>A list of <see cref="Patient" /> objects.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Patient>>> GetPatients()
     {
@@ -65,23 +65,29 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     }
 
     /// <summary>
-    /// Updates a <see cref="Patient"/> in the database.
+    ///     Updates a <see cref="Patient" /> in the database.
     /// </summary>
     /// <param name="id">The id of the patient to update.</param>
     /// <param name="patient">The updated patient.</param>
-    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
+    /// <returns>
+    ///     A <see cref="Task" /> representing the result of the asynchronous operation. The task result contains the HTTP
+    ///     response.
+    /// </returns>
     [HttpPut("{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public async Task<IActionResult> PutPatient(int id, [FromBody] BackendPatient.Models.Patient patient)
+    public async Task<IActionResult> PutPatient(int id, [FromBody] Patient patient)
     {
-        return await _updateService.UpdateEntity(id, patient, PatientExists, p => p.Id);
+        return await _updateService.UpdateEntity(id, patient, PatientExists, getIdFunc: p => p.Id);
     }
 
     /// <summary>
-    /// Creates a new <see cref="Patient"/> in the database.
+    ///     Creates a new <see cref="Patient" /> in the database.
     /// </summary>
     /// <param name="patient">The new patient to be created.</param>
-    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
+    /// <returns>
+    ///     A <see cref="Task" /> representing the result of the asynchronous operation. The task result contains the HTTP
+    ///     response.
+    /// </returns>
     [HttpPost]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> PostPatient([FromBody] Patient patient)
@@ -109,10 +115,13 @@ public class PatientsController(BackendPatient.Data.ApplicationDbContext dbConte
     }
 
     /// <summary>
-    /// Deletes a <see cref="Patient"/> from the database.
+    ///     Deletes a <see cref="Patient" /> from the database.
     /// </summary>
     /// <param name="id">The id of the patient to delete.</param>
-    /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation. The task result contains the HTTP response.</returns>
+    /// <returns>
+    ///     A <see cref="Task" /> representing the result of the asynchronous operation. The task result contains the HTTP
+    ///     response.
+    /// </returns>
     [HttpDelete("{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeletePatient(int id)

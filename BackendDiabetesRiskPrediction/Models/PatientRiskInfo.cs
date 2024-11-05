@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-
 namespace BackendDiabetesRiskPrediction.Models;
 
 public class PatientRiskInfo

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using SharedLibrary.Extensions;
-
 namespace BackendPatient.Models;
 
 public class Patient : IValidatable
@@ -36,6 +35,11 @@ public class Patient : IValidatable
     [RegularExpression(@"^[0-9]{3}[-]([0-9]{3})[-]([0-9]{4})$", ErrorMessage = "Not a valid phone number")]
     public string? PhoneNumber { get; set; }
 
+    public void Validate()
+    {
+        ValidationExtensions.Validate(this);
+    }
+
     // NOTE: This method is responsible for converting raw patient data (unformatted)
     // into a strongly typed Patient object.
     // This conversion is primarily used in the data seeding process or other operations
@@ -46,13 +50,13 @@ public class Patient : IValidatable
     // (e.g., PatientFactory) to respect the Single Responsibility Principle (SRP)
     // and improve separation of concerns as the application grows.
     public static Patient FormatPatient((string nom, string prenom, string? dateDeNaissance, string genre,
-                                        string? adresse, string? telephone) unformattedPatient)
+                                            string? adresse, string? telephone) unformattedPatient)
     {
         DateOnly dateOfBirthFormatted;
         try
         {
-            dateOfBirthFormatted = DateOnly.ParseExact(unformattedPatient.dateDeNaissance?.ToString() ?? string.Empty,
-                                                    "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            dateOfBirthFormatted = DateOnly.ParseExact(unformattedPatient.dateDeNaissance ?? string.Empty,
+                                                       "yyyy-MM-dd", CultureInfo.InvariantCulture);
             return new Patient
             {
                 FirstName = unformattedPatient.nom,
@@ -66,7 +70,7 @@ public class Patient : IValidatable
         catch (FormatException ex)
         {
             throw new InvalidOperationException("Exception occured while parsing dateOfBirth from patient "
-                             + $"{unformattedPatient.nom} {unformattedPatient.prenom} with exception : {ex}");
+                                                + $"{unformattedPatient.nom} {unformattedPatient.prenom} with exception : {ex}");
         }
         catch (ArgumentNullException ex)
         {
@@ -76,10 +80,5 @@ public class Patient : IValidatable
         {
             throw new Exception("An unexpected exception occured : " + ex.Message);
         }
-    }
-
-    public void Validate()
-    {
-        ValidationExtensions.Validate(this);
     }
 }

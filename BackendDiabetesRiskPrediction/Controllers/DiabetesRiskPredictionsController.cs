@@ -1,9 +1,7 @@
 using BackendDiabetesRiskPrediction.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using BackendDiabetesRiskPrediction.Services;
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 namespace BackendDiabetesRiskPrediction.Controllers;
 
 [Route("api/[controller]")]
@@ -15,11 +13,9 @@ public class BackendDiabetesRiskPredictionsController(DiabetesRiskNotePrediction
 
 
     [HttpGet]
-    public DiabetesRisk GetDiabetesRisk(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
+    public async Task<DiabetesRisk> GetDiabetesRisk([FromBody] DiabetesRiskRequest diabetesRiskRequest)
     {
-        DiabetesRisk diabetesRisk = _diabetesRiskNotePredictionService.DiabetesRiskPrediction(notes, patientRiskInfo);
+        DiabetesRisk diabetesRisk = await _diabetesRiskNotePredictionService.DiabetesRiskPrediction(diabetesRiskRequest.NotesRiskInfo, diabetesRiskRequest.PatientRiskInfo);
         return diabetesRisk;
     }
-
-
 }

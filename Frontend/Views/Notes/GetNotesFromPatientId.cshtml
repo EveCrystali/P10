@@ -1,4 +1,4 @@
-@model List<Frontend.Models.Note>
+@model List<Note>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -18,42 +18,42 @@
 }
 
 <body>
-    <h1>Notes du Patient</h1>
+<h1>Notes du Patient</h1>
 
-    @if (Model != null && Model.Any())
-    {
-        <div id="notes-container">
-            @foreach (var note in Model)
-            {
-                <div class="note">
-                    <h2>@note.Title</h2>
-                    <p>@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
-                    @if (note.CreatedDate.HasValue)
-                    {
-                        <small>Date de création: @note.CreatedDate.Value.ToString()</small>
-                    }
-                    @if (note.LastUpdatedDate.HasValue)
-                    {
-                        <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
-                    }
-                    @if (note.Creator != null)
-                    {
-                        <small>Créateur : @note.Creator</small>
-                    }
-                </div>
-                <div>
-                        @Html.ActionLink("Editer", "Edit", "Notes", new { id = note.Id }) |
-                </div>
-                <div>
-                        @Html.ActionLink("Supprimer", "Delete", "Notes", new { id = note.Id })
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <p>Aucune note trouvée</p>
-    }
+@if (Model != null && Model.Any())
+{
+    <div id="notes-container">
+        @foreach (var note in Model)
+        {
+            <div class="note">
+                <h2>@note.Title</h2>
+                <p>@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
+                @if (note.CreatedDate.HasValue)
+                {
+                    <small>Date de création: @note.CreatedDate.Value.ToString()</small>
+                }
+                @if (note.LastUpdatedDate.HasValue)
+                {
+                    <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
+                }
+                @if (note.Creator != null)
+                {
+                    <small>Créateur : @note.Creator</small>
+                }
+            </div>
+            <div>
+                @Html.ActionLink("Editer", "Edit", "Notes", new { id = note.Id }) |
+            </div>
+            <div>
+                @Html.ActionLink("Supprimer", "Delete", "Notes", new { id = note.Id })
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>Aucune note trouvée</p>
+}
 </body>
 
 </html>

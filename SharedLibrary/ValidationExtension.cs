@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-
+using System.Reflection;
 namespace SharedLibrary.Extensions;
 
 public static class ValidationExtensions
@@ -23,10 +23,10 @@ public static class ValidationExtensions
 
     public static void ValidateDateOnlyProperties(this IValidatable entity)
     {
-        IEnumerable<System.Reflection.PropertyInfo> dateOnlyProperties = entity.GetType().GetProperties()
-            .Where(prop => prop.PropertyType == typeof(DateOnly?) || prop.PropertyType == typeof(DateOnly));
+        IEnumerable<PropertyInfo> dateOnlyProperties = entity.GetType().GetProperties()
+                                                             .Where(prop => prop.PropertyType == typeof(DateOnly?) || prop.PropertyType == typeof(DateOnly));
 
-        foreach (System.Reflection.PropertyInfo? prop in dateOnlyProperties)
+        foreach (PropertyInfo? prop in dateOnlyProperties)
         {
             DateOnly? value = prop.GetValue(entity) as DateOnly?;
             if (value != null && value.HasValue)
@@ -52,10 +52,10 @@ public static class ValidationExtensions
             return;
         }
         bool isValid = DateOnly.TryParseExact(date.Value.ToString("yyyy-MM-dd"),
-                                           "yyyy-MM-dd",
-                                           CultureInfo.InvariantCulture,
-                                           DateTimeStyles.None,
-                                           out DateOnly tempDate);
+                                              "yyyy-MM-dd",
+                                              CultureInfo.InvariantCulture,
+                                              DateTimeStyles.None,
+                                              out DateOnly tempDate);
         if (!isValid)
         {
             throw new ValidationException($"{propertyName} must be in the format yyyy-MM-dd");

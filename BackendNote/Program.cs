@@ -1,3 +1,4 @@
+using BackendNote.Data;
 using BackendNote.Models;
 using BackendNote.Services;
 using BackendPatient.Extensions;
@@ -25,6 +26,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
+builder.Services.AddScoped<DataSeeder>();
 
 // Configure authorization policies
 builder.Services.AddAuthorizationPolicies();
@@ -37,6 +39,12 @@ builder.Services.AddSingleton<NotesService>();
 builder.WebHost.UseUrls("http://*:7202");
 
 WebApplication app = builder.Build();
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    DataSeeder dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await dataSeeder.SeedNotesAsync();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

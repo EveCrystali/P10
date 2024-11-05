@@ -5,7 +5,7 @@ namespace BackendNote.Services;
 
 public class NotesService
 {
-    private readonly IMongoCollection<Note> _notesCollection;
+    public readonly IMongoCollection<Note> _notesCollection;
 
 
     public NotesService(

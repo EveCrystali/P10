@@ -8,6 +8,9 @@ using SharedCorsLibrary;
 using SharedSwaggerLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add Authorization policies and authentification
 builder.Services.AddJwtAuthentication(builder.Configuration);
 

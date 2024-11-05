@@ -3,9 +3,9 @@ using BackendNote.Services;
 using MongoDB.Driver;
 namespace BackendNote.Data;
 
-public class DataSeeder(NotesService notesService)
+public class DataSeeder(NotesService notesService, ILogger<DataSeeder> logger)
 {
-    private List<Note> SeedData() => new()
+    private List<Note> notesAtStartup = new()
     {
         new Note
         {
@@ -65,9 +65,11 @@ public class DataSeeder(NotesService notesService)
 
     public async Task SeedNotesAsync()
     {
-        List<Note> notes = SeedData();
+        List<Note> notes = notesAtStartup;
         int batchSize = 10;
         List<Task> tasks = new();
+
+        logger.LogInformation("Start seeding notes");
 
         for (int i = 0; i < notes.Count; i += batchSize)
         {
@@ -84,6 +86,11 @@ public class DataSeeder(NotesService notesService)
                     if (existingNote == null)
                     {
                         await notesService.CreateAsync(note);
+                        logger.LogDebug($"Note created with title {note.Title} and body {note.Body}");
+                    }
+                    else
+                    {
+                        logger.LogDebug($"Note with title {note.Title} and body {note.Body} already exists");
                     }
                 }));
             }
@@ -91,5 +98,7 @@ public class DataSeeder(NotesService notesService)
             await Task.WhenAll(tasks);
             tasks.Clear();
         }
+
+        logger.LogInformation("Finish seeding notes");
     }
 }

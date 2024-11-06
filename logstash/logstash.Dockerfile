@@ -14,7 +14,7 @@ RUN apt-get update && \
 # Crée le répertoire pour les fichiers de base de données SQLite
 RUN mkdir -p /usr/share/logstash/pipeline/db && chmod 777 /usr/share/logstash/pipeline/db
 
-COPY .pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+COPY ./pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
 
 # Revenir à l'utilisateur logstash
 USER logstash

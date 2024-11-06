@@ -12,6 +12,7 @@
     },
     "Docker": {
       "commandName": "Docker",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {

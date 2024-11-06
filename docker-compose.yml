@@ -1,25 +1,84 @@
 services:
 
-  frontend:
-    image: frontend-image
-    container_name: frontend
-    build:
-      context: .
-      dockerfile: Frontend/frontend.Dockerfile
-    env_file:
-      - .env
+  mongodb:
+    container_name: mongodb_container
+    image: mongo:latest
     ports:
-      - "7000:7000"
-    volumes:
-      - shared-output:/app/shared
+      - "27017:27017"
+    restart: always
     environment:
-      - Configuration=Docker
-      - ASPNETCORE_URLS=http://*:7000
-    depends_on:
-      - backendpatient
-      - apigateway
+      ASPNETCORE_ENVIRONMENT: "Development"
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     networks:
       - elastic
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    container_name: elasticsearch_container
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_config:/usr/share/elasticsearch/config
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cat/health" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ingest.geoip.downloader.enabled=false
+    networks:
+      - elastic
+
+  logstash:
+    build:
+      context: ./logstash
+      dockerfile: logstash.Dockerfile
+    container_name: logstash_container
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/config:/usr/share/logstash/config
+    ports:
+      - "5044:5044"
+    env_file:
+      - .env
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9600/_node/stats" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - elastic
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    build:
+      context: ./mongodb
+      dockerfile: mongo-express.Dockerfile
+    volumes:
+      - ./mongodb:/mongodb
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - elastic
+    command: [ "sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh" ]
 
   apigateway:
     container_name: apigateway
@@ -75,7 +134,7 @@ services:
       - "7200:7200"
     networks:
       - elastic
-  
+
   backendnote:
     container_name: backendnote
     build:
@@ -106,7 +165,6 @@ services:
     env_file:
       - .env
     depends_on:
-      - restore
       - elasticsearch
       - mongodb
     environment:
@@ -117,104 +175,26 @@ services:
     networks:
       - elastic
 
-  mongodb:
-    container_name: mongodb_container
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    restart: always
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.runCommand({ ping: 1 })" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    networks:
-      - elastic
-  
-  restore:
+  frontend:
+    image: frontend-image
+    container_name: frontend
     build:
-      context: ./mongodb
-      dockerfile: mongodb.Dockerfile
-    volumes:
-      - ./mongodb/backup:/backup
-    environment:
-      - MONGO_HOST=mongodb_container
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    networks:
-      - elastic
-  
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
-    container_name: elasticsearch_container
-    ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch_config:/usr/share/elasticsearch/config
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cat/health" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ingest.geoip.downloader.enabled=false
-    networks:
-      - elastic
-
-  logstash:
-    build:
-      context: ./logstash
-      dockerfile: logstash.Dockerfile
-    container_name: logstash_container
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config:/usr/share/logstash/config
-    ports:
-      - "5044:5044"
+      context: .
+      dockerfile: Frontend/frontend.Dockerfile
     env_file:
       - .env
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-      restore:
-        condition: service_completed_successfully
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9600/_node/stats" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    networks:
-      - elastic
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo_express
-    
-    build:
-      context: ./mongodb
-      dockerfile: mongo-express.Dockerfile
-    volumes:
-      - ./mongodb:/mongodb
     ports:
-      - "8081:8081"
+      - "7000:7000"
+    volumes:
+      - shared-output:/app/shared
     environment:
-      - ME_CONFIG_MONGODB_URL=mongodb://mongodb_container:27017
+      - Configuration=Docker
+      - ASPNETCORE_URLS=http://*:7000
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - backendpatient
+      - apigateway
     networks:
       - elastic
-    command: [ "sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh" ]
 
 volumes:
   mongo_data:
@@ -225,6 +205,7 @@ volumes:
     driver: local
   shared-output:
   data_protection_keys:
+
 
 networks:
   elastic:

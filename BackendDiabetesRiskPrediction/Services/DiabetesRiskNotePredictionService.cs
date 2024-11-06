@@ -4,8 +4,6 @@ namespace BackendDiabetesRiskPrediction.Services;
 public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictionService> logger, ElasticsearchService elasticsearchService)
 {
 
-    private readonly ILogger<DiabetesRiskNotePredictionService> _logger = logger;
-
     private readonly HashSet<string> triggerWords =
     [
         "Hémoglobine A1C",
@@ -22,15 +20,20 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
         "Anticorps"
     ];
 
-    public async Task<DiabetesRisk> DiabetesRiskPrediction(List<NoteRiskInfo> notes, PatientRiskInfo patientRiskInfo)
+    public async Task<DiabetesRiskPrediction> DiabetesRiskPrediction(List<NoteRiskInfo>? notes, PatientRiskInfo? patientRiskInfo)
     {
-        DiabetesRisk diabetesRisk;
+        DiabetesRiskPrediction diabetesRiskPrediction = new();
+        if (notes is null || patientRiskInfo is null)
+        {
+            diabetesRiskPrediction.DiabetesRisk = DiabetesRisk.None;
+            return diabetesRiskPrediction;
+        }
 
         int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(notes);
 
-        diabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
+        diabetesRiskPrediction.DiabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
 
-        return diabetesRisk;
+        return diabetesRiskPrediction;
     }
 
     private async Task<int> DiabetesRiskPredictionNotesAnalysis(List<NoteRiskInfo> notes)

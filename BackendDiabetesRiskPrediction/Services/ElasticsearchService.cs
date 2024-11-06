@@ -1,111 +1,74 @@
-using System.Text;
 using BackendDiabetesRiskPrediction.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Elasticsearch.Net;
+using Nest;
 namespace BackendDiabetesRiskPrediction.Services;
 
 public class ElasticsearchService
 {
-    private readonly string _elasticsearchUrl = "http://elasticsearch:7203";
-    private readonly HttpClient _httpClient;
+    private readonly ElasticClient _elasticsearchClient;
 
-    public ElasticsearchService()
+    private readonly ILogger<ElasticsearchService> _logger;
+
+    public ElasticsearchService(ILogger<ElasticsearchService> logger)
     {
-        _httpClient = new HttpClient();
+        ConnectionSettings settings = new ConnectionSettings(new Uri("http://elasticsearch:9200"))
+                                      .DefaultIndex("notes_index")
+                                      .ServerCertificateValidationCallback(CertificateValidations.AllowAll)
+                                      .DisablePing()
+                                      .DisableDirectStreaming()
+                                      .ThrowExceptions();
+
+        _elasticsearchClient = new ElasticClient(settings);
+
+        _logger = logger;
+
+        _logger.LogInformation("ElasticsearchService initialized successfully.");
     }
 
     public async Task IndexNoteAsync(NoteRiskInfo note)
     {
-        var requestBody = new
-        {
-            index = "notes",
-            id = note.Id,
-            document = new
-            {
-                note.Title,
-                note.Body,
-                note.PatientId
-            }
-        };
+        var response = await _elasticsearchClient.IndexDocumentAsync(note);
 
-        StringContent content = new(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes/_doc/{note.Id}", content);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsValid)
+        {
+            throw new Exception($"Failed to index note: {response.OriginalException.Message}");
+        }
     }
 
     public async Task<int> CountWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
-        // FUTURE: Add null check conditions
+        _logger.LogInformation("CountWordsInNotes called");
+        var response = await _elasticsearchClient.SearchAsync<NoteRiskInfo>(s => s
+                                                                                 .Query(q => q
+                                                                                            .Bool(b => b
+                                                                                                      .Must(
+                                                                                                            m => m.Term(t => t.Field(f => f.PatientId).Value(patientId)),
+                                                                                                            m => m.Match(mt => mt
+                                                                                                                               .Field(f => f.Body)
+                                                                                                                               .Query(string.Join(" ", wordsToCount))
+                                                                                                                               .Analyzer("custom_french_analyzer")
+                                                                                                                        )
+                                                                                                           )
+                                                                                                 )
+                                                                                       )
+                                                                                 .Aggregations(a => a
+                                                                                                   .Terms("word_counts", t => t
+                                                                                                                              .Field(f => f.Body.Suffix("keyword"))
+                                                                                                                              .Size(10000)
+                                                                                                         )
+                                                                                              )
+                                                                           );
 
-        // Make a string of all the words to count
-        string? queryWords = string.Join(" ", wordsToCount);
-        // Initialize the word count
-        int wordCounts = 0;
-
-        // Build the query
-        var requestBody = new
+        if (!response.IsValid)
         {
-            query = new
-            {
-                // Needed to combine several condition
-                @bool = new
-                {
-                    // conditions must all be true
-                    must = new object[]
-                    {
-                        // Condition 1: search in the patient id
-                        new
-                        {
-                            term = new
-                            {
-                                PatientId = patientId
-                            }
-                        },
-                        // Condition 2: search in the body
-                        // ? What is exactly custom_french_analyzer ? It refers to create_index.json and custom_analyzer.json
-                        new
-                        {
-                            match = new
-                            {
-                                Body = new
-                                {
-                                    query = queryWords,
-                                    analyzer = "custom_french_analyzer"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            // Aggregate to count word occurrences
-            aggs = new
-            {
-                // name of the aggregation
-                word_counts = new
-                {
-                    // Term type aggregation
-                    terms = new
-                    {
-                        // name of the field
-                        field = "Body.keyword",
-                        // size of the aggregation : the maximum of terms that is returned
-                        size = 10000
-                    }
-                }
-            }
-        };
+            throw new Exception($"Failed to search notes: {response.OriginalException.Message}");
+        }
 
-        HttpResponseMessage response = await _httpClient.PostAsync($"{_elasticsearchUrl}/notes_index/_search",
-                                                                   new StringContent(JObject.FromObject(requestBody).ToString(), Encoding.UTF8, "application/json"));
+        // Extract word count from aggregation
+        var wordCounts = response.Aggregations.Terms("word_counts").Buckets
+                                 .Sum(b => (int)b.DocCount);
 
-        response.EnsureSuccessStatusCode();
-
-        string? responseBody = await response.Content.ReadAsStringAsync();
-        JObject? jsonResponse = JObject.Parse(responseBody);
-
-        wordCounts = jsonResponse["aggregations"]["word_counts"]["buckets"]
-            .Sum(b => (int)b["doc_count"]);
-
+        _logger.LogInformation($"Word count is : {wordCounts}");
         return wordCounts;
     }
 }

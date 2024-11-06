@@ -34,12 +34,12 @@ public class PatientsController : Controller
         }
 
         // Get Patient from BackendPatient
-        HttpRequestMessage request1 = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
-        HttpResponseMessage responseFromPatientService = await _httpClientService.SendAsync(request1);
+        HttpRequestMessage requestForBackendPatient = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
+        HttpResponseMessage responseFromPatientService = await _httpClientService.SendAsync(requestForBackendPatient);
 
         // Get Notes from BackendNote for the patient Id
-        HttpRequestMessage request2 = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{id}");
-        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request2);
+        HttpRequestMessage requestForBackendNote = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{id}");
+        HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(requestForBackendNote);
 
         if (responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized ||
             responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized)
@@ -61,19 +61,25 @@ public class PatientsController : Controller
             DiabetesRiskRequestModel diabetesRiskRequestModel = DiabetesRiskPredictionService.MapPatientViewModelAndNoteToDiabetesRiskRequestModel(patientViewModel);
 
             // Secondly let's ask DiabetesRiskPredictionService
-            HttpRequestMessage request3 = new(HttpMethod.Get, $"{_diabetesRiskPredictionServiceUrl}/")
+            HttpRequestMessage requestForDiabetesRiskPredictionService = new(HttpMethod.Get, $"{_diabetesRiskPredictionServiceUrl}/")
             {
                 Content = JsonContent.Create(diabetesRiskRequestModel)
             };
 
+            _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}", id);
+            _logger.LogInformation("Request body: {RequestBody}", diabetesRiskRequestModel);
+
             // Finally let's manage the answer for DiabetesRiskPredictionService
-            HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(request3);
+            HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(requestForDiabetesRiskPredictionService);
 
             if (responseFromDiabetesRiskService.StatusCode == HttpStatusCode.Unauthorized)
             {
+                _logger.LogInformation("Unauthorized access to Diabetes Risk Prediction Service. Status code: {StatusCode}", responseFromDiabetesRiskService.StatusCode);
                 return RedirectToAction(nameof(AuthController.Login),
                                         nameof(AuthController).Replace("Controller", ""));
             }
+
+            _logger.LogDebug("Reading content from Json now...");
 
             patientViewModel.DiabetesRiskPrediction = await responseFromDiabetesRiskService.Content.ReadFromJsonAsync<DiabetesRiskPrediction>();
 

@@ -6,6 +6,9 @@ using SharedCorsLibrary;
 using SharedSwaggerLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add Authorization policies and authentification
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
@@ -42,8 +45,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseRouting();
 
 app.UseCors("AllowApiGateway");
@@ -52,7 +53,7 @@ app.MapControllers();
 
 app.MapGet("/", requestDelegate: async context =>
 {
-    await context.Response.WriteAsync("BackendNote is well running.");
+    await context.Response.WriteAsync("BackendDiabetesRiskPrediction is well running.");
 });
 
 app.UseAuthentication();

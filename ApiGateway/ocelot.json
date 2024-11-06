@@ -58,6 +58,24 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/diabetesriskprediction/",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "backenddiabetesriskprediction",
+          "Port": 7204
+        }
+      ],
+      "UpstreamPathTemplate": "/diabetesriskprediction/",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/patient/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

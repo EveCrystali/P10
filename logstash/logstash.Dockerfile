@@ -16,6 +16,10 @@ RUN mkdir -p /usr/share/logstash/pipeline/db && chmod 777 /usr/share/logstash/pi
 
 COPY ./pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
 
+# Copier le script de chargement des templates pour elasticsearch
+COPY ./config/load_template.sh /usr/share/logstash/load_template.sh
+RUN chmod +x /usr/share/logstash/load_template.sh
+
 # Revenir à l'utilisateur logstash
 USER logstash
 

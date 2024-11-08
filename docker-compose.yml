@@ -24,6 +24,11 @@ services:
     volumes:
       - elasticsearch_config:/usr/share/elasticsearch/config
       - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch/config/custom_analyzer.json:/usr/share/elasticsearch/config/custom_analyzer.json
+      - ./elasticsearch/config/create_index.json:/usr/share/elasticsearch/config/create_index.json
+      - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
+
+      # - ./elasticsearch/init/:/usr/share/elasticsearch/init/
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cat/health" ]
       interval: 5s
@@ -35,6 +40,8 @@ services:
       - ingest.geoip.downloader.enabled=false
     networks:
       - elastic
+    # command: [ "sh", "/usr/share/elasticsearch/init/elasticsearch-init.sh"]
+    mem_limit: 2g
 
   logstash:
     build:

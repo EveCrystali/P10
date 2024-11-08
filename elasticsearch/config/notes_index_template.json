@@ -1,0 +1,32 @@
+{
+  "index_patterns": [
+    "notes_index*"
+  ],
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "analyzer": {
+        "custom_french_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "french_stem"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "custom_french_analyzer"
+      },
+      "body": {
+        "type": "text",
+        "analyzer": "custom_french_analyzer"
+      }
+    }
+  }
+}

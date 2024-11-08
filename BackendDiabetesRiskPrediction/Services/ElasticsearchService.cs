@@ -16,7 +16,14 @@ public class ElasticsearchService
                                       .ServerCertificateValidationCallback(CertificateValidations.AllowAll)
                                       .DisablePing()
                                       .DisableDirectStreaming()
-                                      .ThrowExceptions();
+                                      .ThrowExceptions()
+                                      .EnableDebugMode()
+                                      .PrettyJson()
+                                      .OnRequestCompleted(response =>
+                                      {
+                                          Console.WriteLine($"Request: {response.DebugInformation}");
+                                      });
+
 
         _elasticsearchClient = new ElasticClient(settings);
 
@@ -35,40 +42,48 @@ public class ElasticsearchService
         }
     }
 
-    public async Task<int> CountWordsInNotes(int patientId, HashSet<string> wordsToCount)
+    public async Task<int> CountUniqueWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
         _logger.LogInformation("CountWordsInNotes called");
+
         var response = await _elasticsearchClient.SearchAsync<NoteRiskInfo>(s => s
-                                                                                 .Query(q => q
-                                                                                            .Bool(b => b
-                                                                                                      .Must(
-                                                                                                            m => m.Term(t => t.Field(f => f.PatientId).Value(patientId)),
-                                                                                                            m => m.Match(mt => mt
-                                                                                                                               .Field(f => f.Body)
-                                                                                                                               .Query(string.Join(" ", wordsToCount))
-                                                                                                                               .Analyzer("custom_french_analyzer")
-                                                                                                                        )
-                                                                                                           )
-                                                                                                 )
-                                                                                       )
-                                                                                 .Aggregations(a => a
-                                                                                                   .Terms("word_counts", t => t
-                                                                                                                              .Field(f => f.Body.Suffix("keyword"))
-                                                                                                                              .Size(10000)
-                                                                                                         )
-                                                                                              )
-                                                                           );
+            .Query(q => q
+                .Bool(b => b
+                    .Must(m => m.Term("PatientId", patientId)) // Utilisation correcte du champ
+                    .Should(wordsToCount.Select(word => (Func<QueryContainerDescriptor<NoteRiskInfo>, QueryContainer>)(m => m.Match(mt => mt
+                        .Field("Body")
+                        .Query(word)
+                        .Analyzer("custom_french_analyzer"))))
+                        .ToArray())
+                    .MinimumShouldMatch(1)
+                )
+            )
+            .Aggregations(a => a
+                .Terms("unique_word_counts", t => t
+                    .Field("Body")
+                    .Size(10000)
+                )
+            )
+        );
 
         if (!response.IsValid)
         {
             throw new Exception($"Failed to search notes: {response.OriginalException.Message}");
         }
 
-        // Extract word count from aggregation
-        var wordCounts = response.Aggregations.Terms("word_counts").Buckets
-                                 .Sum(b => (int)b.DocCount);
+        // Extraire les résultats d'agrégation
+        var uniqueWordsFound = new HashSet<string>();
+        var termsAgg = response.Aggregations.Terms("unique_word_counts");
+        if (termsAgg != null)
+        {
+            foreach (var bucket in termsAgg.Buckets)
+            {
+                uniqueWordsFound.Add(bucket.Key.ToString().ToLowerInvariant());
+            }
+        }
 
-        _logger.LogInformation($"Word count is : {wordCounts}");
-        return wordCounts;
+        _logger.LogInformation($"Unique word count is : {uniqueWordsFound.Count}");
+        return uniqueWordsFound.Count;
     }
+
 }

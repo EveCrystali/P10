@@ -24,9 +24,11 @@ services:
     volumes:
       - elasticsearch_config:/usr/share/elasticsearch/config
       - elasticsearch_data:/usr/share/elasticsearch/data
-      - ./elasticsearch/config/custom_analyzer.json:/usr/share/elasticsearch/config/custom_analyzer.json
+      # - ./elasticsearch/config/custom_analyzer.json:/usr/share/elasticsearch/config/custom_analyzer.json
       - ./elasticsearch/config/create_index.json:/usr/share/elasticsearch/config/create_index.json
       - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/load_template.sh:/usr/share/elasticsearch/config/load_template.sh
 
       # - ./elasticsearch/init/:/usr/share/elasticsearch/init/
     healthcheck:
@@ -43,6 +45,29 @@ services:
     # command: [ "sh", "/usr/share/elasticsearch/init/elasticsearch-init.sh"]
     mem_limit: 2g
 
+  init-template:
+    image: curlimages/curl:latest # Image légère pour exécuter des commandes curl
+    container_name: init-template
+    depends_on:
+      - elasticsearch
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for Elasticsearch to be ready...';
+      until curl -s http://elasticsearch:9200/_cat/health > /dev/null; do
+        sleep 5;
+      done;
+      echo 'Elasticsearch is ready. Loading index template...';
+      curl -X PUT 'http://elasticsearch:9200/_index_template/notes_index_template' \
+      -H 'Content-Type: application/json' \
+      -d @/usr/share/elasticsearch/config/notes_index_template.json;
+      echo 'Template loaded successfully!';
+      "
+    volumes:
+      - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
+    networks:
+      - elastic
+
+    
   logstash:
     build:
       context: ./logstash

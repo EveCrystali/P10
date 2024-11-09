@@ -1,20 +1,26 @@
 {
-    "settings": {
-      "analysis": {
-        "analyzer": {
-          "custom_french_analyzer": {
-            "type": "custom",
-            "tokenizer": "standard",
-            "filter": ["lowercase", "french_stem"]
-          }
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "analyzer": {
+        "custom_french_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "french_stem", "asciifolding"]
+        }
+      },
+      "filter": {
+        "french_stem": {
+          "type": "stemmer",
+          "language": "light_french"
         }
       }
-    },
-    "mappings": {
-      "properties": {
-        "title": { "type": "text", "analyzer": "custom_french_analyzer" },
-        "body": { "type": "text", "analyzer": "custom_french_analyzer" }
-      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": { "type": "text", "analyzer": "custom_french_analyzer" },
+      "body": { "type": "text", "analyzer": "custom_french_analyzer" }
     }
   }
-  
+}

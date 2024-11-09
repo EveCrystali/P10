@@ -2,10 +2,12 @@ cluster.name: "docker-cluster"
 network.host: 0.0.0.0
 ingest.geoip.downloader.enabled: false
 
-
-index.analysis:
-  analyzer:
-    custom_french_analyzer:
-      type: custom
-      tokenizer: standard
-      filter: [lowercase, french_stem]
+# index.analysis:
+#   analyzer:
+#     custom_french_analyzer:
+#       type: custom
+#       tokenizer: standard
+#       filter: [lowercase, french_stem]
+      
+# index.templates.notes_index_template:
+#   file: "/usr/share/elasticsearch/config/notes_index_template.json"

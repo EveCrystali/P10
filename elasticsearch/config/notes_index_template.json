@@ -27,11 +27,11 @@
     },
     "mappings": {
       "properties": {
-        "title": {
+        "Title": {
           "type": "text",
           "analyzer": "custom_french_analyzer"
         },
-        "body": {
+        "Body": {
           "type": "text",
           "analyzer": "custom_french_analyzer"
         }

@@ -60,7 +60,7 @@ public class ElasticsearchService
             )
             .Aggregations(a => a
                 .Terms("unique_word_counts", t => t
-                    .Field("Body.keyword")
+                    .Field("Body")
                     .Size(10000)
                 )
             )

@@ -127,7 +127,11 @@ public class ElasticsearchService
 
                 IEnumerable<string> bodyTokens = analyzeBodyResponse.Tokens.Select(token => token.Token);
 
-                uniqueWordsInNotes.UnionWith(bodyTokens.Intersect(analyzedWords));
+                IEnumerable<string> commonWords = bodyTokens.Intersect(analyzedWords);
+
+                _logger.LogInformation("Common words found in note {id}: {commonWords}", hit.Id, string.Join(", ", commonWords));
+
+                uniqueWordsInNotes.UnionWith(commonWords);
             }
         }
 

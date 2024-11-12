@@ -6,47 +6,56 @@
         "custom_french_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
-          "filter": ["lowercase", "french_stem", "asciifolding"]
+          "filter": [
+            "lowercase",
+            "french_stem",
+            "asciifolding",
+            "french_stop"
+          ]
         }
       },
       "normalizer": {
-          "lowercase_normalizer": {
-            "type": "custom",
-            "char_filter": [],
-            "filter": [
-              "lowercase",
-              "asciifolding"
-            ]
-          }
-        },
+        "lowercase_normalizer": {
+          "type": "custom",
+          "char_filter": [],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      },
       "filter": {
         "french_stem": {
           "type": "stemmer",
           "language": "light_french"
+        },
+        "french_stop": {
+          "type": "stop",
+          "stopwords": "_french_" 
         }
       }
     }
   },
   "mappings": {
-      "properties": {
-        "Title": {
-          "type": "text",
-          "analyzer": "custom_french_analyzer"
-        },
-        "Body": {
-          "type": "text",
-          "analyzer": "custom_french_analyzer",
-          "fielddata": true,
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "normalizer": "lowercase_normalizer"
-            }
+    "properties": {
+      "Title": {
+        "type": "text",
+        "analyzer": "custom_french_analyzer"
+      },
+      "Body": {
+        "type": "text",
+        "analyzer": "custom_french_analyzer",
+        "fielddata": true,
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "normalizer": "lowercase_normalizer"
           }
-        },
-        "PatientId": {
-          "type": "integer"
         }
+      },
+      "PatientId": {
+        "type": "integer"
       }
     }
+  }
 }

@@ -44,12 +44,16 @@
         "Body": {
           "type": "text",
           "analyzer": "custom_french_analyzer",
+          "fielddata": true,
           "fields": {
             "keyword": {
               "type": "keyword",
               "normalizer": "lowercase_normalizer"
             }
           }
+        },
+        "PatientId": {
+          "type": "integer"
         }
       }
     }

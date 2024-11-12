@@ -9,6 +9,16 @@
           "filter": ["lowercase", "french_stem", "asciifolding"]
         }
       },
+      "normalizer": {
+          "lowercase_normalizer": {
+            "type": "custom",
+            "char_filter": [],
+            "filter": [
+              "lowercase",
+              "asciifolding"
+            ]
+          }
+        },
       "filter": {
         "french_stem": {
           "type": "stemmer",
@@ -18,9 +28,25 @@
     }
   },
   "mappings": {
-    "properties": {
-      "title": { "type": "text", "analyzer": "custom_french_analyzer" },
-      "body": { "type": "text", "analyzer": "custom_french_analyzer" }
+      "properties": {
+        "Title": {
+          "type": "text",
+          "analyzer": "custom_french_analyzer"
+        },
+        "Body": {
+          "type": "text",
+          "analyzer": "custom_french_analyzer",
+          "fielddata": true,
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "normalizer": "lowercase_normalizer"
+            }
+          }
+        },
+        "PatientId": {
+          "type": "integer"
+        }
+      }
     }
-  }
 }

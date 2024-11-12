@@ -24,13 +24,10 @@ services:
     volumes:
       - elasticsearch_config:/usr/share/elasticsearch/config
       - elasticsearch_data:/usr/share/elasticsearch/data
-      # - ./elasticsearch/config/custom_analyzer.json:/usr/share/elasticsearch/config/custom_analyzer.json
       - ./elasticsearch/config/create_index.json:/usr/share/elasticsearch/config/create_index.json
       - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./elasticsearch/config/load_template.sh:/usr/share/elasticsearch/config/load_template.sh
 
-      # - ./elasticsearch/init/:/usr/share/elasticsearch/init/
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cat/health" ]
       interval: 5s
@@ -42,7 +39,6 @@ services:
       - ingest.geoip.downloader.enabled=false
     networks:
       - elastic
-    # command: [ "sh", "/usr/share/elasticsearch/init/elasticsearch-init.sh"]
     mem_limit: 2g
 
   init-template:
@@ -76,7 +72,6 @@ services:
     volumes:
       - ./logstash/pipeline:/usr/share/logstash/pipeline
       - ./logstash/config:/usr/share/logstash/config
-      - ./logstash/config/load_template.sh:/usr/share/logstash/config/load_template.sh
     ports:
       - "5044:5044"
     env_file:
@@ -239,7 +234,6 @@ volumes:
     driver: local
   shared-output:
   data_protection_keys:
-
 
 networks:
   elastic:

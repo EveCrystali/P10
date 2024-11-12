@@ -223,6 +223,7 @@ services:
       - "7000:7000"
     volumes:
       - shared-output:/app/shared
+      - ./Frontend/Views/:/app/Views/
     environment:
       - Configuration=Docker
       - ASPNETCORE_URLS=http://*:7000

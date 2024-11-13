@@ -2,77 +2,91 @@
 @model Patient
 
 @{
-    Layout = "_Layout";
+Layout = "_Layout";
 }
 
 <!DOCTYPE html>
+<html lang="fr">
 
-<html>
 <head>
-    <meta name="viewport" content="width=device-width"/>
-    <title>Create</title>
+    <meta name="viewport" content="width=device-width" />
+    <title>Créer un Patient</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
 
-<h4>Patient</h4>
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
+<body style="background-color: #f8f9fa;">
+
+<div class="container py-5">
+    @if (TempData["Error"] != null)
+    {
+    <div class="alert alert-danger text-center">
         @TempData["Error"]
     </div>
-}
-<hr/>
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FirstName" for="FirstName" class="control-label">Prénom</label>
-                <input asp-for="FirstName" class="form-control"/>
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+    }
 
-                <label asp-for="LastName" for="LastName" class="control-label">Nom</label>
-                <input asp-for="LastName" class="form-control"/>
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div>
+    <div class="card shadow-sm">
+        <div class="card-header text-center" style="background-color: #4caf50; color: white;">
+            <h4><i class="fas fa-user-plus"></i> Créer un Nouveau Patient</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
-                <label asp-for="DateOfBirth" for="DateOfBirth" class="control-label">Date de naissance</label>
-                <input asp-for="DateOfBirth" class="form-control"/>
-                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label text-primary"><i class="fas fa-user"></i> Prénom</label>
+                    <input asp-for="FirstName" class="form-control" required />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
 
-                <label asp-for="Gender" for="Gender" class="control-label">Sexe</label>
-                <select asp-for="Gender" class="form-control">
-                    <option value="M">Masculin</option>
-                    <option value="F">Féminin</option>
-                </select>
-                <span asp-validation-for="Gender" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label text-primary"><i class="fas fa-user-tag"></i> Nom</label>
+                    <input asp-for="LastName" class="form-control" required />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
 
-                <label asp-for="Address" for="Address" class="control-label">Adresse</label>
-                <input asp-for="Address" class="form-control"/>
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PhoneNumber" for="PhoneNumber" class="control-label">Téléphone</label>
-                <input asp-for="PhoneNumber" class="form-control"/>
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary"/>
-            </div>
-        </form>
+                <div class="mb-3">
+                    <label asp-for="DateOfBirth" class="form-label text-primary"><i class="fas fa-calendar"></i> Date de Naissance</label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" required />
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Gender" class="form-label text-primary"><i class="fas fa-venus-mars"></i> Sexe</label>
+                    <select asp-for="Gender" class="form-control" required>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label text-primary"><i class="fas fa-map-marker-alt"></i> Adresse</label>
+                    <input asp-for="Address" class="form-control" required />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label text-primary"><i class="fas fa-phone"></i> Téléphone</label>
+                    <input asp-for="PhoneNumber" type="tel" class="form-control" required />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    
+                </div>
+            </form>
+        </div>
     </div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+        <i class="fas fa-arrow-left"></i> Retour à la liste
+    </a>
 </div>
 
-<div>
-    <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

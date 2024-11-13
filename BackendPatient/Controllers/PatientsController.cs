@@ -111,7 +111,10 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
         await _dbContext.SaveChangesAsync();
 
         // Return a 201 Created response with the newly created patient
-        return CreatedAtAction(nameof(GetPatient), new { id = patient.Id }, patient);
+        return CreatedAtAction(nameof(GetPatient), new
+        {
+            id = patient.Id
+        }, patient);
     }
 
     /// <summary>

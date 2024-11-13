@@ -175,6 +175,10 @@ public class AuthController : Controller
                 }
             }
         }
-        return Ok(new { isAuthenticated = false, username = (string?)null });
+        return Ok(new
+        {
+            isAuthenticated = false,
+            username = (string?)null
+        });
     }
 }

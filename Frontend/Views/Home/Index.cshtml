@@ -4,77 +4,51 @@
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model IEnumerable<Patient>
 
-<div class="text-center">
+<div class="text-center py-4" style="background: linear-gradient(90deg, #4caf50, #81c784); color: white;">
     <h1 class="display-4">Accueil Médecin</h1>
 </div>
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">
+    <div class="alert alert-danger my-3 text-center">
         @TempData["Error"]
     </div>
 }
-<div class="table-header d-flex justify-content-between">
-    <h4>Patient</h4>
+<div class="table-header d-flex justify-content-between align-items-center mt-4">
+    <h4 style="color: #4caf50;">Liste des Patients</h4>
     <a asp-controller="Patients" method="get" id="newPatient" asp-action="Create">
-        <button class="btn btn-primary">Créer un nouveau patient</button>
+        <button class="btn btn-success btn-lg">
+            <i class="fas fa-user-plus"></i> Créer un nouveau patient
+        </button>
     </a>
 </div>
-<hr/>
-<table class="table">
-    <thead>
+<hr class="my-3" style="border-top: 3px solid #4caf50;" />
+<table class="table table-bordered table-hover">
+    <thead class="thead-light" style="background-color: #81c784;">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LastName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateOfBirth)
-        </th>
-        <th></th>
+        <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+        <th>@Html.DisplayNameFor(model => model.LastName)</th>
+        <th>@Html.DisplayNameFor(model => model.DateOfBirth)</th>
+        <th class="text-center">Actions</th>
     </tr>
     </thead>
     <tbody>
     @foreach (Patient item in Model)
     {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DateOfBirth)
-            </td>
-
-            <td>
-                @try
-                {
-                    <a asp-controller="Patients" asp-action="Edit" asp-route-id="@item.Id">
-                        <button class="btn btn-secondary">Editer</button>
-                    </a>
-                    <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id">
-                        <button class="btn btn-secondary">Details</button>
-                    </a>
-                    <a asp-controller="Patients" asp-action="Delete" asp-route-id="@item.Id">
-                        <button class="btn btn-secondary">Supprimer</button>
-                    </a>
-                    <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id">
-                        <button class="btn btn-secondary">Notes du patient</button>
-                    </a>
-                    <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@item.Id"
-                       asp-route-lastName="@item.LastName" asp-route-firstName="@item.FirstName">
-                        <button class="btn btn-secondary">Créer une note</button>
-                    </a>
-                    Console.WriteLine($"Patient requested is {item.Id}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in Patients/Index.cshtml: {ex.Message}");
-                }
+            <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
+            <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+            <td>@Html.DisplayFor(modelItem => item.DateOfBirth)</td>
+            <td class="text-center">
+                <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info mx-1">
+                    <i class="fas fa-info-circle"></i> Détails
+                </a>
+                <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id" class="btn btn-secondary mx-1">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </a>
+                <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@item.Id"
+                   asp-route-lastName="@item.LastName" asp-route-firstName="@item.FirstName" class="btn btn-success mx-1">
+                    <i class="fas fa-plus"></i> Nouvelle note
+                </a>
             </td>
         </tr>
     }

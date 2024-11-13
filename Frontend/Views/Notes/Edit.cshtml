@@ -2,53 +2,63 @@
 @model Note
 
 @{
-    Layout = "_Layout";
+Layout = "_Layout";
 }
 
 <!DOCTYPE html>
+<html lang="fr">
 
-<html lang="fr" xml:lang="fr">
 <head>
-    <meta name="viewport" content="width=device-width"/>
-    <title>Edit</title>
+    <meta name="viewport" content="width=device-width" />
+    <title>Édition d'une Note</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
+<body style="background-color: #f8f9fa;">
+
+<div class="container py-5">
+    @if (TempData["Error"] != null)
+    {
+    <div class="alert alert-danger text-center">
         @TempData["Error"]
     </div>
-}
+    }
 
-<body>
+    <div class="card shadow-sm">
+        <div class="card-header text-center" style="background-color: #ff9800; color: white;">
+            <h4><i class="fas fa-edit"></i> Modifier une Note</h4>
+        </div>
+        <div class="card-body">
+            <form id="noteForm" class="needs-validation" method="POST" asp-controller="Notes" asp-action="Edit" novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
 
-<h1>Note</h1>
-<hr/>
-<h2>Edition d'une note</h2>
-<div class="row">
-    <div class="col-md-4">
-        <form id="noteForm" class="form-control" method="POST" asp-controller="Notes" asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label">Titre</label>
-                <input class="form-control" asp-for="Title"/>
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Body" class="control-label">Contenu</label>
-                <textarea asp-for="Body" class="form-control"></textarea>
-                <span asp-validation-for="Body" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Enregistrer" class="btn btn-primary"/>
-            </div>
-        </form>
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label text-primary"><i class="fas fa-heading"></i> Titre</label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Body" class="form-label text-primary"><i class="fas fa-align-left"></i> Contenu</label>
+                    <textarea asp-for="Body" class="form-control" rows="5" required></textarea>
+                    <span asp-validation-for="Body" class="text-danger"></span>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
-<div>
-    <a asp-controller="Home" asp-action="Index">Retour à la liste</a>
-</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

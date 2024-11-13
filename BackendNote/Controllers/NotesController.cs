@@ -98,7 +98,10 @@ public class NotesController : ControllerBase
 
         await _notesService.CreateAsync(newNote);
 
-        return CreatedAtAction(nameof(Get), new { id = newNote.Id }, newNote);
+        return CreatedAtAction(nameof(Get), new
+        {
+            id = newNote.Id
+        }, newNote);
     }
 
     [HttpPut("{id}")]

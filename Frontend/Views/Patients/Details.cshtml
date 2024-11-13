@@ -33,7 +33,7 @@
             <dt class="col-sm-3">Téléphone</dt>
             <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
         </dl>
-        <hr />
+        <hr/>
         <h5 class="mt-3">Risque de Diabète</h5>
         <p class="fw-bold @GetRiskClass(Model.DiabetesRiskPrediction.DiabetesRisk)">
             @Html.DisplayFor(model => model.DiabetesRiskPrediction.DiabetesRisk)
@@ -53,10 +53,11 @@
                 <p>@Html.Raw(note.Body?.Replace("\n", "<br>"))</p>
 
                 <h6 class="mb-1 text-primary">Date de mise à jour</h6>
-                <p>@(note.LastUpdatedDate != null ? note.LastUpdatedDate.ToString() : note.CreatedDate.ToString())</p>
+                <p>@(note.LastUpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? (note.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "Inconnu"))</p>
+                @* <p>@(note.LastUpdatedDate != null ? note.LastUpdatedDate.ToString() : (note.CreatedDate.ToString() != null ? note.CreatedDate.ToString() : "Inconnu"))</p> *@
 
                 <h6 class="mb-1 text-primary">Créateur</h6>
-                <p>@note.Creator</p>
+                <p>@(note.Creator != null ? note.Creator : "Inconnu")</p>
 
                 <div>
                     <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-warning me-2">Éditer</a>
@@ -68,6 +69,9 @@
 
     <div class="mt-4">
         <a asp-action="Edit" asp-route-id="@Model.PatientId" class="btn btn-primary">Éditer le patient</a>
+        <a asp-controller="Patients" asp-action="Delete" asp-route-id="@Model.PatientId" class="btn btn-danger mx-1">
+            <i class="fas fa-trash"></i> Supprimer le patient
+        </a>
         <a asp-controller="Home" asp-action="Index" class="btn btn-secondary ms-2">Retour à la liste</a>
     </div>
 </div>
@@ -79,13 +83,14 @@
     {
         return risk switch
         {
-            DiabetesRisk.None => "text-success",          // Vert
-            DiabetesRisk.Borderline => "text-warning",    // Jaune
-            DiabetesRisk.InDanger => "text-danger",       // Rouge clair
+            DiabetesRisk.None       => "text-success", // Vert
+            DiabetesRisk.Borderline => "text-warning", // Jaune
+            DiabetesRisk.InDanger   => "text-danger", // Rouge clair
             DiabetesRisk.EarlyOnset => "bg-danger text-white", // Rouge foncé avec texte blanc
-            _ => "text-muted"                             // Couleur par défaut
+            _                       => "text-muted" // Couleur par défaut
         };
     }
 }
+
 </body>
 </html>

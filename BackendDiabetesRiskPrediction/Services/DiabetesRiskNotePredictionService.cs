@@ -44,10 +44,7 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
     }
 
 
-    private async Task<int> DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note)
-    {
-        return await elasticsearchService.CountUniqueWordsInNotes(note.PatientId, triggerWords);
-    }
+    private async Task<int> DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note) => await elasticsearchService.CountUniqueWordsInNotes(note.PatientId, triggerWords);
 
     private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {

@@ -118,7 +118,10 @@ public class NotesController : Controller
                 Note? createdNote = await response.Content.ReadFromJsonAsync<Note>();
                 if (createdNote != null)
                 {
-                    return RedirectToAction(nameof(Details), new { id = createdNote.Id });
+                    return RedirectToAction(nameof(Details), new
+                    {
+                        id = createdNote.Id
+                    });
                 }
                 ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "Unable to create note.", response);
                 return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
@@ -176,7 +179,10 @@ public class NotesController : Controller
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Note with id {PatientId} was successfully updated.", note.Id);
-                return RedirectToAction(nameof(Details), nameof(NotesController).Replace("Controller", ""), new { id = note.Id });
+                return RedirectToAction(nameof(Details), nameof(NotesController).Replace("Controller", ""), new
+                {
+                    id = note.Id
+                });
             }
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to update note", "Unable to update note.", response);
             return View(note);

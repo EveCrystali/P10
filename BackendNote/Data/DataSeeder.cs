@@ -5,7 +5,7 @@ namespace BackendNote.Data;
 
 public class DataSeeder(NotesService notesService, ILogger<DataSeeder> logger)
 {
-    private List<Note> notesAtStartup = new()
+    private readonly List<Note> notesAtStartup = new()
     {
         new Note
         {

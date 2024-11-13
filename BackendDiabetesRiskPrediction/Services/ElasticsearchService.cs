@@ -48,17 +48,17 @@ public class ElasticsearchService
         _logger.LogInformation("CountUniqueWordsInNotes called with patientId: {patientId}", patientId);
 
         // Step 1: Analyze the trigger words using the same analyzer as the `Body` field
-        HashSet<string> analyzedWords = new HashSet<string>();
+        HashSet<string> analyzedWords = new();
 
         _logger.LogInformation("Analyzing words: {wordsToCount}", string.Join(", ", wordsToCount));
 
         foreach (string word in wordsToCount)
         {
             AnalyzeResponse analyzeResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
-                .Index("notes_index")
-                .Analyzer("custom_french_analyzer")
-                .Text(word)
-            );
+                                                                                                   .Index("notes_index")
+                                                                                                   .Analyzer("custom_french_analyzer")
+                                                                                                   .Text(word)
+                                                                                             );
 
             if (!analyzeResponse.IsValid)
             {
@@ -75,15 +75,15 @@ public class ElasticsearchService
         _logger.LogInformation("Executing search query for patientId: {patientId}", patientId);
 
         ISearchResponse<NoteRiskInfo> response = await _elasticsearchClient.SearchAsync<NoteRiskInfo>(s => s
-            .Index("notes_index")
-            .Query(q => q
-                .Term(t => t.Field("PatientId").Value(patientId))
-            )
-            .Source(src => src
-                .Includes(i => i.Field("Body"))
-            )
-            .Size(1000) // Adjust size as needed
-        );
+                                                                                                           .Index("notes_index")
+                                                                                                           .Query(q => q
+                                                                                                                      .Term(t => t.Field("PatientId").Value(patientId))
+                                                                                                                 )
+                                                                                                           .Source(src => src
+                                                                                                                       .Includes(i => i.Field("Body"))
+                                                                                                                  )
+                                                                                                           .Size(1000) // Adjust size as needed
+                                                                                                     );
 
         if (!response.IsValid)
         {
@@ -107,17 +107,17 @@ public class ElasticsearchService
         _logger.LogInformation("Search query executed successfully.");
 
         // Step 3: Analyze the Body text of each document and count unique matching words
-        HashSet<string> uniqueWordsInNotes = new HashSet<string>();
+        HashSet<string> uniqueWordsInNotes = new();
 
         foreach (IHit<NoteRiskInfo>? hit in response.Hits)
         {
             if (!string.IsNullOrEmpty(hit.Source.Body))
             {
                 AnalyzeResponse analyzeBodyResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
-                .Index("notes_index")
-                .Analyzer("custom_french_analyzer")
-                .Text(hit.Source.Body)
-            );
+                                                                                                           .Index("notes_index")
+                                                                                                           .Analyzer("custom_french_analyzer")
+                                                                                                           .Text(hit.Source.Body)
+                                                                                                     );
 
                 if (!analyzeBodyResponse.IsValid)
                 {
@@ -222,5 +222,4 @@ public class ElasticsearchService
     //     _logger.LogInformation($"Unique word count is : {uniqueWordsFound.Count}");
     //     return uniqueWordsFound.Count;
     // }
-
 }

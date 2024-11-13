@@ -6,9 +6,15 @@ public static class DataSeeder
 {
     private static readonly Dictionary<string, string[]> usersRolesPasswords = new()
     {
-        { "Admin", ["admin@email.com", "0vBZBB.QH83GeE."] },
-        { "Practitioner", ["practitioner@email.com", "1vBZBB.QH83GeE."] },
-        { "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."] }
+        {
+            "Admin", ["admin@email.com", "0vBZBB.QH83GeE."]
+        },
+        {
+            "Practitioner", ["practitioner@email.com", "1vBZBB.QH83GeE."]
+        },
+        {
+            "User", ["noroleuser@email.com", "2vBZBB.QH83GeE."]
+        }
     };
 
     /// <summary>
@@ -25,7 +31,13 @@ public static class DataSeeder
             if (await userManager.FindByEmailAsync(userToAdd.Value[0]) == null)
             {
                 // Create a new user and add it to the database.
-                User newUser = new() { UserName = userToAdd.Value[0], Email = userToAdd.Value[0], EmailConfirmed = true, LockoutEnabled = false };
+                User newUser = new()
+                {
+                    UserName = userToAdd.Value[0],
+                    Email = userToAdd.Value[0],
+                    EmailConfirmed = true,
+                    LockoutEnabled = false
+                };
                 await userManager.CreateAsync(newUser, userToAdd.Value[1]);
                 logger.LogInformation($"Created new user with email: {userToAdd.Value[0]}");
             }

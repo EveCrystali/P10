@@ -23,7 +23,12 @@ public class DataSeeder(ApplicationDbContext dbContext)
 
         // Charger les patients existants en mémoire pour éviter les doublons
         var existingPatients = _dbContext.Patients
-                                         .Select(p => new { p.FirstName, p.LastName, p.DateOfBirth })
+                                         .Select(p => new
+                                         {
+                                             p.FirstName,
+                                             p.LastName,
+                                             p.DateOfBirth
+                                         })
                                          .ToList();
 
         int batchSize = 10;

@@ -13,7 +13,8 @@
             "filter": [
               "lowercase",
               "french_stem",
-              "asciifolding"
+              "asciifolding",
+              "french_stop"
             ]
           }
         },
@@ -31,6 +32,10 @@
           "french_stem": {
             "type": "stemmer",
             "language": "light_french"
+          },
+          "french_stop": {
+            "type": "stop",
+            "stopwords": "_french_"
           }
         }
       }

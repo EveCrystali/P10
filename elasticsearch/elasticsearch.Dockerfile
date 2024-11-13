@@ -15,6 +15,12 @@ COPY /config/elasticsearch.yml /usr/share/elasticsearch/config/config/elasticsea
 COPY load_template.sh /usr/local/bin/load_template.sh
 RUN chmod +x /usr/local/bin/load_template.sh
 
+# Copier le script de configuration
+COPY setup_pipeline.sh /usr/share/elasticsearch/setup_pipeline.sh
+RUN chmod +x /usr/share/elasticsearch/setup_pipeline.sh
+
+# Lancer le script après le démarrage d'Elasticsearch
+CMD ["sh", "-c", "/usr/local/bin/docker-entrypoint.sh && /usr/share/elasticsearch/setup_pipeline.sh"]
 
 # Configuration de l'environnement
 ENV discovery.type=single-node

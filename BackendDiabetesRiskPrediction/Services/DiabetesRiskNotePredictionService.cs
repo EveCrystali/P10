@@ -6,12 +6,12 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
 
     private readonly HashSet<string> triggerWords =
     [
+        // TODO: Hémoglobine A1C is still consider as two separated words
         "Hémoglobine A1C",
         "Microalbumine",
         "Taille",
         "Poids",
-        "Fumeur",
-        "Fumeuse",
+        "Fumer",
         "Anormal",
         "Cholestérol",
         "Vertiges",

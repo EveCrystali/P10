@@ -7,53 +7,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes du Patient</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
+<body style="background-color: #f8f9fa;">
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h1 class="display-6" style="color: #4caf50;">Notes du Patient</h1>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+    <div class="alert alert-danger text-center">
         @TempData["Error"]
     </div>
-}
+    }
 
-<body>
-<h1>Notes du Patient</h1>
-
-@if (Model != null && Model.Any())
-{
-    <div id="notes-container">
+    @if (Model != null && Model.Any())
+    {
+    <div class="row g-4">
         @foreach (var note in Model)
         {
-            <div class="note">
-                <h2>@note.Title</h2>
-                <p>@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
-                @if (note.CreatedDate.HasValue)
-                {
-                    <small>Date de création: @note.CreatedDate.Value.ToString()</small>
-                }
-                @if (note.LastUpdatedDate.HasValue)
-                {
-                    <small>Dernière mise à jour: @note.LastUpdatedDate.Value.ToString()</small>
-                }
-                @if (note.Creator != null)
-                {
-                    <small>Créateur : @note.Creator</small>
-                }
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #4caf50;">@note.Title</h5>
+                    <p class="card-text">@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
+                    <div class="text-muted">
+                        @if (note.CreatedDate.HasValue)
+                        {
+                        <small><i class="fas fa-calendar-alt"></i> Créée le : @note.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small><br>
+                        }
+                        @if (note.LastUpdatedDate.HasValue)
+                        {
+                        <small><i class="fas fa-edit"></i> Dernière mise à jour : @note.LastUpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small><br>
+                        }
+                        @if (!string.IsNullOrEmpty(note.Creator))
+                        {
+                        <small><i class="fas fa-user"></i> Créateur : @note.Creator</small>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer text-center bg-light">
+                    <a asp-controller="Notes" asp-action="Details" asp-route-id="@note.Id" class="btn btn-info btn-sm me-2">
+                        <i class="fas fa-info-circle"></i> Détails
+                    </a>
+                    <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id" class="btn btn-warning btn-sm me-2">
+                        <i class="fas fa-edit"></i> Editer
+                    </a>
+                    <a asp-controller="Notes" asp-action="Delete" asp-route-id="@note.Id" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
             </div>
-            <div>
-                @Html.ActionLink("Editer", "Edit", "Notes", new { id = note.Id }) |
-            </div>
-            <div>
-                @Html.ActionLink("Supprimer", "Delete", "Notes", new { id = note.Id })
-            </div>
+        </div>
         }
     </div>
-}
-else
-{
-    <p>Aucune note trouvée</p>
-}
+    }
+    else
+    {
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle"></i> Aucune note trouvée.
+    </div>
+    }
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

@@ -83,7 +83,6 @@ public class PatientsController : Controller
 
             patientViewModel.DiabetesRiskPrediction = await responseFromDiabetesRiskService.Content.ReadFromJsonAsync<DiabetesRiskPrediction>();
 
-
             return View(patientViewModel);
         }
 
@@ -169,7 +168,8 @@ public class PatientsController : Controller
         return View();
     }
 
-    [HttpPost("edit")]
+    [HttpPost("edit/{id:int}")]
+    // TODO: Cette page n’est pas disponible pour le moment Si le problème persiste, contactez le propriétaire du site. HTTP ERROR 405
     public async Task<IActionResult> Edit(Patient patient)
     {
         if (ModelState.IsValid)

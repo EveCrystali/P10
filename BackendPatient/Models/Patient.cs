@@ -49,7 +49,7 @@ public class Patient : IValidatable
     // FUTURE: Consider moving this logic to a dedicated service or factory class
     // (e.g., PatientFactory) to respect the Single Responsibility Principle (SRP)
     // and improve separation of concerns as the application grows.
-    public static Patient FormatPatient((string nom, string prenom, string? dateDeNaissance, string genre,
+    public static Patient FormatPatient((int Id, string nom, string prenom, string? dateDeNaissance, string genre,
                                             string? adresse, string? telephone) unformattedPatient)
     {
         DateOnly dateOfBirthFormatted;
@@ -59,6 +59,7 @@ public class Patient : IValidatable
                                                        "yyyy-MM-dd", CultureInfo.InvariantCulture);
             return new Patient
             {
+                Id = unformattedPatient.Id,
                 FirstName = unformattedPatient.nom,
                 LastName = unformattedPatient.prenom,
                 DateOfBirth = dateOfBirthFormatted,

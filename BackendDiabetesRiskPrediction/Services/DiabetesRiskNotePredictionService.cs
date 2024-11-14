@@ -1,12 +1,11 @@
 using BackendDiabetesRiskPrediction.Models;
 namespace BackendDiabetesRiskPrediction.Services;
 
-public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictionService> logger, ElasticsearchService elasticsearchService)
+public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearchService, ILogger<DiabetesRiskNotePredictionService> logger)
 {
 
     private readonly HashSet<string> triggerWords =
     [
-        // TODO: Hémoglobine A1C is still consider as two separated words
         "Hémoglobine A1C",
         "Microalbumine",
         "Taille",
@@ -29,24 +28,17 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
             return diabetesRiskPrediction;
         }
 
-        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(notes);
+        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(patientRiskInfo.Id, triggerWords);
 
         diabetesRiskPrediction.DiabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
 
         return diabetesRiskPrediction;
     }
 
-    private async Task<int> DiabetesRiskPredictionNotesAnalysis(List<NoteRiskInfo> notes)
-    {
-        IEnumerable<Task<int>> tasks = notes.Select(DiabetesRiskPredictionSingleNoteAnalysis);
-        int[] results = await Task.WhenAll(tasks);
-        return results.Sum();
-    }
 
+    private async Task<int> DiabetesRiskPredictionNotesAnalysis(int patientId, HashSet<string> hashSetofTriggerWords) => await elasticsearchService.CountUniqueWordsInNotes(patientId, hashSetofTriggerWords);
 
-    private async Task<int> DiabetesRiskPredictionSingleNoteAnalysis(NoteRiskInfo note) => await elasticsearchService.CountUniqueWordsInNotes(note.PatientId, triggerWords);
-
-    private static DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
+    private DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {
         int age = PatientAgeCalculator(patientRiskInfo);
 
@@ -66,6 +58,8 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
 
     private static DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {
+        Console.WriteLine($"Patient gender is : {patientRiskInfo.Gender}");
+        Console.WriteLine($"Patient triggers are : {triggersDiabetesRiskFromNotes}");
         return patientRiskInfo.Gender switch
         {
             // Patient is a male
@@ -95,11 +89,12 @@ public class DiabetesRiskNotePredictionService(ILogger<DiabetesRiskNotePredictio
 
     }
 
-    private static int PatientAgeCalculator(PatientRiskInfo patientRiskInfo)
+    private int PatientAgeCalculator(PatientRiskInfo patientRiskInfo)
     {
         DateTime currentDate = DateTime.Now;
         DateOnly birthDate = patientRiskInfo.DateOfBirth;
         int age = currentDate.Year - birthDate.Year;
+        logger.LogInformation($"Patient age is : {age}");
         return age;
     }
 }

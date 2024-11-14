@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace BackendPatient.Extensions;
 
-// TODO: verify it is needed
 public class DateOnlyJsonConverter : JsonConverter<DateOnly>
 {
     private const string Format = "yyyy-MM-dd";

@@ -14,6 +14,7 @@
               "lowercase",
               "french_stem",
               "asciifolding",
+              "synonym_filter",
               "french_stop"
             ]
           }
@@ -31,11 +32,17 @@
         "filter": {
           "french_stem": {
             "type": "stemmer",
-            "language": "light_french"
+            "language": "french"
           },
           "french_stop": {
             "type": "stop",
             "stopwords": "_french_"
+          },
+          "synonym_filter": {
+            "type": "synonym_graph",
+            "synonyms": [
+              "hémoglobine a1c => hemoglobine_a1c"
+            ]
           }
         }
       }

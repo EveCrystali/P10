@@ -1,4 +1,5 @@
 using BackendPatient.Models;
+using Microsoft.EntityFrameworkCore;
 namespace BackendPatient.Data;
 
 public class DataSeeder(ApplicationDbContext dbContext)
@@ -34,33 +35,55 @@ public class DataSeeder(ApplicationDbContext dbContext)
         int batchSize = 10;
         int counter = 0;
 
-        foreach (Patient patient in patientsFormatted)
+        using var transaction = _dbContext.Database.BeginTransaction();
+        try
         {
-            // Avoid duplicate patients
-            if (existingPatients.Exists(p => p.FirstName == patient.FirstName &&
-                                             p.LastName == patient.LastName &&
-                                             p.DateOfBirth == patient.DateOfBirth))
-            {
-                Console.WriteLine($"Skipping duplicate patient: {patient.FirstName} {patient.LastName} {patient.DateOfBirth}");
-                continue;
-            }
-            patient.Id = counter + 1;
-            _dbContext.Patients.Add(patient);
-            counter++;
+            SetIdentityInsert("Patients", true);
 
-            // Save every 10 patients (batch size)
-            if (counter % batchSize == 0)
+            foreach (Patient patient in patientsFormatted)
+            {
+                // Avoid duplicate patients
+                if (existingPatients.Exists(p => p.FirstName == patient.FirstName &&
+                                                 p.LastName == patient.LastName &&
+                                                 p.DateOfBirth == patient.DateOfBirth))
+                {
+                    Console.WriteLine($"Skipping duplicate patient: {patient.FirstName} {patient.LastName} {patient.DateOfBirth}");
+                    continue;
+                }
+                patient.Id = counter + 1;
+                _dbContext.Patients.Add(patient);
+                counter++;
+
+                // Save every 10 patients (batch size)
+                if (counter % batchSize == 0)
+                {
+                    _dbContext.SaveChanges();
+                    Console.WriteLine($"Saved {counter} patients so far...");
+                }
+            }
+
+            // Save any remaining patients
+            if (counter % batchSize != 0)
             {
                 _dbContext.SaveChanges();
-                Console.WriteLine($"Saved {counter} patients so far...");
+                Console.WriteLine($"Final save, total patients saved: {counter}");
             }
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
         }
 
-        // Save any remaining patients
-        if (counter % batchSize != 0)
-        {
-            _dbContext.SaveChanges();
-            Console.WriteLine($"Final save, total patients saved: {counter}");
-        }
+    }
+
+    private void SetIdentityInsert(string tableName, bool enable = true)
+    {
+        string sql = enable
+            ? $"SET IDENTITY_INSERT {tableName} ON;"
+            : $"SET IDENTITY_INSERT {tableName} OFF;";
+        _dbContext.Database.ExecuteSqlRaw(sql);
     }
 }

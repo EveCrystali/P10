@@ -105,7 +105,6 @@ services:
         condition: service_healthy
     networks:
       - elastic
-    command: [ "sh", "/mongodb/wait-for-mongo.sh", "/docker-entrypoint.sh" ]
 
   apigateway:
     container_name: apigateway

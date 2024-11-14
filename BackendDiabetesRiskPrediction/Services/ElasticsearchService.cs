@@ -118,6 +118,7 @@ public class ElasticsearchService
                     continue;
                 }
 
+
                 IEnumerable<string> bodyTokens = analyzeBodyResponse.Tokens.Select(token => token.Token);
 
                 IEnumerable<string> commonWords = bodyTokens.Intersect(analyzedWords);

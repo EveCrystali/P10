@@ -56,7 +56,6 @@ public class NotesService
     public async Task CreateAsync(Note newNote)
     {
         await NotesCollection.InsertOneAsync(newNote);
-        await _elasticClient.IndexDocumentAsync(newNote);
     }
 
     public async Task UpdateAsync(string id, Note updatedNote)

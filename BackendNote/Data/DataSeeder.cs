@@ -79,7 +79,7 @@ public class DataSeeder(NotesService notesService, ILogger<DataSeeder> logger)
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    Note existingNote = await notesService._notesCollection
+                    Note existingNote = await notesService.NotesCollection
                                                           .Find(n => n.Title == note.Title && n.Body == note.Body)
                                                           .FirstOrDefaultAsync();
 

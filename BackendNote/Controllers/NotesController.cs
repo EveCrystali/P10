@@ -131,7 +131,14 @@ public class NotesController : ControllerBase
             updatedNote.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         }
 
-        await _notesService.UpdateAsync(id, updatedNote);
+        try
+        {
+            await _notesService.UpdateAsync(id, updatedNote);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Failed to delete note from Elasticsearch: {ex.Message}");
+        }
 
         return NoContent();
     }
@@ -147,7 +154,14 @@ public class NotesController : ControllerBase
             return NotFound("Note not found");
         }
 
-        await _notesService.RemoveAsync(id);
+        try
+        {
+            await _notesService.RemoveAsync(note);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Failed to delete note from Elasticsearch: {ex.Message}");
+        }
 
         return Ok("Note deleted");
     }

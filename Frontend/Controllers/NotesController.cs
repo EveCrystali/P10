@@ -133,7 +133,7 @@ public class NotesController : Controller
         return View(note);
     }
 
-    [HttpGet("edit/{id:int}")]
+    [HttpGet("edit/{id}")]
     public async Task<IActionResult> Edit(string id)
     {
         if (ModelState.IsValid)
@@ -158,7 +158,7 @@ public class NotesController : Controller
         return View();
     }
 
-    [HttpPost("edit/{id:int}")]
+    [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Note note)
     {
         note.LastUpdatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);

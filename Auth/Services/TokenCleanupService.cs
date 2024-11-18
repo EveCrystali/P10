@@ -8,7 +8,7 @@ public class TokenCleanupService : IHostedService, IDisposable
 
     private readonly ILogger<TokenCleanupService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
-    private Timer _timer;
+    private Timer? _timer;
 
     public TokenCleanupService(IServiceScopeFactory scopeFactory, ILogger<TokenCleanupService> logger)
     {

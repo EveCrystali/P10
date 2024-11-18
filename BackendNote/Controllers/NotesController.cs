@@ -33,7 +33,7 @@ public class NotesController : ControllerBase
 
     [HttpGet("dto/{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public async Task<ActionResult<Note>> GetNoteDTODiabetesRiskPrediction(string id)
+    public async Task<ActionResult<Note>> GetNoteDtoDiabetesRiskPrediction(string id)
     {
         Note? note = await _notesService.GetAsync(id);
 

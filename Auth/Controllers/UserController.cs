@@ -29,7 +29,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetUsers()
     {
         List<User> users = await _context.Users.ToListAsync();
-        return users != null ? Ok(users) : BadRequest("Failed to get list of Users");
+        return Ok(users);
     }
 
     [Authorize(Policy = "RequireUserRole")]
@@ -169,10 +169,6 @@ public class UserController : ControllerBase
 
     private async Task SignOutCurrentUserAsync()
     {
-        if (HttpContext?.RequestServices == null)
-        {
-            return;
-        }
 
         IAuthenticationService? authService = HttpContext.RequestServices.GetService<IAuthenticationService>();
         if (authService == null)

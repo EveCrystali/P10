@@ -8,19 +8,17 @@ namespace Frontend.Controllers;
 [Route("note")]
 public class NotesController : Controller
 {
-    private readonly HttpClient _httpClient;
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<NotesController> _logger;
     private readonly string _noteServiceUrl;
 
     private readonly PatientService _patientService;
 
-    public NotesController(ILogger<NotesController> logger, HttpClient httpClient,
+    public NotesController(ILogger<NotesController> logger,
                            HttpClientService httpClientService,
                            IConfiguration configuration, PatientService patientService)
     {
         _logger = logger;
-        _httpClient = httpClient;
         _patientService = patientService;
         _httpClientService = httpClientService;
         _noteServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Note");
@@ -166,6 +164,8 @@ public class NotesController : Controller
         if (ModelState.IsValid)
         {
             _logger.LogInformation("Updating note with id {Id} to {NoteTitle}", note.Id, note.Title);
+
+            if (note.Id == null) return View(note);
 
             HttpRequestMessage request = new(HttpMethod.Put, $"{_noteServiceUrl}/{Uri.EscapeDataString(note.Id)}")
             {

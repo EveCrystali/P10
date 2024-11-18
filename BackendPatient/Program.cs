@@ -1,12 +1,8 @@
 using BackendPatient.Data;
-using BackendPatient.Extensions;
 using BackendPatient.Models;
 using BackendPatient.Services;
 using Microsoft.EntityFrameworkCore;
-using SharedAuthLibrary;
-using SharedAuthorizationLibrary;
-using SharedCorsLibrary;
-using SharedSwaggerLibrary;
+using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add Authorization policies and authentification

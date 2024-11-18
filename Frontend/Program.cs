@@ -1,9 +1,7 @@
 using System.Net.Security;
 using Frontend.Controllers;
 using Frontend.Services;
-using SharedAuthLibrary;
-using SharedAuthorizationLibrary;
-using SharedCorsLibrary;
+using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration Configuration = builder.Configuration;

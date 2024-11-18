@@ -25,7 +25,7 @@ public class DataSeeder(ApplicationDbContext dbContext)
         using var transaction = _dbContext.Database.BeginTransaction();
         try
         {
-            SetIdentityInsert("Patients", true);
+            SetIdentityInsert("Patients");
 
             foreach (var patient in patientsFormatted)
             {

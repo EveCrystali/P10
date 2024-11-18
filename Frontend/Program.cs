@@ -4,7 +4,7 @@ using Frontend.Services;
 using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-IConfiguration Configuration = builder.Configuration;
+IConfiguration configuration = builder.Configuration;
 
 // Add Authorization policies and authentification
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -25,7 +25,7 @@ builder.Services.AddSingleton<JwtValidationService>();
 builder.Services.AddHttpClient<HomeController>(client =>
        {
            // Remplacer l'URI codée en dur par une configuration
-           string? apiGatewayBaseUrl = Configuration["ApiGatewayAddress:BaseUrl"];
+           string? apiGatewayBaseUrl = configuration["ApiGatewayAddress:BaseUrl"];
            if (string.IsNullOrEmpty(apiGatewayBaseUrl))
            {
                throw new ArgumentNullException(apiGatewayBaseUrl, "L'URL de base ne peut pas être nulle ou vide.");
@@ -34,10 +34,7 @@ builder.Services.AddHttpClient<HomeController>(client =>
        })
        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
        {
-           ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-           {
-               return errors == SslPolicyErrors.None;
-           }
+           ServerCertificateCustomValidationCallback = (_, _, _, errors) => errors == SslPolicyErrors.None
        });
 
 builder.Services.AddScoped<PatientService>();

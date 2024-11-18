@@ -6,7 +6,6 @@ namespace Frontend.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly string _homeServiceUrl;
     private readonly HttpClient _httpClient;
     private readonly ILogger<HomeController> _logger;
 
@@ -16,7 +15,6 @@ public class HomeController : Controller
     {
         _logger = logger;
         _httpClient = httpClient;
-        _homeServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Home");
         _patientServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Patient");
     }
 

@@ -80,81 +80,27 @@ public class AuthController : Controller
         return View(loginModel);
     }
 
-    [HttpGet("register")]
-    public IActionResult Register() => View();
-
-    // [HttpPost("register")]
-    // public async Task<IActionResult> Register(RegisterModel registerModel)
-    // {
-    //     if (!ModelState.IsValid)
-    //     {
-    //         return View(registerModel);
-    //     }
-
-    // using HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/register");
-    // request.Content = new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json");
-
-    // using HttpResponseMessage response = await _httpClientServiceync(request);
-    // if (response.IsSuccessStatusCode)
-    // {
-    //     string? token = await response.Content.ReadFromJsonAsync<string>();
-    //     if (string.IsNullOrEmpty(token))
-    //     {
-    //         ModelState.AddModelError(string.Empty, "Tentative de connexion invalide.");
-    //         return View(registerModel);
-    //     }
-
-    //     // Store the JWT token (for example, in cookies or local storage)
-    //     HttpContext.Response.Cookies.Append("JwtToken", token, new CookieOptions
-    //     {
-    //         HttpOnly = true,
-    //         Secure = true,
-    //         SameSite = SameSiteMode.Strict
-    //     });
-
-    //     return RedirectToAction("Index", "Home");
-    // }
-    // else
-    // {
-    //     Dictionary<string, string[]>? errors = await response.Content.ReadFromJsonAsync<Dictionary<string, string[]>>();
-    //     if (errors != null)
-    //     {
-    //         foreach (string desc in errors.SelectMany(error => error.Value))
-    //         {
-    //             ModelState.AddModelError(string.Empty, desc);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         ModelState.AddModelError(string.Empty, "Une erreur est survenue.");
-    //     }
-    //     return View(registerModel);
-    // }
-    // }
-
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         if (!ModelState.IsValid)
         {
             _logger.LogError("Model state is not valid.");
-            return View();
+            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
 
         HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/logout");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
-        {
-            HttpContext.Response.Cookies.Delete("AuthTokens");
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-        }
+        if (!response.IsSuccessStatusCode) return BadRequest("Erreur lors de la déconnexion.");
 
-        return BadRequest("Erreur lors de la déconnexion.");
+        HttpContext.Response.Cookies.Delete("AuthTokens");
+        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+
     }
 
     [HttpGet("status")]
-    public async Task<IActionResult> Status()
+    public Task<IActionResult> Status()
     {
         string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
 
@@ -167,18 +113,18 @@ public class AuthController : Controller
                 if (principal != null)
                 {
                     string? username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
-                    return Ok(new
+                    return Task.FromResult<IActionResult>(Ok(new
                     {
                         isAuthenticated = true,
                         username
-                    });
+                    }));
                 }
             }
         }
-        return Ok(new
+        return Task.FromResult<IActionResult>(Ok(new
         {
             isAuthenticated = false,
             username = (string?)null
-        });
+        }));
     }
 }

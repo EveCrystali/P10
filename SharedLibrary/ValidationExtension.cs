@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
-namespace SharedLibrary.Extensions;
+namespace SharedLibrary;
 
 public static class ValidationExtensions
 {
@@ -21,7 +21,7 @@ public static class ValidationExtensions
         entity.ValidateDateOnlyProperties();
     }
 
-    public static void ValidateDateOnlyProperties(this IValidatable entity)
+    private static void ValidateDateOnlyProperties(this IValidatable entity)
     {
         IEnumerable<PropertyInfo> dateOnlyProperties = entity.GetType().GetProperties()
                                                              .Where(prop => prop.PropertyType == typeof(DateOnly?) || prop.PropertyType == typeof(DateOnly));
@@ -29,22 +29,23 @@ public static class ValidationExtensions
         foreach (PropertyInfo? prop in dateOnlyProperties)
         {
             DateOnly? value = prop.GetValue(entity) as DateOnly?;
-            if (value != null && value.HasValue)
+
+            if (value != null)
             {
                 ValidateDateOnly(value, prop.Name);
             }
-            else if (value == null && prop.PropertyType == typeof(DateOnly?))
-            {
-                return;
-            }
-            else if (value == null && prop.PropertyType == typeof(DateOnly))
-            {
-                throw new ValidationException($"{prop.Name} must not be null or empty");
-            }
+            else
+                switch (value)
+                {
+                    case null when prop.PropertyType == typeof(DateOnly?):
+                        return;
+                    case null when prop.PropertyType == typeof(DateOnly):
+                        throw new ValidationException($"{prop.Name} must not be null or empty");
+                }
         }
     }
 
-    public static void ValidateDateOnly(DateOnly? date, string propertyName)
+    private static void ValidateDateOnly(DateOnly? date, string propertyName)
     {
         if (date == null)
         {
@@ -55,7 +56,7 @@ public static class ValidationExtensions
                                               "yyyy-MM-dd",
                                               CultureInfo.InvariantCulture,
                                               DateTimeStyles.None,
-                                              out DateOnly tempDate);
+                                              out DateOnly _);
         if (!isValid)
         {
             throw new ValidationException($"{propertyName} must be in the format yyyy-MM-dd");

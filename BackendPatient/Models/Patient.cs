@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using SharedLibrary.Extensions;
+using SharedLibrary;
 namespace BackendPatient.Models;
 
 public class Patient : IValidatable

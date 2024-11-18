@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-namespace SharedSwaggerLibrary;
+namespace SharedLibrary;
 
 public static class SwaggerConfiguration
 {

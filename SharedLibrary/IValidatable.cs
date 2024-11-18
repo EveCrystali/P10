@@ -1,4 +1,4 @@
-namespace SharedLibrary.Extensions;
+namespace SharedLibrary;
 
 public interface IValidatable
 {

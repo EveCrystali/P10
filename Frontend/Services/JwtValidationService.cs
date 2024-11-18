@@ -37,10 +37,9 @@ public class JwtValidationService
             };
 
             JwtSecurityTokenHandler tokenHandler = new();
-            SecurityToken validatedToken;
 
             // Validate the token
-            ClaimsPrincipal tokenValidationResult = tokenHandler.ValidateToken(token, tokenValidationParameters, out validatedToken);
+            ClaimsPrincipal tokenValidationResult = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken _);
             return tokenValidationResult;
         }
         catch (SecurityTokenException ex)

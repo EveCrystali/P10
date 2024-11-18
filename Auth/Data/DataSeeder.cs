@@ -4,7 +4,7 @@ namespace Auth.Data;
 
 public static class DataSeeder
 {
-    private static readonly Dictionary<string, string[]> usersRolesPasswords = new()
+    private static readonly Dictionary<string, string[]> UsersRolesPasswords = new()
     {
         {
             "Admin", ["admin@email.com", "0vBZBB.QH83GeE."]
@@ -26,7 +26,7 @@ public static class DataSeeder
     public static async Task SeedUsers(UserManager<User> userManager, ILogger logger)
     {
         // Loop through each user and see if the user already exists.
-        foreach (KeyValuePair<string, string[]> userToAdd in usersRolesPasswords)
+        foreach (KeyValuePair<string, string[]> userToAdd in UsersRolesPasswords)
         {
             if (await userManager.FindByEmailAsync(userToAdd.Value[0]) == null)
             {
@@ -54,11 +54,12 @@ public static class DataSeeder
     ///     Seeds the roles in the database.
     /// </summary>
     /// <param name="roleManager">The role manager.</param>
+    /// <param name="logger">The logger.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task SeedRoles(RoleManager<IdentityRole> roleManager, ILogger logger)
     {
         // Loop through each role name and see if the role already exists.
-        foreach (string roleName in usersRolesPasswords.Keys)
+        foreach (string roleName in UsersRolesPasswords.Keys)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
             {
@@ -90,7 +91,7 @@ public static class DataSeeder
     /// </remarks>
     public static async Task SeedAffectationsRolesToUsers(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger logger)
     {
-        foreach (KeyValuePair<string, string[]> userToAffect in usersRolesPasswords)
+        foreach (KeyValuePair<string, string[]> userToAffect in UsersRolesPasswords)
         {
             User? user = await userManager.FindByEmailAsync(userToAffect.Value[0]);
             if (user != null)

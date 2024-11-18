@@ -92,17 +92,15 @@ public class AuthController : Controller
         HttpRequestMessage request = new(HttpMethod.Post, $"{_authServiceUrl}/logout");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
-        {
-            HttpContext.Response.Cookies.Delete("AuthTokens");
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
-        }
+        if (!response.IsSuccessStatusCode) return BadRequest("Erreur lors de la déconnexion.");
 
-        return BadRequest("Erreur lors de la déconnexion.");
+        HttpContext.Response.Cookies.Delete("AuthTokens");
+        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+
     }
 
     [HttpGet("status")]
-    public async Task<IActionResult> Status()
+    public Task<IActionResult> Status()
     {
         string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
 
@@ -115,18 +113,18 @@ public class AuthController : Controller
                 if (principal != null)
                 {
                     string? username = principal.Identity?.Name ?? principal.Claims.FirstOrDefault(c => c.Type == "unique_name")?.Value;
-                    return Ok(new
+                    return Task.FromResult<IActionResult>(Ok(new
                     {
                         isAuthenticated = true,
                         username
-                    });
+                    }));
                 }
             }
         }
-        return Ok(new
+        return Task.FromResult<IActionResult>(Ok(new
         {
             isAuthenticated = false,
             username = (string?)null
-        });
+        }));
     }
 }

@@ -102,10 +102,12 @@ public class ElasticsearchService
         // Step 3: Analyze the Body text of each document and count unique matching words
         HashSet<string> uniqueWordsInNotes = new();
 
-        foreach (IHit<NoteRiskInfo>? hit in response.Hits)
+        if (response?.Hits != null)
         {
-            if (!string.IsNullOrEmpty(hit.Source.Body))
+            foreach (IHit<NoteRiskInfo> hit in response.Hits)
             {
+                if (string.IsNullOrEmpty(hit.Source.Body)) continue;
+
                 AnalyzeResponse analyzeBodyResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
                                                                                                            .Index("notes_index")
                                                                                                            .Analyzer("custom_french_analyzer")
@@ -121,14 +123,13 @@ public class ElasticsearchService
 
                 IEnumerable<string> bodyTokens = analyzeBodyResponse.Tokens.Select(token => token.Token);
 
-                IEnumerable<string> commonWords = bodyTokens.Intersect(analyzedWords);
+                List<string> commonWords = bodyTokens.Intersect(analyzedWords).ToList();
 
                 _logger.LogInformation("Common words found in note {id}: {commonWords}", hit.Id, string.Join(", ", commonWords));
 
                 uniqueWordsInNotes.UnionWith(commonWords);
             }
         }
-
         int uniqueWordCount = uniqueWordsInNotes.Count;
 
         _logger.LogInformation("Unique word count is: {uniqueWordCount}", uniqueWordCount);

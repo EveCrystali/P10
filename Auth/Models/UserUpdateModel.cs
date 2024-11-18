@@ -8,7 +8,7 @@ public class UserUpdateModel
 
     [Required(ErrorMessage = "Email is mandatory")]
     [DataType(DataType.EmailAddress)]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     [RegularExpression(@"^(User|Practitioner|Admin)$", ErrorMessage = "Invalid role")]
     public string? Role { get; set; }

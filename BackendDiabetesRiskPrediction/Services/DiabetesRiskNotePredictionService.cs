@@ -4,7 +4,7 @@ namespace BackendDiabetesRiskPrediction.Services;
 public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearchService, ILogger<DiabetesRiskNotePredictionService> logger)
 {
 
-    private readonly HashSet<string> triggerWords =
+    private readonly HashSet<string> _triggerWords =
     [
         "Hémoglobine A1C",
         "Microalbumine",
@@ -28,7 +28,7 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
             return diabetesRiskPrediction;
         }
 
-        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(patientRiskInfo.Id, triggerWords);
+        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(patientRiskInfo.Id, _triggerWords);
 
         diabetesRiskPrediction.DiabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
 

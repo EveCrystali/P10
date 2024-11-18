@@ -33,7 +33,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="card-title" style="color: #4caf50;">@note.Title</h5>
-                    <p class="card-text">@Html.Raw(note?.Body?.Replace("\n", "<br>"))</p>
+                    <p class="card-text">@Html.Raw(note.Body?.Replace("\n", "<br>"))</p>
                     <div class="text-muted">
                         @if (note.CreatedDate.HasValue)
                         {

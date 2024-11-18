@@ -97,12 +97,12 @@ public class ElasticsearchService
             return 0;
         }
 
-        _logger.LogInformation("Found {total} notes for PatientId: {patientId}", response?.HitsMetadata?.Total.Value, patientId);
+        _logger.LogInformation("Found {total} notes for PatientId: {patientId}", response.HitsMetadata?.Total.Value, patientId);
 
         // Step 3: Analyze the Body text of each document and count unique matching words
         HashSet<string> uniqueWordsInNotes = new();
 
-        if (response?.Hits != null)
+        if (response.Hits != null)
         {
             foreach (IHit<NoteRiskInfo> hit in response.Hits)
             {

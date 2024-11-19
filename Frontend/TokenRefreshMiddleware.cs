@@ -10,6 +10,10 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
 
     private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
 
+    private const string _tokenName = "Token";
+
+    private const string _refreshTokenName = "RefreshToken";
+
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -21,21 +25,32 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         await next(context);
     }
 
-    private async Task ProcessAuthTokens(HttpContext context)
+    private async Task<bool> ProcessAuthTokens(HttpContext context)
     {
         TryExtractTokensFromCookie(context);
 
-        string? accessToken = context.Items["Token"] as string;
-        string? refreshToken = context.Items["RefreshToken"] as string;
+        string? accessToken = context.Items[_tokenName] as string;
+        string? refreshToken = context.Items[_refreshTokenName] as string;
 
         LogTokenDebugInfo(accessToken, refreshToken);
 
-        if (await HandleTokenRefreshIfNeeded(context, accessToken, refreshToken))
+        if (IsTokenExpired(accessToken) && !string.IsNullOrEmpty(refreshToken))
         {
-            return;
+            logger.LogInformation("TokenRefreshMiddleware : Access token renewal");
+            TokenResponse newTokens = await RefreshTokens(refreshToken);
+
+            if (string.IsNullOrEmpty(newTokens.AccessToken) || string.IsNullOrEmpty(newTokens.RefreshToken))
+            {
+                HandleFailedRefresh(context);
+                return false;
+            }
+
+            UpdateTokensAndCookie(context, newTokens);
+            return true; // Indique qu'un refresh a été effectué
         }
 
         UpdateAuthorizationHeaderIfValidToken(context, accessToken);
+        return false;
     }
 
     private void TryExtractTokensFromCookie(HttpContext context)
@@ -48,8 +63,8 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(authTokensCookie);
             if (authToken != null)
             {
-                context.Items["Token"] = authToken.Token;
-                context.Items["RefreshToken"] = authToken.RefreshToken;
+                context.Items[_tokenName] = authToken.Token;
+                context.Items[_refreshTokenName] = authToken.RefreshToken;
 
                 if (!IsTokenExpired(authToken.Token))
                 {
@@ -69,38 +84,22 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         logger.LogDebug("TokenRefreshMiddleware : Current refresh token : {RefreshToken}", refreshToken);
     }
 
-    private async Task<bool> HandleTokenRefreshIfNeeded(HttpContext context, string? accessToken, string? refreshToken)
-    {
-        if (!IsTokenExpired(accessToken) || string.IsNullOrEmpty(refreshToken)) return false;
-
-        logger.LogInformation("TokenRefreshMiddleware : Access token renewal");
-        TokenResponse newTokens = await RefreshTokens(refreshToken);
-
-        if (string.IsNullOrEmpty(newTokens.AccessToken) || string.IsNullOrEmpty(newTokens.RefreshToken))
-        {
-            HandleFailedRefresh(context);
-            return true;
-        }
-
-        UpdateTokensAndCookie(context, newTokens);
-        return false;
-    }
-
     private void HandleFailedRefresh(HttpContext context)
     {
         context.Response.Cookies.Delete("AuthTokens");
-        logger.LogDebug("TokenRefreshMiddleware : Redirecting to the login page because the refresh token is invalid");
-        context.Response.Redirect("/Auth/Login");
+        context.Items[_tokenName] = null;
+        context.Items[_refreshTokenName] = null;
+        logger.LogDebug("TokenRefreshMiddleware : Tokens cleared due to failed refresh");
     }
 
     private void UpdateTokensAndCookie(HttpContext context, TokenResponse newTokens)
     {
-        context.Items["Token"] = newTokens.AccessToken;
-        context.Items["RefreshToken"] = newTokens.RefreshToken;
+        context.Items[_tokenName] = newTokens.AccessToken;
+        context.Items[_refreshTokenName] = newTokens.RefreshToken;
         context.Request.Headers.Authorization = $"Bearer {newTokens.AccessToken}";
 
-        var cookieOptions = CreateCookieOptions();
-        var updatedAuthToken = new AuthToken
+        CookieOptions cookieOptions = CreateCookieOptions();
+        AuthToken updatedAuthToken = new AuthToken
         {
             Token = newTokens.AccessToken,
             RefreshToken = newTokens.RefreshToken
@@ -129,88 +128,6 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         }
     }
 
-
-    // string? authTokensCookie = context.Request.Cookies["AuthTokens"];
-    // if (!string.IsNullOrEmpty(authTokensCookie))
-    // {
-    //     try 
-    //     {
-    //         AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(authTokensCookie);
-    //         if (authToken != null)
-    //         {
-    //             context.Items["Token"] = authToken.Token;
-    //             context.Items["RefreshToken"] = authToken.RefreshToken;
-
-    //             // Add the token to the Authorization header if it has not expired
-    //             if (!IsTokenExpired(authToken.Token))
-    //             {
-    //                 context.Request.Headers.Authorization = $"Bearer {authToken.Token}";
-    //             }
-    //         }
-    //     }
-    //     catch (JsonException ex)
-    //     {
-    //         logger.LogError(ex, "Error while deserializing AuthTokens cookie");
-    //     }
-    // }
-
-    // string? accessToken = context.Items["Token"] as string;
-    // string? refreshToken = context.Items["RefreshToken"] as string;
-
-    // logger.LogDebug("TokenRefreshMiddleware : Current access token : {AccessToken}", accessToken);
-    // logger.LogDebug("TokenRefreshMiddleware : Current refresh token : {RefreshToken}", refreshToken);
-
-    // if (IsTokenExpired(accessToken) && !string.IsNullOrEmpty(refreshToken))
-    // {
-    //     // Renew the access token
-    //     logger.LogInformation("TokenRefreshMiddleware : Access token renewal");
-    //     TokenResponse newTokens = await RefreshTokens(refreshToken);
-    //     if (!string.IsNullOrEmpty(newTokens.AccessToken) && !string.IsNullOrEmpty(newTokens.RefreshToken))
-    //     {
-    //         // Update the tokens in HttpContext.Items
-    //         context.Items["Token"] = newTokens.AccessToken;
-    //         context.Items["RefreshToken"] = newTokens.RefreshToken;
-
-    //         // Add the new access token to the Authorization header
-    //         context.Request.Headers.Authorization = $"Bearer {newTokens.AccessToken}";
-
-    //         // Update the cookie with a longer lifetime (7 days like the refresh token)
-    //         CookieOptions cookieOptions = new()
-    //         {
-    //             HttpOnly = true,
-    //             Secure = true,
-    //             SameSite = SameSiteMode.Strict,
-    //             Expires = DateTimeOffset.UtcNow.AddDays(_configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
-    //         };
-
-    //         AuthToken updatedAuthToken = new()
-    //         {
-    //             Token = newTokens.AccessToken,
-    //             RefreshToken = newTokens.RefreshToken
-    //         };
-
-    //         context.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(updatedAuthToken), cookieOptions);
-    //         logger.LogDebug("TokenRefreshMiddleware : Updating cookie with new tokens");
-    //     }
-    //     else
-    //     {
-    //         // Delete the cookie if the refresh has failed
-    //         context.Response.Cookies.Delete("AuthTokens");
-    //         logger.LogDebug("TokenRefreshMiddleware : Redirecting to the login page because the refresh token is invalid");
-    //         context.Response.Redirect("/Auth/Login");
-    //         return;
-    //     }
-    // }
-    // else if (!string.IsNullOrEmpty(accessToken) && !IsTokenExpired(accessToken))
-    // {
-    //     // If the token is valid, add it to the Authorization header
-    //     context.Request.Headers.Authorization = $"Bearer {accessToken}";
-    // }
-
-    // logger.LogInformation("TokenRefreshMiddleware : Fin de l'exécution");
-    // await next(context);
-    // }
-
     private bool IsTokenExpired(string? token)
     {
         if (string.IsNullOrEmpty(token))
@@ -221,7 +138,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
 
         JwtSecurityToken? jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
         bool result = jwt.ValidTo < DateTime.UtcNow;
-        logger.LogDebug($"TokenRefreshMiddleware : The token is expired : {result}");
+        logger.LogInformation("Token expired at {ExpirationTime}", jwt.ValidTo.ToString("yyyy-MM-dd HH:mm:ss")); 
         return result;
     }
 

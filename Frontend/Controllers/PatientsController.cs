@@ -44,6 +44,8 @@ public class PatientsController : Controller
         if (responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized ||
             responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized)
         {
+            _logger.LogDebug("Unauthorized access to Patient Service. Status code: {StatusCode}", responseFromPatientService.StatusCode);
+            _logger.LogDebug("Unauthorized access to Note Service. Status code: {StatusCode}", responseFromNoteService.StatusCode);
             return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
         }
 

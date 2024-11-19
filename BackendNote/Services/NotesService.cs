@@ -26,7 +26,6 @@ public class NotesService
         NotesCollection = mongoDatabase.GetCollection<Note>(
                                                             noteDatabaseSettings.Value.NotesCollectionName);
 
-
         CreateIndexes();
 
         ConnectionSettings settings = new ConnectionSettings(new Uri("http://elasticsearch:9200"))
@@ -56,51 +55,68 @@ public class NotesService
     public async Task CreateAsync(Note newNote)
     {
         await NotesCollection.InsertOneAsync(newNote);
+        await CreateAsyncElasticsearch(newNote);
     }
 
     public async Task UpdateAsync(string id, Note updatedNote)
     {
-        _logger.LogInformation("Updating note with ID {id}", id);
+        _logger.LogInformation("Updating note with ID {Id}", id);
+
+        // Get existing note to preserve PatientId
+        Note? existingNote = await GetAsync(id) ?? throw new InvalidOperationException($"Note with ID {id} not found");
+
+        // Preserve PatientId
+
+        updatedNote.PatientId = existingNote.PatientId;
+        updatedNote.Id = existingNote.Id;
 
         FilterDefinition<Note> filter = Builders<Note>.Filter.Eq(field: note => note.Id, id);
         UpdateDefinition<Note> update = Builders<Note>.Update
-                                                      .Set(field: note => note.Title, updatedNote.Title)
-                                                      .Set(field: note => note.Body, updatedNote.Body)
-                                                      .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
+                                                  .Set(field: note => note.Title, updatedNote.Title)
+                                                  .Set(field: note => note.Body, updatedNote.Body)
+                                                  .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
         UpdateResult? updateResult = await NotesCollection.UpdateOneAsync(filter, update);
 
-        _logger.LogInformation("MongoDB update result: {matchedCount} matched, {modifiedCount} modified", updateResult.MatchedCount, updateResult.ModifiedCount);
+        _logger.LogInformation("MongoDB update result: {MatchedCount} matched, {ModifiedCount} modified", updateResult.MatchedCount, updateResult.ModifiedCount);
 
-        UpdateResponse<Note>? updateResponse = await _elasticClient.UpdateAsync<Note, Note>(id, u => u
-                                                                                                     .Doc(updatedNote)
-                                                                                                     .Index("notes_index"));
-        if (updateResponse.IsValid)
-        {
-            _logger.LogInformation("Successfully updated document in Elasticsearch with ID {id}", id);
-        }
-        else
-        {
-            string errorMessage = $"Failed to update document in Elasticsearch. Reason: {updateResponse.ServerError?.Error.Reason}";
-            _logger.LogError(errorMessage);
-            throw new Exception(errorMessage);
-        }
+        await RemoveAsyncElasticsearch(id);
+        await CreateAsyncElasticsearch(updatedNote);
     }
 
     public async Task RemoveAsync(Note note)
     {
-        _logger.LogInformation("Deleting note with ID {id} from MongoDB and Elasticsearch", note.Id);
+        _logger.LogInformation("Deleting note with ID {Id} from MongoDB and Elasticsearch", note.Id);
+        if (note.Id != null)
+        {
+            await RemoveAsyncElasticsearch(note.Id);
+        }
+        _logger.LogInformation("Note with ID {Id} deleted successfully", note.Id);
+    }
 
-        await NotesCollection.DeleteOneAsync(x => x.Id == note.Id);
-        DeleteResponse? deleteResponse = await _elasticClient.DeleteAsync<Note>(note.Id);
-
+    private async Task RemoveAsyncElasticsearch(string id)
+    {
+        _logger.LogInformation("Deleting note with ID {Id} from Elasticsearch", id);
+        DeleteResponse? deleteResponse = await _elasticClient.DeleteAsync<Note>(id);
         if (!deleteResponse.IsValid)
         {
-            string errorMessage = $"Failed to delete document with ID {note.Id} from Elasticsearch. Reason: {deleteResponse.ServerError?.Error.Reason}";
+            string errorMessage = $"Failed to delete document with ID {id} from Elasticsearch. Reason: {deleteResponse.ServerError?.Error.Reason}";
             _logger.LogError(errorMessage);
-            throw new Exception(errorMessage);
+            throw new InvalidOperationException("Error deleting document from Elasticsearch" + errorMessage);
         }
+        _logger.LogInformation("Note with ID {Id} deleted successfully in Elasticsearch", id);
+    }
 
-        _logger.LogInformation("Note with ID {id} deleted successfully", note.Id);
+    private async Task CreateAsyncElasticsearch(Note note)
+    {
+        _logger.LogInformation("Creating note with ID {Id} in Elasticsearch", note.Id);
+        CreateResponse? createResponse = await _elasticClient.CreateAsync<Note>(note, x => x.Index("notes_index"));
+        if (!createResponse.IsValid)
+        {
+            string errorMessage = $"Failed to create document with ID {note.Id} in Elasticsearch. Reason: {createResponse.ServerError?.Error.Reason}";
+            _logger.LogError(errorMessage);
+            throw new InvalidOperationException("Error creating document in Elasticsearch" + errorMessage);
+        }
+        _logger.LogInformation("Note with ID {Id} created successfully in Elasticsearch", note.Id);
     }
 
     private void CreateIndexes()

@@ -12,6 +12,9 @@ public class PatientsController : Controller
     private readonly ILogger<PatientsController> _logger;
     private readonly string _noteServiceUrl;
     private readonly string _patientServiceUrl;
+    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
+    private readonly string _controllerHomeControllerName = nameof(HomeController).Replace("Controller", "");
+
 
     public PatientsController(ILogger<PatientsController> logger,
                               HttpClientService httpClientService,
@@ -46,7 +49,7 @@ public class PatientsController : Controller
         {
             _logger.LogDebug("Unauthorized access to Patient Service. Status code: {StatusCode}", responseFromPatientService.StatusCode);
             _logger.LogDebug("Unauthorized access to Note Service. Status code: {StatusCode}", responseFromNoteService.StatusCode);
-            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
         }
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
@@ -78,7 +81,7 @@ public class PatientsController : Controller
             {
                 _logger.LogInformation("Unauthorized access to Diabetes Risk Prediction Service. Status code: {StatusCode}", responseFromDiabetesRiskService.StatusCode);
                 return RedirectToAction(nameof(AuthController.Login),
-                                        nameof(AuthController).Replace("Controller", ""));
+                                        _controllerAuthName);
             }
 
             _logger.LogDebug("Reading content from Json now...");
@@ -109,7 +112,7 @@ public class PatientsController : Controller
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
             }
             if (response.IsSuccessStatusCode)
             {
@@ -123,13 +126,13 @@ public class PatientsController : Controller
                 }
                 ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                        "Failed to create patient", "Unable to create patient");
-                return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+                return RedirectToAction(nameof(Index), _controllerHomeControllerName);
             }
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                    $"Error from the server : {response.ReasonPhrase}",
                                                    "Unable to create patient", response);
 
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+            return RedirectToAction(nameof(Index), _controllerHomeControllerName);
         }
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                "Model state is not valid.", "Unable to create patient");
@@ -146,7 +149,7 @@ public class PatientsController : Controller
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
             }
             if (response.IsSuccessStatusCode)
             {
@@ -184,7 +187,7 @@ public class PatientsController : Controller
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
             }
             if (response.IsSuccessStatusCode)
             {
@@ -217,7 +220,7 @@ public class PatientsController : Controller
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
         }
         if (response.IsSuccessStatusCode)
         {
@@ -227,7 +230,7 @@ public class PatientsController : Controller
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                $"Failed to load patient with id {id}. Status code: {response.StatusCode}",
                                                "Unable to load patient for deletion.", response);
-        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+        return RedirectToAction(nameof(Index), _controllerHomeControllerName);
     }
 
     [HttpPost("delete/{id:int}")]
@@ -244,15 +247,15 @@ public class PatientsController : Controller
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
         }
         if (response.IsSuccessStatusCode)
         {
-            return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+            return RedirectToAction(nameof(Index), _controllerHomeControllerName);
         }
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData,
                                                $"Failed to delete patient with id {id}. Status code: {response.StatusCode}",
                                                "Unable to delete patient", response);
-        return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
+        return RedirectToAction(nameof(Index), _controllerHomeControllerName);
     }
 }

@@ -14,13 +14,15 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
     private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
     private readonly ILogger<HttpClientService> _logger = logger;
 
+    private const string _bearerPrefix = "Bearer";
+
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequest)
     {
         // Get token from HttpContext.Items first as it's the most up-to-date
         string? token = _httpContextAccessor.HttpContext?.Items["Token"] as string;
         if (!string.IsNullOrEmpty(token))
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
         }
         else
         {
@@ -36,7 +38,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
             if (!string.IsNullOrEmpty(token))
             {
                 _logger.LogInformation("Using newly refreshed token from middleware");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
                 // Create a new request as the old one is already disposed
                 HttpRequestMessage newRequest = new HttpRequestMessage(httpRequest.Method, httpRequest.RequestUri);
                 if (httpRequest.Content != null)
@@ -122,7 +124,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
     {
         if (token != null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
             return;
         }
 
@@ -130,7 +132,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
         if (tokenSerialized != null)
         {
             token = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized)?.Token;
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
         }
     }
 

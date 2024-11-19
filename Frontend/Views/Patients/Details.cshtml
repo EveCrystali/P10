@@ -58,7 +58,6 @@
 
                 <h6 class="mb-1 text-primary">Date de mise à jour</h6>
                 <p>@(note.LastUpdatedDate?.ToString("dd/MM/yyyy HH:mm") ?? (note.CreatedDate?.ToString("dd/MM/yyyy HH:mm") ?? "Inconnu"))</p>
-                @* <p>@(note.LastUpdatedDate != null ? note.LastUpdatedDate.ToString() : (note.CreatedDate.ToString() != null ? note.CreatedDate.ToString() : "Inconnu"))</p> *@
 
                 <h6 class="mb-1 text-primary">Créateur</h6>
                 <p>@(note.Creator != null ? note.Creator : "Inconnu")</p>

@@ -94,7 +94,7 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
         DateTime currentDate = DateTime.Now;
         DateOnly birthDate = patientRiskInfo.DateOfBirth;
         int age = currentDate.Year - birthDate.Year;
-        logger.LogInformation($"Patient age is : {age}");
+        logger.LogInformation("Patient age is : {Age}", age);
         return age;
     }
 }

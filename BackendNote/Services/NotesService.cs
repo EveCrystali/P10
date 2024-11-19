@@ -67,13 +67,13 @@ public class NotesService
                                                       .Set(field: note => note.Title, updatedNote.Title)
                                                       .Set(field: note => note.Body, updatedNote.Body)
                                                       .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
-        var updateResult = await NotesCollection.UpdateOneAsync(filter, update);
+        UpdateResult? updateResult = await NotesCollection.UpdateOneAsync(filter, update);
 
         _logger.LogInformation("MongoDB update result: {matchedCount} matched, {modifiedCount} modified", updateResult.MatchedCount, updateResult.ModifiedCount);
 
-        var updateResponse = await _elasticClient.UpdateAsync<Note, Note>(id, u => u
-                                                                                   .Doc(updatedNote)
-                                                                                   .Index("notes_index"));
+        UpdateResponse<Note>? updateResponse = await _elasticClient.UpdateAsync<Note, Note>(id, u => u
+                                                                                                     .Doc(updatedNote)
+                                                                                                     .Index("notes_index"));
         if (updateResponse.IsValid)
         {
             _logger.LogInformation("Successfully updated document in Elasticsearch with ID {id}", id);
@@ -91,7 +91,7 @@ public class NotesService
         _logger.LogInformation("Deleting note with ID {id} from MongoDB and Elasticsearch", note.Id);
 
         await NotesCollection.DeleteOneAsync(x => x.Id == note.Id);
-        var deleteResponse = await _elasticClient.DeleteAsync<Note>(note.Id);
+        DeleteResponse? deleteResponse = await _elasticClient.DeleteAsync<Note>(note.Id);
 
         if (!deleteResponse.IsValid)
         {

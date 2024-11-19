@@ -127,32 +127,32 @@ public class AuthController(
         RefreshToken? refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == model.RefreshToken);
         if (refreshToken == null || refreshToken.ExpiryDate < DateTime.UtcNow || refreshToken.IsRevoked)
         {
-            _logger.LogWarning("Invalid or expired refresh token.");
+            _logger.LogDebug("Invalid or expired refresh token.");
             return Unauthorized();
         }
 
         User? user = await _userManager.FindByIdAsync(refreshToken.UserId);
         if (user == null || !user.IsUserActive() || user.UserName == null)
         {
-            _logger.LogWarning("User not found or inactive.");
+            _logger.LogDebug("User not found or inactive.");
             return Unauthorized();
         }
 
         IList<string> userRoles = await _userManager.GetRolesAsync(user);
         if (user.UserName != null)
         {
-            _logger.LogInformation("Generating new tokens for user.");
+            _logger.LogDebug("Generating new tokens for user.");
             string newToken = _jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
             RefreshToken newRefreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-            _logger.LogInformation("Revoking previous refresh token.");
+            _logger.LogDebug("Revoking previous refresh token.");
             refreshToken.IsRevoked = true;
             _context.RefreshTokens.Update(refreshToken);
 
-            _logger.LogInformation("Adding new refresh token.");
+            _logger.LogDebug("Adding new refresh token.");
             _context.RefreshTokens.Add(newRefreshToken);
 
-            _logger.LogInformation("Removing old refresh tokens.");
+            _logger.LogDebug("Removing old refresh tokens.");
             List<RefreshToken> oldTokens = await _context.RefreshTokens
                                                          .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
                                                          .ToListAsync();

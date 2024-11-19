@@ -26,7 +26,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
                     context.Items["Token"] = authToken.Token;
                     context.Items["RefreshToken"] = authToken.RefreshToken;
                     
-                    // Ajouter le token à l'en-tête Authorization s'il n'est pas expiré
+                    // Add the token to the Authorization header if it has not expired
                     if (!IsTokenExpired(authToken.Token))
                     {
                         context.Request.Headers.Authorization = $"Bearer {authToken.Token}";
@@ -35,31 +35,31 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             }
             catch (JsonException ex)
             {
-                logger.LogError(ex, "Erreur lors de la désérialisation du cookie AuthTokens");
+                logger.LogError(ex, "Error while deserializing AuthTokens cookie");
             }
         }
 
         string? accessToken = context.Items["Token"] as string;
         string? refreshToken = context.Items["RefreshToken"] as string;
 
-        logger.LogDebug("TokenRefreshMiddleware : Accès token actuel : {AccessToken}", accessToken);
-        logger.LogDebug("TokenRefreshMiddleware : Token de rafraîchissement actuel : {RefreshToken}", refreshToken);
+        logger.LogDebug("TokenRefreshMiddleware : Current access token : {AccessToken}", accessToken);
+        logger.LogDebug("TokenRefreshMiddleware : Current refresh token : {RefreshToken}", refreshToken);
 
         if (IsTokenExpired(accessToken) && !string.IsNullOrEmpty(refreshToken))
         {
-            // Renouveler le token d'accès
-            logger.LogInformation("TokenRefreshMiddleware : Renouvellement du token d'accès");
+            // Renew the access token
+            logger.LogInformation("TokenRefreshMiddleware : Access token renewal");
             TokenResponse newTokens = await RefreshTokens(refreshToken);
             if (!string.IsNullOrEmpty(newTokens.AccessToken) && !string.IsNullOrEmpty(newTokens.RefreshToken))
             {
-                // Mettre à jour les tokens dans HttpContext.Items
+                // Update the tokens in HttpContext.Items
                 context.Items["Token"] = newTokens.AccessToken;
                 context.Items["RefreshToken"] = newTokens.RefreshToken;
 
-                // Ajouter le nouveau access token à l'en-tête Authorization
+                // Add the new access token to the Authorization header
                 context.Request.Headers.Authorization = $"Bearer {newTokens.AccessToken}";
 
-                // Mettre à jour le cookie avec une durée de vie plus longue (7 jours comme le refresh token)
+                // Update the cookie with a longer lifetime (7 days like the refresh token)
                 CookieOptions cookieOptions = new()
                 {
                     HttpOnly = true,
@@ -75,20 +75,20 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
                 };
 
                 context.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(updatedAuthToken), cookieOptions);
-                logger.LogDebug("TokenRefreshMiddleware : Mise à jour du cookie avec les nouveaux tokens");
+                logger.LogDebug("TokenRefreshMiddleware : Updating cookie with new tokens");
             }
             else
             {
-                // Supprimer le cookie si le refresh a échoué
+                // Delete the cookie if the refresh has failed
                 context.Response.Cookies.Delete("AuthTokens");
-                logger.LogDebug("TokenRefreshMiddleware : Redirection vers la page de connexion car le refresh token est invalide");
+                logger.LogDebug("TokenRefreshMiddleware : Redirecting to the login page because the refresh token is invalid");
                 context.Response.Redirect("/Auth/Login");
                 return;
             }
         }
         else if (!string.IsNullOrEmpty(accessToken) && !IsTokenExpired(accessToken))
         {
-            // Si le token est valide, l'ajouter à l'en-tête Authorization
+            // If the token is valid, add it to the Authorization header
             context.Request.Headers.Authorization = $"Bearer {accessToken}";
         }
 
@@ -100,13 +100,13 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
     {
         if (string.IsNullOrEmpty(token))
         {
-            logger.LogDebug("TokenRefreshMiddleware : Le token est vide ou nul");
+            logger.LogDebug("TokenRefreshMiddleware : The token is empty or null");
             return true;
         }
 
         JwtSecurityToken? jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
         bool result = jwt.ValidTo < DateTime.UtcNow;
-        logger.LogDebug($"TokenRefreshMiddleware : le token est expiré : {result}");
+        logger.LogDebug($"TokenRefreshMiddleware : The token is expired : {result}");
         return result;
     }
     
@@ -117,7 +117,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             using HttpClient client = httpClientFactory.CreateClient();
             RefreshRequest request = new() { RefreshToken = refreshToken };
             
-            logger.LogDebug("TokenRefreshMiddleware : Envoi de la requête de rafraîchissement avec le token : {RefreshToken}", refreshToken);
+            logger.LogDebug("TokenRefreshMiddleware : Sending refresh request with token : {RefreshToken}", refreshToken);
             
             HttpResponseMessage response = await client.PostAsJsonAsync($"{_authServiceUrl}/refresh", request);
             string content = await response.Content.ReadAsStringAsync();
@@ -129,25 +129,25 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
                     TokenResponse? tokens = JsonConvert.DeserializeObject<TokenResponse>(content);
                     if (tokens != null && !string.IsNullOrEmpty(tokens.AccessToken) && !string.IsNullOrEmpty(tokens.RefreshToken))
                     {
-                        logger.LogInformation("TokenRefreshMiddleware : Tokens rafraîchis avec succès");
+                        logger.LogInformation("TokenRefreshMiddleware : Tokens refreshed successfully");
                         return tokens;
                     }
-                    logger.LogWarning("TokenRefreshMiddleware : La réponse du serveur ne contient pas les tokens attendus. Content: {Content}", content);
+                    logger.LogWarning("TokenRefreshMiddleware : The server response does not contain the expected tokens. Content: {Content}", content);
                 }
                 catch (JsonException ex)
                 {
-                    logger.LogError(ex, "TokenRefreshMiddleware : Erreur lors de la désérialisation de la réponse. Content: {Content}", content);
+                    logger.LogError(ex, "TokenRefreshMiddleware : Error deserializing the response. Content: {Content}", content);
                 }
             }
             else
             {
-                logger.LogWarning("TokenRefreshMiddleware : Échec du rafraîchissement des tokens. Status code: {StatusCode}, Content: {Content}", 
+                logger.LogWarning("TokenRefreshMiddleware : Refreshing tokens failed. Status code: {StatusCode}, Content: {Content}", 
                     response.StatusCode, content);
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "TokenRefreshMiddleware : Erreur lors du rafraîchissement des tokens");
+            logger.LogError(ex, "TokenRefreshMiddleware : Error refreshing tokens");
         }
 
         return new TokenResponse();

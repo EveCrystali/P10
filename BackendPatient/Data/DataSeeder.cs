@@ -1,5 +1,6 @@
 using BackendPatient.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 namespace BackendPatient.Data;
 
 public class DataSeeder(ApplicationDbContext dbContext)
@@ -22,16 +23,16 @@ public class DataSeeder(ApplicationDbContext dbContext)
                                           .Select(Patient.FormatPatient)
                                           .ToList();
 
-        using var transaction = _dbContext.Database.BeginTransaction();
+        using IDbContextTransaction transaction = _dbContext.Database.BeginTransaction();
         try
         {
-            SetIdentityInsert("Patients", true);
+            SetIdentityInsert("Patients");
 
-            foreach (var patient in patientsFormatted)
+            foreach (Patient patient in patientsFormatted)
             {
 
                 // Vérifier si le patient avec cet ID existe déjà
-                var existingPatient = _dbContext.Patients.FirstOrDefault(p => p.Id == patient.Id);
+                Patient? existingPatient = _dbContext.Patients.FirstOrDefault(p => p.Id == patient.Id);
 
                 if (existingPatient != null)
                 {

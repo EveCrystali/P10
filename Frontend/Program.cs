@@ -1,12 +1,11 @@
 using System.Net.Security;
 using Frontend.Controllers;
 using Frontend.Services;
-using SharedAuthLibrary;
-using SharedAuthorizationLibrary;
-using SharedCorsLibrary;
+using SharedLibrary;
+using Frontend;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-IConfiguration Configuration = builder.Configuration;
+IConfiguration configuration = builder.Configuration;
 
 // Add Authorization policies and authentification
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -27,7 +26,7 @@ builder.Services.AddSingleton<JwtValidationService>();
 builder.Services.AddHttpClient<HomeController>(client =>
        {
            // Remplacer l'URI codée en dur par une configuration
-           string? apiGatewayBaseUrl = Configuration["ApiGatewayAddress:BaseUrl"];
+           string? apiGatewayBaseUrl = configuration["ApiGatewayAddress:BaseUrl"];
            if (string.IsNullOrEmpty(apiGatewayBaseUrl))
            {
                throw new ArgumentNullException(apiGatewayBaseUrl, "L'URL de base ne peut pas être nulle ou vide.");
@@ -36,10 +35,7 @@ builder.Services.AddHttpClient<HomeController>(client =>
        })
        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
        {
-           ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-           {
-               return errors == SslPolicyErrors.None;
-           }
+           ServerCertificateCustomValidationCallback = (_, _, _, errors) => errors == SslPolicyErrors.None
        });
 
 builder.Services.AddScoped<PatientService>();
@@ -71,8 +67,11 @@ app.MapControllerRoute(
 // We need to allow all origins because Frontend and Auth are not on the same port
 app.UseCors("AllowFrontend");
 
+app.UseMiddleware<TokenRefreshMiddleware>();
+
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.UseCookiePolicy();

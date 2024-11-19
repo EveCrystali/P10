@@ -16,16 +16,6 @@ public class NotesController : ControllerBase
         _notesService = notesService;
     }
 
-    [HttpGet]
-    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public async Task<ActionResult<IEnumerable<Note>>> Get()
-    {
-        List<Note> notes = await _notesService.GetAsync();
-
-        return notes != null ? Ok(notes) : NotFound("No notes found");
-    }
-
-
     [HttpGet("{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Note>> GetNote(string id)
@@ -43,7 +33,7 @@ public class NotesController : ControllerBase
 
     [HttpGet("dto/{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public async Task<ActionResult<Note>> GetNoteDTODiabetesRiskPrediction(string id)
+    public async Task<ActionResult<Note>> GetNoteDtoDiabetesRiskPrediction(string id)
     {
         Note? note = await _notesService.GetAsync(id);
 
@@ -93,12 +83,11 @@ public class NotesController : ControllerBase
         if (newNote.CreatedDate == null)
         {
             newNote.CreatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            ;
         }
 
         await _notesService.CreateAsync(newNote);
 
-        return CreatedAtAction(nameof(Get), new
+        return CreatedAtAction(nameof(GetNote), new
         {
             id = newNote.Id
         }, newNote);

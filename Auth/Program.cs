@@ -3,9 +3,7 @@ using Auth.Models;
 using Auth.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SharedAuthLibrary;
-using SharedAuthorizationLibrary;
-using SharedSwaggerLibrary;
+using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Database configuration

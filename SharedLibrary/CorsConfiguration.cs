@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-namespace SharedCorsLibrary;
+namespace SharedLibrary;
 
 public static class CorsConfiguration
 {
@@ -9,10 +9,10 @@ public static class CorsConfiguration
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(corsPolicyName,
-                              configurePolicy: builder => builder.WithOrigins(origins)
-                                                                 .AllowAnyMethod()
-                                                                 .AllowAnyHeader()
-                                                                 .AllowCredentials());
+                              configurePolicy: policyBuilder => policyBuilder.WithOrigins(origins)
+                                                                             .AllowAnyMethod()
+                                                                             .AllowAnyHeader()
+                                                                             .AllowCredentials());
         });
     }
 }

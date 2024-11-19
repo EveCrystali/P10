@@ -4,8 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Serilog;
-using SharedAuthorizationLibrary;
-using SharedCorsLibrary;
+using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Configuration de Serilog
@@ -20,8 +19,8 @@ builder.Configuration.AddJsonFile("ocelot.json", false, true);
 // Add services to the container.
 builder.Services.AddOcelot(builder.Configuration);
 
-IConfigurationSection? jwtSettings = builder.Configuration.GetSection("JwtSettings");
-string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
+IConfigurationSection jwtSettings = builder.Configuration.GetSection("JwtSettings");
+string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY") ?? throw new ArgumentNullException(nameof(secretKey), "JWT Key configuration is missing.");
 
 builder.Services.AddAuthentication(options =>
        {

@@ -33,7 +33,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     }
 
     [HttpGet("dto/{id}")]
-    public async Task<ActionResult<Patient>> GetPatientDTODiabetesRiskPrediction(int id)
+    public async Task<ActionResult<Patient>> GetPatientDtoDiabetesRiskPrediction(int id)
     {
         Patient? patient = await _dbContext.Patients.FindAsync(id);
 
@@ -42,14 +42,14 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
             return NotFound("Patient not found");
         }
 
-        PatientDtoDiabetesRiskPrediction patientDTODiabetesRiskPrediction = new()
+        PatientDtoDiabetesRiskPrediction patientDtoDiabetesRiskPrediction = new()
         {
             Id = patient.Id,
             DateOfBirth = patient.DateOfBirth,
             Gender = patient.Gender
         };
 
-        return Ok(patientDTODiabetesRiskPrediction);
+        return Ok(patientDtoDiabetesRiskPrediction);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     {
         List<Patient> patients = await _dbContext.Patients.ToListAsync();
 
-        return patients != null ? Ok(patients) : NotFound("No patients found");
+        return Ok(patients);
     }
 
     /// <summary>

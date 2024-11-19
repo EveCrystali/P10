@@ -214,6 +214,34 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/auth/refresh",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth",
+          "Port": 7201
+        }
+      ],
+      "UpstreamPathTemplate": "/auth/refresh",
+      "UpstreamHttpMethod": [ "POST" ],
+      "AuthenticationOptions": null,
+      "CorsPolicy": {
+        "AllowAnyOrigin": false,
+        "AllowCredentials": true,
+        "AllowedOrigins": [
+          "http://frontend:7000"
+        ],
+        "AllowedMethods": [
+          "GET",
+          "POST",
+          "OPTIONS"
+        ],
+        "AllowedHeaders": [
+          "*"
+        ]
+      }
+    },
+    {
       "DownstreamPathTemplate": "/auth/status",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

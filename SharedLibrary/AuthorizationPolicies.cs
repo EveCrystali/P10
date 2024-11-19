@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-namespace SharedAuthorizationLibrary;
+namespace SharedLibrary;
 
 public static class AuthorizationPolicies
 {

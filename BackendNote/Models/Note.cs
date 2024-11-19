@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using SharedLibrary.Extensions;
+using SharedLibrary;
 namespace BackendNote.Models;
 
 public class Note : IValidatable

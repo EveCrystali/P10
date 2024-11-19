@@ -1,11 +1,7 @@
 using BackendNote.Data;
 using BackendNote.Models;
 using BackendNote.Services;
-using BackendPatient.Extensions;
-using SharedAuthLibrary;
-using SharedAuthorizationLibrary;
-using SharedCorsLibrary;
-using SharedSwaggerLibrary;
+using SharedLibrary;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();

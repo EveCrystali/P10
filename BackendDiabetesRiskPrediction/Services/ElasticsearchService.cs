@@ -39,99 +39,111 @@ public class ElasticsearchService
 
         if (!response.IsValid)
         {
-            throw new Exception($"Failed to index note: {response.OriginalException.Message}");
+            throw new InvalidOperationException($"Failed to index note: {response.OriginalException.Message}");
         }
     }
 
     public async Task<int> CountUniqueWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
-        _logger.LogInformation("CountUniqueWordsInNotes called with patientId: {patientId}", patientId);
+        _logger.LogInformation("CountUniqueWordsInNotes called with patientId: {PatientId}", patientId);
 
-        // Step 1: Analyze the trigger words using the same analyzer as the `Body` field
+        HashSet<string> analyzedTriggerWords = await AnalyzeWords(wordsToCount);
+        ISearchResponse<NoteRiskInfo> patientNotes = await GetPatientNotes(patientId);
+        return await CountUniqueWordsInPatientNotes(patientNotes, analyzedTriggerWords);
+    }
+
+    private async Task<HashSet<string>> AnalyzeWords(HashSet<string> wordsToCount)
+    {
         HashSet<string> analyzedWords = new();
-
-        _logger.LogInformation("Analyzing words: {wordsToCount}", string.Join(", ", wordsToCount));
+        _logger.LogInformation("Analyzing words: {WordsToCount}", string.Join(", ", wordsToCount));
 
         foreach (string word in wordsToCount)
         {
-            AnalyzeResponse analyzeResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
-                                                                                                   .Index("notes_index")
-                                                                                                   .Analyzer("custom_french_analyzer")
-                                                                                                   .Text(word)
-                                                                                             );
-
-            if (!analyzeResponse.IsValid)
+            IEnumerable<string>? analyzedTokens = await AnalyzeText(word);
+            if (analyzedTokens != null)
             {
-                _logger.LogError("Failed to analyze word: {word}. Reason: {reason}", word, analyzeResponse.OriginalException.Message);
-                continue;
+                analyzedWords.UnionWith(analyzedTokens);
             }
-
-            analyzedWords.UnionWith(analyzeResponse.Tokens.Select(token => token.Token));
         }
 
-        _logger.LogInformation("Analyzed words are: {words}", string.Join(", ", analyzedWords));
+        _logger.LogInformation("Analyzed words are: {Words}", string.Join(", ", analyzedWords));
+        return analyzedWords;
+    }
 
-        // Step 2: Query for documents matching PatientId
-        _logger.LogInformation("Executing search query for patientId: {patientId}", patientId);
+    private async Task<IEnumerable<string>?> AnalyzeText(string text)
+    {
+        AnalyzeResponse analyzeResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
+            .Index("notes_index")
+            .Analyzer("custom_french_analyzer")
+            .Text(text));
+
+        if (!analyzeResponse.IsValid)
+        {
+            _logger.LogError("Failed to analyze text: {Text}. Reason: {Reason}", text, analyzeResponse.OriginalException.Message);
+            return null;
+        }
+
+        return analyzeResponse.Tokens.Select(token => token.Token);
+    }
+
+    private async Task<ISearchResponse<NoteRiskInfo>> GetPatientNotes(int patientId)
+    {
+        _logger.LogInformation("Executing search query for patientId: {PatientId}", patientId);
 
         ISearchResponse<NoteRiskInfo> response = await _elasticsearchClient.SearchAsync<NoteRiskInfo>(s => s
-                                                                                                           .Index("notes_index")
-                                                                                                           .Query(q => q
-                                                                                                                      .Term(t => t.Field("PatientId").Value(patientId))
-                                                                                                                 )
-                                                                                                           .Source(src => src
-                                                                                                                       .Includes(i => i.Field("Body"))
-                                                                                                                  )
-                                                                                                           .Size(1000) // Adjust size as needed
-                                                                                                     );
+            .Index("notes_index")
+            .Query(q => q
+                .Term(t => t.Field("PatientId").Value(patientId))
+            )
+            .Source(src => src
+                .Includes(i => i.Field("Body"))
+            )
+            .Size(1000)
+        );
 
+        ValidateSearchResponse(response, patientId);
+        return response;
+    }
+
+    private void ValidateSearchResponse(ISearchResponse<NoteRiskInfo> response, int patientId)
+    {
         if (!response.IsValid)
         {
-            _logger.LogError("Search query failed. Reason: {reason}", response.OriginalException.Message);
-            throw new Exception($"Failed to search notes: {response.OriginalException.Message}");
+            _logger.LogError("Search query failed. Reason: {Reason}", response.OriginalException.Message);
+            throw new InvalidOperationException($"Failed to search notes: {response.OriginalException.Message}");
         }
 
         if (response.HitsMetadata?.Total.Value == 0)
         {
-            _logger.LogWarning("No notes found for PatientId: {patientId}", patientId);
-            return 0;
+            _logger.LogWarning("No notes found for PatientId: {PatientId}", patientId);
+            return;
         }
 
-        _logger.LogInformation("Found {total} notes for PatientId: {patientId}", response?.HitsMetadata?.Total.Value, patientId);
+        _logger.LogInformation("Found {Total} notes for PatientId: {PatientId}", response.HitsMetadata?.Total.Value, patientId);
+    }
 
-        // Step 3: Analyze the Body text of each document and count unique matching words
+    private async Task<int> CountUniqueWordsInPatientNotes(ISearchResponse<NoteRiskInfo> response, HashSet<string> analyzedWords)
+    {
         HashSet<string> uniqueWordsInNotes = new();
 
-        foreach (IHit<NoteRiskInfo>? hit in response.Hits)
+        if (response.Hits != null)
         {
-            if (!string.IsNullOrEmpty(hit.Source.Body))
+            foreach (IHit<NoteRiskInfo> hit in response.Hits)
             {
-                AnalyzeResponse analyzeBodyResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
-                                                                                                           .Index("notes_index")
-                                                                                                           .Analyzer("custom_french_analyzer")
-                                                                                                           .Text(hit.Source.Body)
-                                                                                                     );
+                if (string.IsNullOrEmpty(hit.Source.Body)) continue;
 
-                if (!analyzeBodyResponse.IsValid)
-                {
-                    _logger.LogError("Failed to analyze Body for document {id}. Reason: {reason}", hit.Id, analyzeBodyResponse.OriginalException.Message);
-                    continue;
-                }
+                IEnumerable<string>? bodyTokens = await AnalyzeText(hit.Source.Body);
+                if (bodyTokens == null) continue;
 
-
-                IEnumerable<string> bodyTokens = analyzeBodyResponse.Tokens.Select(token => token.Token);
-
-                IEnumerable<string> commonWords = bodyTokens.Intersect(analyzedWords);
-
-                _logger.LogInformation("Common words found in note {id}: {commonWords}", hit.Id, string.Join(", ", commonWords));
+                List<string> commonWords = bodyTokens.Intersect(analyzedWords).ToList();
+                _logger.LogInformation("Common words found in note {Id}: {CommonWords}", hit.Id, string.Join(", ", commonWords));
 
                 uniqueWordsInNotes.UnionWith(commonWords);
             }
         }
 
         int uniqueWordCount = uniqueWordsInNotes.Count;
-
-        _logger.LogInformation("Unique word count is: {uniqueWordCount}", uniqueWordCount);
+        _logger.LogInformation("Unique word count is: {UniqueWordCount}", uniqueWordCount);
 
         return uniqueWordCount;
     }

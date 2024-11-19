@@ -14,6 +14,7 @@ public class AuthController : Controller
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JwtValidationService _jwtValidationService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IConfiguration _configuration;
 
     public AuthController(ILogger<AuthController> logger, IConfiguration configuration, HttpClientService httpClientService, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, JwtValidationService jwtValidationService)
     {
@@ -23,6 +24,7 @@ public class AuthController : Controller
         _httpClient = httpClient;
         _authServiceUrl = new ServiceUrl(configuration, _logger).GetServiceUrl("Auth");
         _jwtValidationService = jwtValidationService;
+        _configuration = configuration;
     }
 
     [HttpGet("login")]
@@ -60,13 +62,14 @@ public class AuthController : Controller
                 Token = authResponseDeserialized.Token,
                 RefreshToken = authResponseDeserialized.RefreshToken
             };
-
+            
             // Serialize to JSON and store in a cookie
             CookieOptions cookieOptions = new()
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.Now.AddDays(_configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
             };
 
             HttpContext.Response.Cookies.Append("AuthTokens", JsonConvert.SerializeObject(authToken), cookieOptions);

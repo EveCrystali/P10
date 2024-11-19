@@ -2,6 +2,7 @@ using System.Net.Security;
 using Frontend.Controllers;
 using Frontend.Services;
 using SharedLibrary;
+using Frontend;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;
@@ -66,8 +67,11 @@ app.MapControllerRoute(
 // We need to allow all origins because Frontend and Auth are not on the same port
 app.UseCors("AllowFrontend");
 
+app.UseMiddleware<TokenRefreshMiddleware>();
+
 // Add protection gainst CSRF attacks and secure authentication
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.UseCookiePolicy();

@@ -29,26 +29,26 @@ public class AuthController(
         switch (user)
         {
             case { UserName: not null } when await _userManager.CheckPasswordAsync(user, model.Password):
-            {
-                user.LastLoginDate = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
-
-                _logger.LogInformation("User found, last login date updated. Generating JWT token and refresh token.");
-                IList<string> userRoles = await _userManager.GetRolesAsync(user);
-                string token = _jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
-                RefreshToken refreshToken = _jwtService.GenerateRefreshToken(user.Id);
-
-                await _context.RefreshTokens.AddAsync(refreshToken);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Login successful, returning tokens.");
-
-                return Ok(new
                 {
-                    Token = token,
-                    RefreshToken = refreshToken.Token
-                });
-            }
+                    user.LastLoginDate = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+
+                    _logger.LogInformation("User found, last login date updated. Generating JWT token and refresh token.");
+                    IList<string> userRoles = await _userManager.GetRolesAsync(user);
+                    string token = _jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
+                    RefreshToken refreshToken = _jwtService.GenerateRefreshToken(user.Id);
+
+                    await _context.RefreshTokens.AddAsync(refreshToken);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation("Login successful, returning tokens.");
+
+                    return Ok(new
+                    {
+                        Token = token,
+                        RefreshToken = refreshToken.Token
+                    });
+                }
             case null:
                 _logger.LogError("User not found");
                 return NotFound("User not found");
@@ -122,32 +122,37 @@ public class AuthController(
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest model)
     {
+        _logger.LogInformation("Refresh token request received.");
+        
         RefreshToken? refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == model.RefreshToken);
         if (refreshToken == null || refreshToken.ExpiryDate < DateTime.UtcNow || refreshToken.IsRevoked)
         {
+            _logger.LogWarning("Invalid or expired refresh token.");
             return Unauthorized();
         }
 
         User? user = await _userManager.FindByIdAsync(refreshToken.UserId);
         if (user == null || !user.IsUserActive() || user.UserName == null)
         {
+            _logger.LogWarning("User not found or inactive.");
             return Unauthorized();
         }
 
         IList<string> userRoles = await _userManager.GetRolesAsync(user);
         if (user.UserName != null)
         {
+            _logger.LogInformation("Generating new tokens for user.");
             string newToken = _jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
             RefreshToken newRefreshToken = _jwtService.GenerateRefreshToken(user.Id);
 
-            // Revok previous refresh token
+            _logger.LogInformation("Revoking previous refresh token.");
             refreshToken.IsRevoked = true;
             _context.RefreshTokens.Update(refreshToken);
 
-            // Add new refresh token
+            _logger.LogInformation("Adding new refresh token.");
             _context.RefreshTokens.Add(newRefreshToken);
 
-            // Delete old refresh tokens
+            _logger.LogInformation("Removing old refresh tokens.");
             List<RefreshToken> oldTokens = await _context.RefreshTokens
                                                          .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
                                                          .ToListAsync();
@@ -155,6 +160,7 @@ public class AuthController(
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation("Tokens refreshed successfully.");
             return Ok(new
             {
                 Token = newToken,
@@ -163,6 +169,7 @@ public class AuthController(
         }
         else
         {
+            _logger.LogWarning("Authorization failed.");
             return Unauthorized();
         }
     }

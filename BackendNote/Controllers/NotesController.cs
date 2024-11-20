@@ -7,20 +7,14 @@ namespace BackendNote.Controllers;
 
 [Route("note")]
 [ApiController]
-public class NotesController : ControllerBase
+public class NotesController(NotesService notesService) : ControllerBase
 {
-    private readonly NotesService _notesService;
-
-    public NotesController(NotesService notesService)
-    {
-        _notesService = notesService;
-    }
 
     [HttpGet("{id}")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Note>> GetNote(string id)
     {
-        Note? note = await _notesService.GetAsync(id);
+        Note? note = await notesService.GetAsync(id);
 
         if (note is null)
         {
@@ -35,7 +29,7 @@ public class NotesController : ControllerBase
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Note>> GetNoteDtoDiabetesRiskPrediction(string id)
     {
-        Note? note = await _notesService.GetAsync(id);
+        Note? note = await notesService.GetAsync(id);
 
         if (note is null)
         {
@@ -57,7 +51,7 @@ public class NotesController : ControllerBase
     // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Note>> GetNotesFromPatientId(int patientId)
     {
-        List<Note>? notes = await _notesService.GetFromPatientIdAsync(patientId);
+        List<Note>? notes = await notesService.GetFromPatientIdAsync(patientId);
 
         if (notes is null)
         {
@@ -85,7 +79,7 @@ public class NotesController : ControllerBase
             newNote.CreatedDate = DateTime.ParseExact(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         }
 
-        await _notesService.CreateAsync(newNote);
+        await notesService.CreateAsync(newNote);
 
         return CreatedAtAction(nameof(GetNote), new
         {
@@ -97,7 +91,7 @@ public class NotesController : ControllerBase
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> UpdateNote(string id, Note updatedNote)
     {
-        Note? note = await _notesService.GetAsync(id);
+        Note? note = await notesService.GetAsync(id);
 
         if (note is null)
         {
@@ -122,7 +116,7 @@ public class NotesController : ControllerBase
 
         try
         {
-            await _notesService.UpdateAsync(updatedNote.Id, updatedNote);
+            await notesService.UpdateAsync(updatedNote.Id, updatedNote);
         }
         catch (Exception ex)
         {
@@ -136,7 +130,7 @@ public class NotesController : ControllerBase
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> DeleteNote(string id)
     {
-        Note? note = await _notesService.GetAsync(id);
+        Note? note = await notesService.GetAsync(id);
 
         if (note is null)
         {
@@ -145,7 +139,7 @@ public class NotesController : ControllerBase
 
         try
         {
-            await _notesService.RemoveAsync(note);
+            await notesService.RemoveAsync(note);
         }
         catch (Exception ex)
         {

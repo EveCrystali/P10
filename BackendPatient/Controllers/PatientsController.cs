@@ -10,8 +10,6 @@ namespace BackendPatient.Controllers;
 [Route("patient")]
 public class PatientsController(ApplicationDbContext dbContext, IUpdateService<Patient> updateService) : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext = dbContext;
-    private readonly IUpdateService<Patient> _updateService = updateService;
 
     /// <summary>
     ///     Retrieves a <see cref="Patient" /> from the database by its identifier.
@@ -22,7 +20,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Patient>> GetPatient(int id)
     {
-        Patient? patient = await _dbContext.Patients.FindAsync(id);
+        Patient? patient = await dbContext.Patients.FindAsync(id);
 
         if (patient == null)
         {
@@ -35,7 +33,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     [HttpGet("dto/{id}")]
     public async Task<ActionResult<Patient>> GetPatientDtoDiabetesRiskPrediction(int id)
     {
-        Patient? patient = await _dbContext.Patients.FindAsync(id);
+        Patient? patient = await dbContext.Patients.FindAsync(id);
 
         if (patient == null)
         {
@@ -59,7 +57,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Patient>>> GetPatients()
     {
-        List<Patient> patients = await _dbContext.Patients.ToListAsync();
+        List<Patient> patients = await dbContext.Patients.ToListAsync();
 
         return Ok(patients);
     }
@@ -77,7 +75,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> PutPatient(int id, [FromBody] Patient patient)
     {
-        return await _updateService.UpdateEntity(id, patient, PatientExists, getIdFunc: p => p.Id);
+        return await updateService.UpdateEntity(id, patient, PatientExists, getIdFunc: p => p.Id);
     }
 
     /// <summary>
@@ -107,8 +105,8 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
         // patient.Id = 0;
 
         // Add the patient to the database
-        _dbContext.Patients.Add(patient);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Patients.Add(patient);
+        await dbContext.SaveChangesAsync();
 
         // Return a 201 Created response with the newly created patient
         return CreatedAtAction(nameof(GetPatient), new
@@ -130,7 +128,7 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
     public async Task<IActionResult> DeletePatient(int id)
     {
         // Find the patient in the database
-        Patient? patient = await _dbContext.Patients.FindAsync(id);
+        Patient? patient = await dbContext.Patients.FindAsync(id);
         if (patient == null)
         {
             // Return a 404 Not Found response if the patient is not found
@@ -138,8 +136,8 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
         }
 
         // Remove the patient from the database
-        _dbContext.Patients.Remove(patient);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Patients.Remove(patient);
+        await dbContext.SaveChangesAsync();
 
         // Return a 200 OK response with a message indicating that the patient was deleted
         return Ok("Patient deleted");
@@ -147,6 +145,6 @@ public class PatientsController(ApplicationDbContext dbContext, IUpdateService<P
 
     private bool PatientExists(Patient patient)
     {
-        return _dbContext.Patients.Any(e => e.Id == patient.Id);
+        return dbContext.Patients.Any(e => e.Id == patient.Id);
     }
 }

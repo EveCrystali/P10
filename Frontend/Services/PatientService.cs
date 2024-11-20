@@ -5,9 +5,6 @@ namespace Frontend.Services;
 
 public class PatientService(IHttpContextAccessor httpContextAccessor, ILogger<PatientService> logger, JwtValidationService jwtValidationService)
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    private readonly JwtValidationService _jwtValidationService = jwtValidationService;
-    private readonly ILogger<PatientService> _logger = logger;
 
     public static PatientViewModel MapPatientNoteToPatientNotesViewModel(Patient patient, List<Note> notes)
     {
@@ -40,52 +37,33 @@ public class PatientService(IHttpContextAccessor httpContextAccessor, ILogger<Pa
         return patient;
     }
 
-    public List<Note> MapPatientNotesViewModelToNotes(PatientViewModel patientViewModel)
-    {
-        if (patientViewModel.Notes == null) return [];
-
-        List<Note> notes = patientViewModel.Notes
-                                           .Select(note => new Note
-                                           {
-                                               Id = note.Id,
-                                               Creator = note.Creator,
-                                               PatientId = patientViewModel.PatientId,
-                                               CreatedDate = note.CreatedDate,
-                                               LastUpdatedDate = note.LastUpdatedDate,
-                                               Title = note.Title,
-                                               Body = note.Body
-                                           })
-                                           .ToList();
-        return notes;
-    }
-
     public async Task<string?> GetUsernameFromAuthToken()
     {
-        if (_httpContextAccessor.HttpContext == null)
+        if (httpContextAccessor.HttpContext == null)
         {
-            _logger.LogError("HttpContext is null.");
+            logger.LogError("HttpContext is null.");
             return null;
         }
 
-        string? tokenSerialized = _httpContextAccessor.HttpContext.Request.Cookies["AuthTokens"];
+        string? tokenSerialized = httpContextAccessor.HttpContext.Request.Cookies["AuthTokens"];
 
         if (string.IsNullOrEmpty(tokenSerialized))
         {
-            _logger.LogError("No AuthToken found in cookies.");
+            logger.LogError("No AuthToken found in cookies.");
             return null;
         }
 
         AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized);
         if (authToken == null || string.IsNullOrEmpty(authToken.Token))
         {
-            _logger.LogError("AuthToken is null or token is empty.");
+            logger.LogError("AuthToken is null or token is empty.");
             return null;
         }
 
-        ClaimsPrincipal? principal = _jwtValidationService.ValidateToken(authToken.Token);
+        ClaimsPrincipal? principal = jwtValidationService.ValidateToken(authToken.Token);
         if (principal == null)
         {
-            _logger.LogError("Failed to validate JWT token. Principal is null.");
+            logger.LogError("Failed to validate JWT token. Principal is null.");
             return null;
         }
 
@@ -93,7 +71,7 @@ public class PatientService(IHttpContextAccessor httpContextAccessor, ILogger<Pa
 
         if (string.IsNullOrEmpty(username) || username == "defaultNullUsername")
         {
-            _logger.LogError("Username is null or defaultNullUsername.");
+            logger.LogError("Username is null or defaultNullUsername.");
             return null;
         }
 

@@ -4,16 +4,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 namespace Frontend.Services;
 
-public class JwtValidationService
+public class JwtValidationService(IConfiguration configuration, ILogger<JwtValidationService> logger)
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<JwtValidationService> _logger;
-
-    public JwtValidationService(IConfiguration configuration, ILogger<JwtValidationService> logger)
-    {
-        _configuration = configuration;
-        _logger = logger;
-    }
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
@@ -30,8 +22,8 @@ public class JwtValidationService
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = _configuration["JwtSettings:Issuer"],
-                ValidAudiences = _configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
+                ValidIssuer = configuration["JwtSettings:Issuer"],
+                ValidAudiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>(),
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                 ClockSkew = TimeSpan.Zero
             };
@@ -44,7 +36,7 @@ public class JwtValidationService
         }
         catch (SecurityTokenException ex)
         {
-            _logger.LogError(ex, "Token validation failed.");
+            logger.LogError(ex, "Token validation failed.");
             return null;
         }
     }

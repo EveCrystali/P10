@@ -7,7 +7,6 @@ namespace Auth.Services;
 
 public class JwtService(IConfiguration configuration) : IJwtService
 {
-    private readonly IConfiguration _configuration = configuration;
 
     /// <summary>
     ///     Generates a JSON Web Token (JWT) for the given user ID, username, and roles.
@@ -28,7 +27,7 @@ public class JwtService(IConfiguration configuration) : IJwtService
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         // Ajouter toutes les audiences en tant que claims 'aud'
-        string[] audiences = _configuration.GetSection("JwtSettings:Audience").Get<string[]>() ?? [];
+        string[] audiences = configuration.GetSection("JwtSettings:Audience").Get<string[]>() ?? [];
 
         foreach (string audience in audiences)
         {
@@ -44,10 +43,10 @@ public class JwtService(IConfiguration configuration) : IJwtService
         SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(secretKey));
         SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
 
-        DateTime expiryTimeFromConfirguration = DateTime.UtcNow.AddMinutes(int.TryParse(_configuration["JwtSettings:TokenLifetimeMinutes"], out int lifeTimeMinutes) ? lifeTimeMinutes : 10);
+        DateTime expiryTimeFromConfirguration = DateTime.UtcNow.AddMinutes(int.TryParse(configuration["JwtSettings:TokenLifetimeMinutes"], out int lifeTimeMinutes) ? lifeTimeMinutes : 10);
 
         JwtSecurityToken token = new(
-                                     _configuration["JwtSettings:Issuer"],
+                                     configuration["JwtSettings:Issuer"],
                                      // Ne pas passer l'audience ici car elle est ajoutée en tant que claims
                                      claims: claims,
                                      expires: expiryTimeFromConfirguration,
@@ -72,7 +71,7 @@ public class JwtService(IConfiguration configuration) : IJwtService
     /// </remarks>
     public RefreshToken GenerateRefreshToken(string userId)
     {
-        DateTime expiryDateFromConfirguration = DateTime.UtcNow.AddDays(int.TryParse(_configuration["JwtSettings:RefreshTokenLifetimeDays"], out int lifetimeDays) ? lifetimeDays : 30);
+        DateTime expiryDateFromConfirguration = DateTime.UtcNow.AddDays(int.TryParse(configuration["JwtSettings:RefreshTokenLifetimeDays"], out int lifetimeDays) ? lifetimeDays : 30);
 
         // Create a new instance of the RefreshToken class
         RefreshToken refreshToken = new()

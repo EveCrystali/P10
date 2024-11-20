@@ -6,7 +6,6 @@ namespace Frontend;
 
 public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<TokenRefreshMiddleware> logger)
 {
-    private readonly IConfiguration _configuration = configuration;
 
     private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
 
@@ -25,7 +24,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         await next(context);
     }
 
-    private async Task<bool> ProcessAuthTokens(HttpContext context)
+    private async Task ProcessAuthTokens(HttpContext context)
     {
         TryExtractTokensFromCookie(context);
 
@@ -42,15 +41,14 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             if (string.IsNullOrEmpty(newTokens.AccessToken) || string.IsNullOrEmpty(newTokens.RefreshToken))
             {
                 HandleFailedRefresh(context);
-                return false;
+                return;
             }
 
             UpdateTokensAndCookie(context, newTokens);
-            return true; // Indique qu'un refresh a été effectué
+            return; 
         }
 
         UpdateAuthorizationHeaderIfValidToken(context, accessToken);
-        return false;
     }
 
     private void TryExtractTokensFromCookie(HttpContext context)
@@ -116,7 +114,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddDays(_configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
+            Expires = DateTimeOffset.UtcNow.AddDays(configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
         };
     }
 

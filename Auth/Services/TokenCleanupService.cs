@@ -3,18 +3,10 @@ using Auth.Models;
 using Microsoft.EntityFrameworkCore;
 namespace Auth.Services;
 
-public class TokenCleanupService : IHostedService, IDisposable
+public class TokenCleanupService(IServiceScopeFactory scopeFactory, ILogger<TokenCleanupService> logger) : IHostedService, IDisposable
 {
 
-    private readonly ILogger<TokenCleanupService> _logger;
-    private readonly IServiceScopeFactory _scopeFactory;
     private Timer? _timer;
-
-    public TokenCleanupService(IServiceScopeFactory scopeFactory, ILogger<TokenCleanupService> logger)
-    {
-        _scopeFactory = scopeFactory;
-        _logger = logger;
-    }
 
     public void Dispose()
     {
@@ -78,7 +70,7 @@ public class TokenCleanupService : IHostedService, IDisposable
     private void CleanUpExpiredTokens(object? state)
     {
         // Create a new scope for database operations.
-        using IServiceScope scope = _scopeFactory.CreateScope();
+        using IServiceScope scope = scopeFactory.CreateScope();
 
         // Get the instance of the LocalDbContext.
         ApplicationDbContext context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -97,7 +89,7 @@ public class TokenCleanupService : IHostedService, IDisposable
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _logger.LogError(ex, "A concurrency error occurred while trying to remove expired tokens !! Potential security breach with refresh tokens. Remove manually refresh token from database. ");
+            logger.LogError(ex, "A concurrency error occurred while trying to remove expired tokens !! Potential security breach with refresh tokens. Remove manually refresh token from database. ");
         }
     }
 }

@@ -52,11 +52,10 @@ public class Patient : IValidatable
     public static Patient FormatPatient((int Id, string nom, string prenom, string? dateDeNaissance, string genre,
                                             string? adresse, string? telephone) unformattedPatient)
     {
-        DateOnly dateOfBirthFormatted;
         try
         {
-            dateOfBirthFormatted = DateOnly.ParseExact(unformattedPatient.dateDeNaissance ?? string.Empty,
-                                                       "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateOnly dateOfBirthFormatted = DateOnly.ParseExact(unformattedPatient.dateDeNaissance ?? string.Empty,
+                                                                "yyyy-MM-dd", CultureInfo.InvariantCulture);
             return new Patient
             {
                 Id = unformattedPatient.Id,

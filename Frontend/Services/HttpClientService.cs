@@ -1,58 +1,52 @@
 using System.Net.Http.Headers;
 using Frontend.Models;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace Frontend.Services;
 
 public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor, IConfiguration configuration, ILogger<HttpClientService> logger)
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-    private readonly IConfiguration _configuration = configuration;
     private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
-    private readonly ILogger<HttpClientService> _logger = logger;
 
     private const string _bearerPrefix = "Bearer";
 
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage httpRequest)
     {
         // Get token from HttpContext.Items first as it's the most up-to-date
-        string? token = _httpContextAccessor.HttpContext?.Items["Token"] as string;
+        string? token = httpContextAccessor.HttpContext?.Items["Token"] as string;
         if (!string.IsNullOrEmpty(token))
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
         }
         else
         {
             AddJwtToken();
         }
 
-        HttpResponseMessage response = await _httpClient.SendAsync(httpRequest);
+        HttpResponseMessage response = await httpClient.SendAsync(httpRequest);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             // Check if token was just refreshed by middleware
-            token = _httpContextAccessor.HttpContext?.Items["Token"] as string;
+            token = httpContextAccessor.HttpContext?.Items["Token"] as string;
             if (!string.IsNullOrEmpty(token))
             {
-                _logger.LogInformation("Using newly refreshed token from middleware");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
+                logger.LogInformation("Using newly refreshed token from middleware");
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
                 // Create a new request as the old one is already disposed
                 HttpRequestMessage newRequest = new HttpRequestMessage(httpRequest.Method, httpRequest.RequestUri);
                 if (httpRequest.Content != null)
                 {
                     newRequest.Content = await CloneContent(httpRequest.Content);
                 }
-                return await _httpClient.SendAsync(newRequest);
+                return await httpClient.SendAsync(newRequest);
             }
 
             // If no new token from middleware, try to refresh
             TokenResponse? newTokens = await RefreshToken();
             if (newTokens != null)
             {
-                _logger.LogInformation("Successfully refreshed token in HttpClientService");
+                logger.LogInformation("Successfully refreshed token in HttpClientService");
                 AddJwtToken(newTokens.AccessToken);
                 // Create a new request as the old one is already disposed
                 HttpRequestMessage newRequest = new HttpRequestMessage(httpRequest.Method, httpRequest.RequestUri);
@@ -60,11 +54,11 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
                 {
                     newRequest.Content = await CloneContent(httpRequest.Content);
                 }
-                return await _httpClient.SendAsync(newRequest);
+                return await httpClient.SendAsync(newRequest);
             }
             else
             {
-                _logger.LogWarning("Token refresh failed in HttpClientService");
+                logger.LogWarning("Token refresh failed in HttpClientService");
             }
         }
 
@@ -75,14 +69,14 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
     {
         try
         {
-            string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
+            string? tokenSerialized = httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
             if (string.IsNullOrEmpty(tokenSerialized)) return null;
 
             AuthToken? authToken = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized);
             if (authToken?.RefreshToken == null) return null;
 
             RefreshRequest request = new RefreshRequest { RefreshToken = authToken.RefreshToken };
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_authServiceUrl}/refresh", request);
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{_authServiceUrl}/refresh", request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -95,7 +89,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
                         HttpOnly = true,
                         Secure = true,
                         SameSite = SameSiteMode.Strict,
-                        Expires = DateTimeOffset.UtcNow.AddDays(_configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
+                        Expires = DateTimeOffset.UtcNow.AddDays(configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
                     };
 
                     AuthToken updatedAuthToken = new()
@@ -104,7 +98,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
                         RefreshToken = newTokens.RefreshToken
                     };
 
-                    _httpContextAccessor.HttpContext?.Response.Cookies.Append("AuthTokens", 
+                    httpContextAccessor.HttpContext?.Response.Cookies.Append("AuthTokens", 
                         JsonConvert.SerializeObject(updatedAuthToken), 
                         cookieOptions);
 
@@ -114,7 +108,7 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during token refresh");
+            logger.LogError(ex, "Error during token refresh");
         }
 
         return null;
@@ -124,21 +118,20 @@ public class HttpClientService(HttpClient httpClient, IHttpContextAccessor httpC
     {
         if (token != null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
             return;
         }
 
-        string? tokenSerialized = _httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
+        string? tokenSerialized = httpContextAccessor.HttpContext?.Request.Cookies["AuthTokens"];
         if (tokenSerialized != null)
         {
             token = JsonConvert.DeserializeObject<AuthToken>(tokenSerialized)?.Token;
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_bearerPrefix, token);
         }
     }
 
     private static async Task<HttpContent?> CloneContent(HttpContent content)
     {
-        if (content == null) return null;
         MemoryStream ms = new MemoryStream();
         await content.CopyToAsync(ms);
         ms.Position = 0;

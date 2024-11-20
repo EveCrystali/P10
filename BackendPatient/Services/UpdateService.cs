@@ -6,7 +6,6 @@ namespace BackendPatient.Services;
 
 public class UpdateService<T>(ApplicationDbContext dbContext) : IUpdateService<T> where T : class
 {
-    private readonly ApplicationDbContext _dbContext = dbContext;
 
     /// <summary>
     ///     This service is used to update an entity in the database.
@@ -47,11 +46,11 @@ public class UpdateService<T>(ApplicationDbContext dbContext) : IUpdateService<T
         }
 
         Console.WriteLine("Saving the entity to the database");
-        _dbContext.Entry(entity).State = EntityState.Modified;
+        dbContext.Entry(entity).State = EntityState.Modified;
 
         try
         {
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {

@@ -32,17 +32,7 @@ public class ElasticsearchService
 
         _logger.LogInformation("ElasticsearchService initialized successfully.");
     }
-
-    public async Task IndexNoteAsync(NoteRiskInfo note)
-    {
-        IndexResponse response = await _elasticsearchClient.IndexDocumentAsync(note);
-
-        if (!response.IsValid)
-        {
-            throw new InvalidOperationException($"Failed to index note: {response.OriginalException.Message}");
-        }
-    }
-
+    
     public async Task<int> CountUniqueWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
         _logger.LogInformation("CountUniqueWordsInNotes called with patientId: {PatientId}", patientId);

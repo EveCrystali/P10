@@ -2,18 +2,16 @@ namespace Frontend.Services;
 
 public class ServiceUrl(IConfiguration configuration, ILogger logger)
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly ILogger _logger = logger;
 
     public string GetServiceUrl(string? service)
     {
-        string? serviceUrl = _configuration[$"{service}:BaseUrl"];
+        string? serviceUrl = configuration[$"{service}:BaseUrl"];
         if (string.IsNullOrEmpty(serviceUrl) || string.IsNullOrWhiteSpace(service))
         {
             string messageLog = $"{service} URL is not configured.";
             throw new InvalidOperationException(messageLog);
         }
-        _logger.LogInformation("Service URL for {Service} is {ServiceUrl}", service, serviceUrl);
+        logger.LogInformation("Service URL for {Service} is {ServiceUrl}", service, serviceUrl);
         return serviceUrl;
     }
 }

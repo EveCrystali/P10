@@ -10,25 +10,13 @@ namespace Auth.Controllers;
 
 [Route("user")]
 [ApiController]
-public class UserController : ControllerBase
+public class UserController(ApplicationDbContext context, UserManager<User> userManager, IJwtRevocationService jwtRevocationService) : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-
-    private readonly IJwtRevocationService _jwtRevocationService;
-
-    private readonly UserManager<User> _userManager;
-
-    public UserController(ApplicationDbContext context, UserManager<User> userManager, IJwtRevocationService jwtRevocationService)
-    {
-        _context = context;
-        _userManager = userManager;
-        _jwtRevocationService = jwtRevocationService;
-    }
 
     [HttpGet]
     public async Task<IActionResult> GetUsers()
     {
-        List<User> users = await _context.Users.ToListAsync();
+        List<User> users = await context.Users.ToListAsync();
         return Ok(users);
     }
 
@@ -36,7 +24,7 @@ public class UserController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUser(string id)
     {
-        User? user = await _context.Users.FindAsync(id);
+        User? user = await context.Users.FindAsync(id);
 
         if (user == null)
         {
@@ -50,7 +38,7 @@ public class UserController : ControllerBase
     [HttpGet("username/{username}")]
     public async Task<ActionResult<string>> GetUserIdFromUsername(string username)
     {
-        User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.UserName == username);
 
         if (user == null)
         {
@@ -68,8 +56,8 @@ public class UserController : ControllerBase
             return BadRequest("The Id entered in the parameter is not the same as the Id enter in the body");
         }
 
-        User? currentUser = await _userManager.GetUserAsync(HttpContext.User);
-        User? existingUser = await _userManager.FindByIdAsync(id);
+        User? currentUser = await userManager.GetUserAsync(HttpContext.User);
+        User? existingUser = await userManager.FindByIdAsync(id);
 
         if (currentUser == null)
         {
@@ -81,7 +69,7 @@ public class UserController : ControllerBase
             return NotFound("User with this Id does not exist.");
         }
 
-        if (currentUser.Id != userModel.Id && !await _userManager.IsInRoleAsync(currentUser, "Admin"))
+        if (currentUser.Id != userModel.Id && !await userManager.IsInRoleAsync(currentUser, "Admin"))
         {
             return Forbid();
         }
@@ -93,7 +81,7 @@ public class UserController : ControllerBase
 
         existingUser.Email = userModel.Email;
 
-        if ((userModel.Role == "User" || userModel.Role == "Practitioner") && await _userManager.IsInRoleAsync(currentUser, "Admin"))
+        if ((userModel.Role == "User" || userModel.Role == "Practitioner") && await userManager.IsInRoleAsync(currentUser, "Admin"))
         {
             IActionResult? roleUpdateResult = await UpdateUserRole(existingUser, userModel.Role);
             if (roleUpdateResult != null)
@@ -102,7 +90,7 @@ public class UserController : ControllerBase
             }
         }
 
-        IdentityResult result = await _userManager.UpdateAsync(existingUser);
+        IdentityResult result = await userManager.UpdateAsync(existingUser);
         if (!result.Succeeded)
         {
             return BadRequest(result.Errors);
@@ -113,17 +101,17 @@ public class UserController : ControllerBase
 
     private async Task<IActionResult?> UpdateUserRole(User user, string newRole)
     {
-        IList<string> currentRoles = await _userManager.GetRolesAsync(user);
+        IList<string> currentRoles = await userManager.GetRolesAsync(user);
 
         if (!currentRoles.Contains(newRole))
         {
-            IdentityResult removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            IdentityResult removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!removeResult.Succeeded)
             {
                 return BadRequest(removeResult.Errors);
             }
 
-            IdentityResult addResult = await _userManager.AddToRoleAsync(user, newRole);
+            IdentityResult addResult = await userManager.AddToRoleAsync(user, newRole);
             if (!addResult.Succeeded)
             {
                 return BadRequest(addResult.Errors);
@@ -136,33 +124,33 @@ public class UserController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        User? currentUser = await _userManager.GetUserAsync(HttpContext.User);
+        User? currentUser = await userManager.GetUserAsync(HttpContext.User);
         if (currentUser == null)
         {
             return Forbid();
         }
 
-        bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+        bool isAdmin = await userManager.IsInRoleAsync(currentUser, "Admin");
         if (!isAdmin && id != currentUser.Id)
         {
             return Forbid();
         }
 
-        User? userToDelete = await _context.Users.FindAsync(id);
+        User? userToDelete = await context.Users.FindAsync(id);
         if (userToDelete == null)
         {
             return NotFound();
         }
 
-        await _jwtRevocationService.RevokeUserTokensAsync(currentUser.Id);
+        await jwtRevocationService.RevokeUserTokensAsync(currentUser.Id);
 
         if (id == currentUser.Id)
         {
             await SignOutCurrentUserAsync();
         }
 
-        _context.Users.Remove(userToDelete);
-        await _context.SaveChangesAsync();
+        context.Users.Remove(userToDelete);
+        await context.SaveChangesAsync();
 
         return NoContent();
     }

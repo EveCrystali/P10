@@ -42,10 +42,7 @@ public class NotesService
 
         _logger.LogInformation("ElasticsearchService initialized successfully.");
     }
-
-    public async Task<List<Note>> GetAsync() =>
-        await NotesCollection.Find(_ => true).ToListAsync();
-
+    
     public async Task<Note?> GetAsync(string id) =>
         await NotesCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -63,7 +60,7 @@ public class NotesService
         _logger.LogInformation("Updating note with ID {Id}", id);
 
         // Get existing note to preserve PatientId
-        Note? existingNote = await GetAsync(id) ?? throw new InvalidOperationException($"Note with ID {id} not found");
+        Note existingNote = await GetAsync(id) ?? throw new InvalidOperationException($"Note with ID {id} not found");
 
         // Preserve PatientId
 
@@ -109,7 +106,7 @@ public class NotesService
     private async Task CreateAsyncElasticsearch(Note note)
     {
         _logger.LogInformation("Creating note with ID {Id} in Elasticsearch", note.Id);
-        CreateResponse? createResponse = await _elasticClient.CreateAsync<Note>(note, x => x.Index("notes_index"));
+        CreateResponse? createResponse = await _elasticClient.CreateAsync(note, x => x.Index("notes_index"));
         if (!createResponse.IsValid)
         {
             string errorMessage = $"Failed to create document with ID {note.Id} in Elasticsearch. Reason: {createResponse.ServerError?.Error.Reason}";

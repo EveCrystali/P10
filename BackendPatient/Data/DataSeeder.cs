@@ -5,7 +5,6 @@ namespace BackendPatient.Data;
 
 public class DataSeeder(ApplicationDbContext dbContext)
 {
-    private readonly ApplicationDbContext _dbContext = dbContext;
 
     public void SeedPatients()
     {
@@ -23,7 +22,7 @@ public class DataSeeder(ApplicationDbContext dbContext)
                                           .Select(Patient.FormatPatient)
                                           .ToList();
 
-        using IDbContextTransaction transaction = _dbContext.Database.BeginTransaction();
+        using IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
         try
         {
             SetIdentityInsert("Patients");
@@ -32,7 +31,7 @@ public class DataSeeder(ApplicationDbContext dbContext)
             {
 
                 // Vérifier si le patient avec cet ID existe déjà
-                Patient? existingPatient = _dbContext.Patients.FirstOrDefault(p => p.Id == patient.Id);
+                Patient? existingPatient = dbContext.Patients.FirstOrDefault(p => p.Id == patient.Id);
 
                 if (existingPatient != null)
                 {
@@ -43,18 +42,18 @@ public class DataSeeder(ApplicationDbContext dbContext)
                     existingPatient.Gender = patient.Gender;
                     existingPatient.Address = patient.Address;
                     existingPatient.PhoneNumber = patient.PhoneNumber;
-                    _dbContext.Patients.Update(existingPatient);
+                    dbContext.Patients.Update(existingPatient);
                     Console.WriteLine($"Updated test patient with ID {patient.Id}");
                 }
                 else
                 {
                     // Ajouter le patient avec son ID spécifique
-                    _dbContext.Patients.Add(patient);
+                    dbContext.Patients.Add(patient);
                     Console.WriteLine($"Added new test patient with ID {patient.Id}");
                 }
             }
 
-            _dbContext.SaveChanges();
+            dbContext.SaveChanges();
             transaction.Commit();
             Console.WriteLine("Test patients seeded successfully.");
         }
@@ -76,6 +75,6 @@ public class DataSeeder(ApplicationDbContext dbContext)
         string sql = enable
             ? $"SET IDENTITY_INSERT {tableName} ON;"
             : $"SET IDENTITY_INSERT {tableName} OFF;";
-        _dbContext.Database.ExecuteSqlRaw(sql);
+        dbContext.Database.ExecuteSqlRaw(sql);
     }
 }

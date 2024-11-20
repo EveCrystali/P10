@@ -122,7 +122,7 @@ public class NotesController : ControllerBase
 
         try
         {
-            await _notesService.UpdateAsync(id, updatedNote);
+            await _notesService.UpdateAsync(updatedNote.Id, updatedNote);
         }
         catch (Exception ex)
         {

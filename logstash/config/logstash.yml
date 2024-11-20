@@ -1,6 +1,0 @@
-http.host: 0.0.0.0
-pipeline.batch.delay: 5
-pipeline.batch.size: 1
-xpack.monitoring.elasticsearch.hosts:
-- http://elasticsearch:9200
-xpack.monitoring.enabled: false

@@ -64,31 +64,6 @@ services:
     networks:
       - elastic
 
-  logstash:
-    build:
-      context: ./logstash
-      dockerfile: logstash.Dockerfile
-    container_name: logstash_container
-    volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config:/usr/share/logstash/config
-    ports:
-      - "5044:5044"
-    env_file:
-      - .env
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9600/_node/stats" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-    networks:
-      - elastic
-
   mongo-express:
     image: mongo-express
     container_name: mongo_express
@@ -171,8 +146,6 @@ services:
       - .env
     depends_on:
       elasticsearch:
-        condition: service_healthy
-      logstash:
         condition: service_healthy
       mongodb:
         condition: service_healthy

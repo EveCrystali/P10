@@ -65,7 +65,7 @@ app.MapControllerRoute(
 
 // Configure Cors policy to allow all origins because we are using Ocelot Api Gateway
 // We need to allow all origins because Frontend and Auth are not on the same port
-app.UseCors("AllowFrontend");
+app.UseCors("AllowApiGateway");
 
 app.UseMiddleware<TokenRefreshMiddleware>();
 

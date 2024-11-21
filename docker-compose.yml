@@ -26,7 +26,6 @@ services:
     volumes:
       - elasticsearch_config:/usr/share/elasticsearch/config
       - elasticsearch_data:/usr/share/elasticsearch/data
-      - ./elasticsearch/config/create_index.json:/usr/share/elasticsearch/config/create_index.json
       - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 

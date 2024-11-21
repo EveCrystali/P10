@@ -17,7 +17,7 @@ public class BackendDiabetesRiskPredictionsController(DiabetesRiskNotePrediction
         logger.LogDebug("GetDiabetesRisk called");
         logger.LogDebug($"Diabetes risk request : {diabetesRiskRequest}");
         DiabetesRiskPrediction diabetesRisk = await diabetesRiskNotePredictionService.DiabetesRiskPrediction(diabetesRiskRequest.NotesRiskInfo, diabetesRiskRequest.PatientRiskInfo);
-        logger.LogInformation($"Diabetes risk is : {diabetesRisk}");
+        logger.LogInformation($"Diabetes risk is : {diabetesRisk.DiabetesRisk}");
         return Ok(diabetesRisk);
     }
 }

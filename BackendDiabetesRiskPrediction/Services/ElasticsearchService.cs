@@ -131,6 +131,7 @@ public class ElasticsearchService
                 uniqueWordsInNotes.UnionWith(commonWords);
             }
         }
+        _logger.LogInformation("Unique words in notes are: {UniqueWordsInNotes}", string.Join(", ", uniqueWordsInNotes));
 
         int uniqueWordCount = uniqueWordsInNotes.Count;
         _logger.LogInformation("Unique word count is: {UniqueWordCount}", uniqueWordCount);

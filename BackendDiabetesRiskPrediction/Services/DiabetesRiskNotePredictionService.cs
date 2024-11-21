@@ -56,10 +56,10 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
             DiabetesRiskPredictionFor30AndOlder(triggersDiabetesRiskFromNotes);
     }
 
-    private static DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
+    private DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
     {
-        Console.WriteLine($"Patient gender is : {patientRiskInfo.Gender}");
-        Console.WriteLine($"Patient triggers are : {triggersDiabetesRiskFromNotes}");
+        logger.LogInformation($"Patient gender is : {patientRiskInfo.Gender}");
+
         return patientRiskInfo.Gender switch
         {
             // Patient is a male

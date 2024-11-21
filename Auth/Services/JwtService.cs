@@ -19,8 +19,8 @@ public class JwtService(IConfiguration configuration) : IJwtService
     {
         List<Claim> claims =
         [
-            new Claim(ClaimTypes.NameIdentifier, userId),
-            new Claim(ClaimTypes.Name, userName)
+            new(ClaimTypes.NameIdentifier, userId),
+            new(ClaimTypes.Name, userName)
         ];
 
         // Ajouter les rôles en tant que claims

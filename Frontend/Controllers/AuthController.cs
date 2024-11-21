@@ -9,12 +9,12 @@ namespace Frontend.Controllers;
 public class AuthController : Controller
 {
     private readonly string _authServiceUrl;
+    private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
     private readonly HttpClientService _httpClientService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly JwtValidationService _jwtValidationService;
     private readonly ILogger<AuthController> _logger;
-    private readonly IConfiguration _configuration;
 
     public AuthController(ILogger<AuthController> logger, IConfiguration configuration, HttpClientService httpClientService, IHttpContextAccessor httpContextAccessor, HttpClient httpClient, JwtValidationService jwtValidationService)
     {
@@ -62,7 +62,7 @@ public class AuthController : Controller
                 Token = authResponseDeserialized.Token,
                 RefreshToken = authResponseDeserialized.RefreshToken
             };
-            
+
             // Serialize to JSON and store in a cookie
             CookieOptions cookieOptions = new()
             {

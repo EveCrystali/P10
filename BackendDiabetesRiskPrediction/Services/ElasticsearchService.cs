@@ -32,7 +32,7 @@ public class ElasticsearchService
 
         _logger.LogInformation("ElasticsearchService initialized successfully.");
     }
-    
+
     public async Task<int> CountUniqueWordsInNotes(int patientId, HashSet<string> wordsToCount)
     {
         _logger.LogInformation("CountUniqueWordsInNotes called with patientId: {PatientId}", patientId);
@@ -63,9 +63,9 @@ public class ElasticsearchService
     private async Task<IEnumerable<string>?> AnalyzeText(string text)
     {
         AnalyzeResponse analyzeResponse = await _elasticsearchClient.Indices.AnalyzeAsync(a => a
-            .Index("notes_index")
-            .Analyzer("custom_french_analyzer")
-            .Text(text));
+                                                                                               .Index("notes_index")
+                                                                                               .Analyzer("custom_french_analyzer")
+                                                                                               .Text(text));
 
         if (!analyzeResponse.IsValid)
         {
@@ -81,15 +81,15 @@ public class ElasticsearchService
         _logger.LogInformation("Executing search query for patientId: {PatientId}", patientId);
 
         ISearchResponse<NoteRiskInfo> response = await _elasticsearchClient.SearchAsync<NoteRiskInfo>(s => s
-            .Index("notes_index")
-            .Query(q => q
-                .Term(t => t.Field("PatientId").Value(patientId))
-            )
-            .Source(src => src
-                .Includes(i => i.Field("Body"))
-            )
-            .Size(1000)
-        );
+                                                                                                           .Index("notes_index")
+                                                                                                           .Query(q => q
+                                                                                                                      .Term(t => t.Field("PatientId").Value(patientId))
+                                                                                                                 )
+                                                                                                           .Source(src => src
+                                                                                                                       .Includes(i => i.Field("Body"))
+                                                                                                                  )
+                                                                                                           .Size(1000)
+                                                                                                     );
 
         ValidateSearchResponse(response, patientId);
         return response;

@@ -42,7 +42,7 @@ public class NotesService
 
         _logger.LogInformation("ElasticsearchService initialized successfully.");
     }
-    
+
     public async Task<Note?> GetAsync(string id) =>
         await NotesCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
@@ -69,9 +69,9 @@ public class NotesService
 
         FilterDefinition<Note> filter = Builders<Note>.Filter.Eq(field: note => note.Id, id);
         UpdateDefinition<Note> update = Builders<Note>.Update
-                                                  .Set(field: note => note.Title, updatedNote.Title)
-                                                  .Set(field: note => note.Body, updatedNote.Body)
-                                                  .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
+                                                      .Set(field: note => note.Title, updatedNote.Title)
+                                                      .Set(field: note => note.Body, updatedNote.Body)
+                                                      .Set(field: note => note.LastUpdatedDate, updatedNote.LastUpdatedDate);
         UpdateResult? updateResult = await NotesCollection.UpdateOneAsync(filter, update);
 
         _logger.LogInformation("MongoDB update result: {MatchedCount} matched, {ModifiedCount} modified", updateResult.MatchedCount, updateResult.ModifiedCount);
@@ -106,7 +106,7 @@ public class NotesService
     private async Task CreateAsyncElasticsearch(Note note)
     {
         _logger.LogInformation("Creating note with ID {Id} in Elasticsearch", note.Id);
-        CreateResponse? createResponse = await _elasticClient.CreateAsync(note, x => x.Index("notes_index"));
+        CreateResponse? createResponse = await _elasticClient.CreateAsync(note, selector: x => x.Index("notes_index"));
         if (!createResponse.IsValid)
         {
             string errorMessage = $"Failed to create document with ID {note.Id} in Elasticsearch. Reason: {createResponse.ServerError?.Error.Reason}";
@@ -116,7 +116,7 @@ public class NotesService
         _logger.LogInformation("Note with ID {Id} created successfully in Elasticsearch", note.Id);
     }
 
-    private async void CreateIndexes()
+    private async Task CreateIndexes()
     {
         IndexKeysDefinition<Note> indexKeysDefinition = Builders<Note>.IndexKeys.Ascending(note => note.PatientId);
         CreateIndexModel<Note> indexModel = new(indexKeysDefinition);

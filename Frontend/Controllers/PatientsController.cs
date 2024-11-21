@@ -7,13 +7,13 @@ namespace Frontend.Controllers;
 [Route("patient")]
 public class PatientsController : Controller
 {
+    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
+    private readonly string _controllerHomeControllerName = nameof(HomeController).Replace("Controller", "");
     private readonly string _diabetesRiskPredictionServiceUrl;
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<PatientsController> _logger;
     private readonly string _noteServiceUrl;
     private readonly string _patientServiceUrl;
-    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
-    private readonly string _controllerHomeControllerName = nameof(HomeController).Replace("Controller", "");
 
 
     public PatientsController(ILogger<PatientsController> logger,
@@ -71,7 +71,7 @@ public class PatientsController : Controller
                 Content = JsonContent.Create(patientRiskRequest)
             };
             _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}, Date of birth: {DateOfBirth}, Gender: {Gender}", patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
-            
+
             // Finally let's manage the answer for DiabetesRiskPredictionService
             HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(requestForDiabetesRiskPredictionService);
 

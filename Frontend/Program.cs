@@ -1,8 +1,8 @@
 using System.Net.Security;
+using Frontend;
 using Frontend.Controllers;
 using Frontend.Services;
 using SharedLibrary;
-using Frontend;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 IConfiguration configuration = builder.Configuration;

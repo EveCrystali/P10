@@ -25,26 +25,26 @@ public class AuthController(
         switch (user)
         {
             case { UserName: not null } when await userManager.CheckPasswordAsync(user, model.Password):
+            {
+                user.LastLoginDate = DateTime.UtcNow;
+                await userManager.UpdateAsync(user);
+
+                logger.LogInformation("User found, last login date updated. Generating JWT token and refresh token.");
+                IList<string> userRoles = await userManager.GetRolesAsync(user);
+                string token = jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
+                RefreshToken refreshToken = jwtService.GenerateRefreshToken(user.Id);
+
+                await context.RefreshTokens.AddAsync(refreshToken);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("Login successful, returning tokens.");
+
+                return Ok(new
                 {
-                    user.LastLoginDate = DateTime.UtcNow;
-                    await userManager.UpdateAsync(user);
-
-                    logger.LogInformation("User found, last login date updated. Generating JWT token and refresh token.");
-                    IList<string> userRoles = await userManager.GetRolesAsync(user);
-                    string token = jwtService.GenerateToken(user.Id, user.UserName, userRoles.ToArray());
-                    RefreshToken refreshToken = jwtService.GenerateRefreshToken(user.Id);
-
-                    await context.RefreshTokens.AddAsync(refreshToken);
-                    await context.SaveChangesAsync();
-
-                    logger.LogInformation("Login successful, returning tokens.");
-
-                    return Ok(new
-                    {
-                        Token = token,
-                        RefreshToken = refreshToken.Token
-                    });
-                }
+                    Token = token,
+                    RefreshToken = refreshToken.Token
+                });
+            }
             case null:
                 logger.LogError("User not found");
                 return NotFound("User not found");
@@ -119,7 +119,7 @@ public class AuthController(
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest model)
     {
         logger.LogInformation("Refresh token request received.");
-        
+
         RefreshToken? refreshToken = await context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == model.RefreshToken);
         if (refreshToken == null || refreshToken.ExpiryDate < DateTime.UtcNow || refreshToken.IsRevoked)
         {
@@ -150,8 +150,8 @@ public class AuthController(
 
             logger.LogDebug("Removing old refresh tokens.");
             List<RefreshToken> oldTokens = await context.RefreshTokens
-                                                         .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
-                                                         .ToListAsync();
+                                                        .Where(rt => rt.UserId == user.Id && (rt.ExpiryDate < DateTime.UtcNow || rt.IsRevoked))
+                                                        .ToListAsync();
             context.RefreshTokens.RemoveRange(oldTokens);
 
             await context.SaveChangesAsync();
@@ -163,11 +163,8 @@ public class AuthController(
                 RefreshToken = newRefreshToken.Token
             });
         }
-        else
-        {
-            logger.LogWarning("Authorization failed.");
-            return Unauthorized();
-        }
+        logger.LogWarning("Authorization failed.");
+        return Unauthorized();
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -198,8 +195,8 @@ public class AuthController(
 
         // Find all refresh tokens associated with the user
         List<RefreshToken> userTokens = await context.RefreshTokens
-                                                      .Where(rt => rt.UserId == userId && !rt.IsRevoked)
-                                                      .ToListAsync();
+                                                     .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                                                     .ToListAsync();
 
         if (userTokens.Count == 0)
         {

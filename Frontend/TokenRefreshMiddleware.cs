@@ -1,17 +1,17 @@
 using System.IdentityModel.Tokens.Jwt;
-using Newtonsoft.Json;
 using Frontend.Models;
 using Frontend.Services;
+using Newtonsoft.Json;
 namespace Frontend;
 
 public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<TokenRefreshMiddleware> logger)
 {
 
-    private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
-
     private const string _tokenName = "Token";
 
     private const string _refreshTokenName = "RefreshToken";
+
+    private readonly string _authServiceUrl = new ServiceUrl(configuration, logger).GetServiceUrl("Auth");
 
 
     public async Task InvokeAsync(HttpContext context)
@@ -45,7 +45,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             }
 
             UpdateTokensAndCookie(context, newTokens);
-            return; 
+            return;
         }
 
         UpdateAuthorizationHeaderIfValidToken(context, accessToken);
@@ -97,7 +97,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         context.Request.Headers.Authorization = $"Bearer {newTokens.AccessToken}";
 
         CookieOptions cookieOptions = CreateCookieOptions();
-        AuthToken updatedAuthToken = new AuthToken
+        AuthToken updatedAuthToken = new()
         {
             Token = newTokens.AccessToken,
             RefreshToken = newTokens.RefreshToken
@@ -107,16 +107,13 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         logger.LogDebug("TokenRefreshMiddleware : Updating cookie with new tokens");
     }
 
-    private CookieOptions CreateCookieOptions()
+    private CookieOptions CreateCookieOptions() => new()
     {
-        return new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddDays(configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
-        };
-    }
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTimeOffset.UtcNow.AddDays(configuration.GetSection("JwtSettings").GetValue<int>("RefreshTokenLifetimeDays"))
+    };
 
     private void UpdateAuthorizationHeaderIfValidToken(HttpContext context, string? accessToken)
     {
@@ -136,7 +133,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
 
         JwtSecurityToken? jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
         bool result = jwt.ValidTo < DateTime.UtcNow;
-        logger.LogInformation("Token expired at {ExpirationTime}", jwt.ValidTo.ToString("yyyy-MM-dd HH:mm:ss")); 
+        logger.LogInformation("Token expired at {ExpirationTime}", jwt.ValidTo.ToString("yyyy-MM-dd HH:mm:ss"));
         return result;
     }
 
@@ -145,7 +142,10 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
         try
         {
             using HttpClient client = httpClientFactory.CreateClient();
-            RefreshRequest request = new() { RefreshToken = refreshToken };
+            RefreshRequest request = new()
+            {
+                RefreshToken = refreshToken
+            };
 
             logger.LogDebug("TokenRefreshMiddleware : Sending refresh request with token : {RefreshToken}", refreshToken);
 
@@ -172,7 +172,7 @@ public class TokenRefreshMiddleware(RequestDelegate next, IHttpClientFactory htt
             else
             {
                 logger.LogWarning("TokenRefreshMiddleware : Refreshing tokens failed. Status code: {StatusCode}, Content: {Content}",
-                    response.StatusCode, content);
+                                  response.StatusCode, content);
             }
         }
         catch (Exception ex)

@@ -223,7 +223,9 @@
         }
       ],
       "UpstreamPathTemplate": "/auth/refresh",
-      "UpstreamHttpMethod": [ "POST" ],
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
       "AuthenticationOptions": null,
       "CorsPolicy": {
         "AllowAnyOrigin": false,

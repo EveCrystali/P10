@@ -5,7 +5,6 @@ namespace BackendNote.Data;
 
 public class DataSeeder(NotesService notesService, ILogger<DataSeeder> logger)
 {
-    private static Note CreateNote(int patientId, string body) => new() { PatientId = patientId, Title = "", Body = body };
 
     private readonly List<Note> _notesAtStartup = new()
     {
@@ -25,6 +24,13 @@ public class DataSeeder(NotesService notesService, ILogger<DataSeeder> logger)
         CreateNote(4, "Le patient déclare qu'il a mal au dos lorsqu'il reste assis pendant longtemps"),
         CreateNote(4, "Le patient déclare avoir commencé à fumer depuis peu Hémoglobine A1C supérieure au niveau recommandé"),
         CreateNote(4, "Taille, Poids, Cholestérol, Vertige et Réaction")
+    };
+
+    private static Note CreateNote(int patientId, string body) => new()
+    {
+        PatientId = patientId,
+        Title = "",
+        Body = body
     };
 
     public async Task SeedNotesAsync()

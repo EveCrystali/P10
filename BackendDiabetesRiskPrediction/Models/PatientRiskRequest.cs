@@ -1,6 +1,6 @@
-namespace Frontend.Models;
+namespace BackendDiabetesRiskPrediction.Models;
 
-public class PatientRiskInfo
+public class PatientRiskRequest
 {
     public int Id { get; set; }
     public required DateOnly DateOfBirth { get; set; }

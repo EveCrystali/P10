@@ -12,11 +12,11 @@ public class BackendDiabetesRiskPredictionsController(DiabetesRiskNotePrediction
 
 
     [HttpGet]
-    public async Task<ActionResult<DiabetesRisk>> GetDiabetesRisk([FromBody] DiabetesRiskRequest diabetesRiskRequest)
+    public async Task<ActionResult<DiabetesRisk>> GetDiabetesRisk([FromBody] PatientRiskRequest patientRiskRequest)
     {
         logger.LogDebug("GetDiabetesRisk called");
-        logger.LogDebug($"Diabetes risk request : {diabetesRiskRequest}");
-        DiabetesRiskPrediction diabetesRisk = await diabetesRiskNotePredictionService.DiabetesRiskPrediction(diabetesRiskRequest.NotesRiskInfo, diabetesRiskRequest.PatientRiskInfo);
+        logger.LogDebug($"Diabetes risk request : {patientRiskRequest}");
+        DiabetesRiskPrediction diabetesRisk = await diabetesRiskNotePredictionService.DiabetesRiskPrediction(patientRiskRequest);
         logger.LogInformation($"Diabetes risk is : {diabetesRisk.DiabetesRisk}");
         return Ok(diabetesRisk);
     }

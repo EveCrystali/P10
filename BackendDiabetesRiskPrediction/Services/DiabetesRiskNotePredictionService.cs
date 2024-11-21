@@ -19,10 +19,10 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
         "Anticorps"
     ];
 
-    public async Task<DiabetesRiskPrediction> DiabetesRiskPrediction(List<NoteRiskInfo>? notes, PatientRiskInfo? patientRiskInfo)
+    public async Task<DiabetesRiskPrediction> DiabetesRiskPrediction(PatientRiskRequest? patientRiskInfo)
     {
         DiabetesRiskPrediction diabetesRiskPrediction = new();
-        if (notes is null || patientRiskInfo is null)
+        if (patientRiskInfo is null)
         {
             diabetesRiskPrediction.DiabetesRisk = DiabetesRisk.None;
             return diabetesRiskPrediction;
@@ -38,9 +38,9 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
 
     private async Task<int> DiabetesRiskPredictionNotesAnalysis(int patientId, HashSet<string> hashSetofTriggerWords) => await elasticsearchService.CountUniqueWordsInNotes(patientId, hashSetofTriggerWords);
 
-    private DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
+    private DiabetesRisk DiabetesRiskPredictionCalculator(PatientRiskRequest patientRiskRequest, int triggersDiabetesRiskFromNotes)
     {
-        int age = PatientAgeCalculator(patientRiskInfo);
+        int age = PatientAgeCalculator(patientRiskRequest);
 
         // Do not need to consider if Female or Male or Age
         if (triggersDiabetesRiskFromNotes == 0)
@@ -50,17 +50,17 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
 
         // Patient is younger than 30 (exclusive)
         return age < 30
-            ? DiabetesRiskPredictionForUnder30(patientRiskInfo, triggersDiabetesRiskFromNotes)
+            ? DiabetesRiskPredictionForUnder30(patientRiskRequest, triggersDiabetesRiskFromNotes)
             :
             // Patient is older (or equal) than 30 (inclusive)
             DiabetesRiskPredictionFor30AndOlder(triggersDiabetesRiskFromNotes);
     }
 
-    private DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskInfo patientRiskInfo, int triggersDiabetesRiskFromNotes)
+    private DiabetesRisk DiabetesRiskPredictionForUnder30(PatientRiskRequest patientRiskRequest, int triggersDiabetesRiskFromNotes)
     {
-        logger.LogInformation($"Patient gender is : {patientRiskInfo.Gender}");
+        logger.LogInformation($"Patient gender is : {patientRiskRequest.Gender}");
 
-        return patientRiskInfo.Gender switch
+        return patientRiskRequest.Gender switch
         {
             // Patient is a male
             // Let's consider triggers from notes
@@ -89,10 +89,10 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
 
     }
 
-    private int PatientAgeCalculator(PatientRiskInfo patientRiskInfo)
+    private int PatientAgeCalculator(PatientRiskRequest patientRiskRequest)
     {
         DateTime currentDate = DateTime.Now;
-        DateOnly birthDate = patientRiskInfo.DateOfBirth;
+        DateOnly birthDate = patientRiskRequest.DateOfBirth;
         int age = currentDate.Year - birthDate.Year;
         logger.LogInformation("Patient age is : {Age}", age);
         return age;

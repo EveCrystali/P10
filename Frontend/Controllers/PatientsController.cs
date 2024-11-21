@@ -63,17 +63,15 @@ public class PatientsController : Controller
 
             // First let's construct our needs
             PatientViewModel patientViewModel = PatientService.MapPatientNoteToPatientNotesViewModel(patient, notes);
-            DiabetesRiskRequestModel diabetesRiskRequestModel = DiabetesRiskPredictionService.MapPatientViewModelAndNoteToDiabetesRiskRequestModel(patientViewModel);
+            PatientRiskRequest patientRiskRequest = DiabetesRiskPredictionService.MapPatientViewModelToPatientRiskInfo(patientViewModel);
 
             // Secondly let's ask DiabetesRiskPredictionService
             HttpRequestMessage requestForDiabetesRiskPredictionService = new(HttpMethod.Get, $"{_diabetesRiskPredictionServiceUrl}/")
             {
-                Content = JsonContent.Create(diabetesRiskRequestModel)
+                Content = JsonContent.Create(patientRiskRequest)
             };
-
-            _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}", id);
-            _logger.LogInformation("Request body: {RequestBody}", diabetesRiskRequestModel);
-
+            _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}, Date of birth: {DateOfBirth}, Gender: {Gender}", patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
+            
             // Finally let's manage the answer for DiabetesRiskPredictionService
             HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(requestForDiabetesRiskPredictionService);
 

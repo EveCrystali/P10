@@ -1,5 +1,5 @@
 # Utilise l'image officielle MongoDB
-FROM mongo:latest
+FROM mongo:8.0.3
 
 # Installer dockerize pour attendre le démarrage de MongoDB
 RUN apt-get update && apt-get install -y wget \

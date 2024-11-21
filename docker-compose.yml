@@ -2,7 +2,7 @@ services:
 
   mongodb:
     container_name: mongodb_container
-    image: mongo:latest
+    image: mongo:8.0.3
     ports:
       - "27017:27017"
     restart: always
@@ -43,7 +43,7 @@ services:
     mem_limit: 2g
 
   init-template:
-    image: curlimages/curl:latest 
+    image: curlimages/curl:8.11.0 
     container_name: init-template
     depends_on:
       - elasticsearch

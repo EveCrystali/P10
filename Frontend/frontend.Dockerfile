@@ -1,5 +1,5 @@
-# Étape 1 : Utiliser l'image SDK pour construire SharedLibrary et Frontend
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Étape 1 : Utiliser l'image pour construire SharedLibrary et Frontend
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /source
 EXPOSE 7000
 
@@ -19,7 +19,7 @@ RUN dotnet build SharedLibrary/SharedLibrary.csproj -c Release -o /source/build
 RUN dotnet publish Frontend/Frontend.csproj -c Release -o /source/publish
 
 # Étape 2 : Utiliser l'image runtime pour exécuter l'application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /app
 COPY --from=build /source/publish .
 

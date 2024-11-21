@@ -116,10 +116,10 @@ public class NotesService
         _logger.LogInformation("Note with ID {Id} created successfully in Elasticsearch", note.Id);
     }
 
-    private void CreateIndexes()
+    private async void CreateIndexes()
     {
-        IndexKeysDefinition<Note> indexKeys = Builders<Note>.IndexKeys.Text(note => note.Title).Text(note => note.Body);
-        CreateIndexModel<Note> indexModel = new(indexKeys);
-        NotesCollection.Indexes.CreateOne(indexModel);
+        IndexKeysDefinition<Note> indexKeysDefinition = Builders<Note>.IndexKeys.Ascending(note => note.PatientId);
+        CreateIndexModel<Note> indexModel = new(indexKeysDefinition);
+        await NotesCollection.Indexes.CreateOneAsync(indexModel);
     }
 }

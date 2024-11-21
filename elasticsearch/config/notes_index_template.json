@@ -41,7 +41,8 @@
           "synonym_filter": {
             "type": "synonym_graph",
             "synonyms": [
-              "hémoglobine a1c => hemoglobine_a1c"
+              "hémoglobine a1c => hemoglobine_a1c",
+              "fumeur, fumeuse => fum"
             ]
           }
         }

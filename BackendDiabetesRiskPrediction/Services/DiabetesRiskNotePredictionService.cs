@@ -10,7 +10,7 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
         "Microalbumine",
         "Taille",
         "Poids",
-        "Fumer",
+        "Fumeur",
         "Anormal",
         "Cholestérol",
         "Vertiges",

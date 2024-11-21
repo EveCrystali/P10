@@ -86,6 +86,13 @@ public class NotesService
         if (note.Id != null)
         {
             await RemoveAsyncElasticsearch(note.Id);
+            DeleteResult? deleteResult = await NotesCollection.DeleteOneAsync(x => x.Id == note.Id);
+            if (!deleteResult.IsAcknowledged)
+            {
+                string errorMessage = $"Failed to delete document with ID {note.Id} from MongoDB. Reason: {deleteResult.ToString()}";
+                _logger.LogError("errorMessage");
+                throw new InvalidOperationException("Error deleting document from MongoDB" + errorMessage);
+            }
         }
         _logger.LogInformation("Note with ID {Id} deleted successfully", note.Id);
     }

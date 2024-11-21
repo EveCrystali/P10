@@ -17,6 +17,11 @@ services:
       - mongo_data:/data/db
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1g
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
@@ -28,19 +33,21 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
       - ./elasticsearch/config/notes_index_template.json:/usr/share/elasticsearch/config/notes_index_template.json
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9200/_cat/health" ]
-      interval: 5s
+      interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - ingest.geoip.downloader.enabled=false
     networks:
       - elastic
-    mem_limit: 2g
+    deploy:
+      resources:
+        limits:
+          memory: 2g
 
   init-template:
     image: curlimages/curl:8.11.0 
@@ -80,6 +87,11 @@ services:
         condition: service_healthy
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512m
 
   apigateway:
     container_name: apigateway
@@ -95,6 +107,11 @@ services:
       - "5000:5000"
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512m
 
   auth:
     container_name: auth
@@ -115,6 +132,11 @@ services:
       - "7201:7201"
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512m
 
   backendpatient:
     container_name: backendpatient
@@ -135,6 +157,11 @@ services:
       - "7200:7200"
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512m
 
   backendnote:
     container_name: backendnote
@@ -155,6 +182,11 @@ services:
       - "7202:7202"
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512m
 
   backenddiabetesriskprediction:
     container_name: backenddiabetesriskprediction
@@ -173,6 +205,11 @@ services:
       - "7204:7204"
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512m
 
   frontend:
     image: frontend-image
@@ -195,6 +232,11 @@ services:
       - apigateway
     networks:
       - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1g
 
 volumes:
   mongo_data:

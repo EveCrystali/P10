@@ -1,5 +1,5 @@
 # Étape 1 : Utiliser l'image SDK pour construire SharedLibrary et ApiGateway
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /source
 EXPOSE 5000
 
@@ -19,7 +19,7 @@ RUN dotnet build SharedLibrary/SharedLibrary.csproj -c Release -o /source/build
 RUN dotnet build ApiGateway/ApiGateway.csproj -c Release -o /source/build
 
 # Étape 2 : Utiliser l'image runtime pour exécuter l'application
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 WORKDIR /app
 COPY --from=build /source/build .
 

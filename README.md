@@ -382,9 +382,4 @@ Pour faciliter les tests, les comptes suivants sont disponibles :
   - **Mot de passe :** 1vBZBB.QH83GeE.
   - **Rôle :** Practitioner
 
-- **User :**
-  - **Nom d'utilisateur :** noroleuser@email.com
-  - **Mot de passe :** 2vBZBB.QH83GeE.
-  - **Rôle :** User
-
 Vous pouvez utiliser ces comptes pour vous connecter à l'application et tester les différentes fonctionnalités en fonction des rôles.

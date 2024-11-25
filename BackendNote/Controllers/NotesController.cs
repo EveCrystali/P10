@@ -143,7 +143,7 @@ public class NotesController(NotesService notesService) : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Failed to delete note from Elasticsearch: {ex.Message}");
+            return StatusCode(500, $"Failed to delete note : {ex.Message}");
         }
 
         return Ok("Note deleted");

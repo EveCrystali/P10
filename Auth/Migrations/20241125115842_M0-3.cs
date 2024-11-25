@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace BackendPatient.Migrations
+namespace Auth.Migrations
 {
     /// <inheritdoc />
-    public partial class M02 : Migration
+    public partial class M03 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

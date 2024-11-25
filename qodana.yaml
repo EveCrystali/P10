@@ -6,3 +6,5 @@ exclude:
   - name: All
     paths:
       - Frontend\wwwroot\lib\
+      - Frontend\wwwroot\lib
+      - Frontend\wwwroot

@@ -30,6 +30,13 @@ public class NotesController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized || 
+            response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied to Notes. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
+
         if (response.IsSuccessStatusCode)
         {
             List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
@@ -76,12 +83,24 @@ public class NotesController : Controller
     }
 
     [HttpGet("create")]
-    public IActionResult Create(int patientId, string lastName, string firstName)
+    public async Task<IActionResult> Create(int patientId, string lastName, string firstName)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
+
+        // Vérifier les droits d'accès en essayant d'accéder aux notes du patient
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized || 
+            response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied to Note creation. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
+
         ViewBag.PatientId = patientId;
         ViewBag.LastName = lastName;
         ViewBag.FirstName = firstName;
@@ -106,9 +125,11 @@ public class NotesController : Controller
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode == HttpStatusCode.Unauthorized || 
+                response.StatusCode == HttpStatusCode.Forbidden)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                _logger.LogDebug("Access denied to Notes creation. Status code: {StatusCode}", response.StatusCode);
+                return View("AccessDenied");
             }
 
             if (response.IsSuccessStatusCode)
@@ -127,7 +148,7 @@ public class NotesController : Controller
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note - Error from the server", "Unable to create note.", response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
-        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "odel state is not valid.");
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "Model state is not valid.");
         return View(note);
     }
 
@@ -242,9 +263,11 @@ public class NotesController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{Uri.EscapeDataString(patientId.ToString())}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        if (response.StatusCode == HttpStatusCode.Unauthorized || 
+            response.StatusCode == HttpStatusCode.Forbidden)
         {
-            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            _logger.LogDebug("Access denied to Notes. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
         }
 
         if (response.IsSuccessStatusCode)
@@ -252,6 +275,7 @@ public class NotesController : Controller
             List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
             return View(notes);
         }
+
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", "Unable to load notes for patient.", response);
         return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }

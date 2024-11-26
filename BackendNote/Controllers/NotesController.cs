@@ -48,7 +48,7 @@ public class NotesController(NotesService notesService) : ControllerBase
     }
 
     [HttpGet("patient/{patientId}")]
-    // [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<ActionResult<Note>> GetNotesFromPatientId(int patientId)
     {
         List<Note>? notes = await notesService.GetFromPatientIdAsync(patientId);

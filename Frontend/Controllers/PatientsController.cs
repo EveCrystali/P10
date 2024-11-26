@@ -49,7 +49,14 @@ public class PatientsController : Controller
         {
             _logger.LogDebug("Unauthorized access to Patient Service. Status code: {StatusCode}", responseFromPatientService.StatusCode);
             _logger.LogDebug("Unauthorized access to Note Service. Status code: {StatusCode}", responseFromNoteService.StatusCode);
-            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+            return View("AccessDenied");
+        }
+
+        if (responseFromPatientService.StatusCode == HttpStatusCode.Forbidden ||
+            responseFromNoteService.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Forbidden access to services");
+            return View("AccessDenied");
         }
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
@@ -57,7 +64,16 @@ public class PatientsController : Controller
             Patient? patient = await responseFromPatientService.Content.ReadFromJsonAsync<Patient>();
             List<Note>? notes = await responseFromNoteService.Content.ReadFromJsonAsync<List<Note>>();
 
-            if (patient == null || notes == null) return View();
+            if (patient == null)
+            {
+                _logger.LogError("Patient not found");
+                return NotFound("Patient non trouvé");
+            }
+
+            if (notes == null)
+            {
+                notes = new List<Note>();
+            }
 
             // Time To Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
 
@@ -95,7 +111,21 @@ public class PatientsController : Controller
     }
 
     [HttpGet("create")]
-    public IActionResult Create() => View();
+    public async Task<IActionResult> Create()
+    {
+        // Vérifier les droits d'accès avant d'afficher le formulaire
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/checkaccess");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized || 
+            response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied to Patient creation. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
+
+        return View();
+    }
 
     [HttpPost("create")]
     public async Task<IActionResult> Create(Patient patient)
@@ -108,10 +138,13 @@ public class PatientsController : Controller
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            if (response.StatusCode == HttpStatusCode.Unauthorized || 
+                response.StatusCode == HttpStatusCode.Forbidden)
             {
-                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+                _logger.LogDebug("Access denied to Patient creation. Status code: {StatusCode}", response.StatusCode);
+                return View("AccessDenied");
             }
+
             if (response.IsSuccessStatusCode)
             {
                 Patient? createdPatient = await response.Content.ReadFromJsonAsync<Patient>();

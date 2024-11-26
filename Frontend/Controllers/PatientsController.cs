@@ -1,7 +1,9 @@
 using System.Net;
 using Frontend.Models;
 using Frontend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Frontend.Controllers;
 
 [Route("patient")]
@@ -115,28 +117,12 @@ public class PatientsController : Controller
     }
 
     [HttpGet("create")]
-    public async Task<IActionResult> Create()
-    {
-        // Vérifier les droits d'accès avant d'afficher le formulaire
-        HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/checkaccess");
-        HttpResponseMessage response = await _httpClientService.SendAsync(request);
-
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            _logger.LogDebug("User not authenticated. Redirecting to login");
-            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-        }
-
-        if (response.StatusCode == HttpStatusCode.Forbidden)
-        {
-            _logger.LogDebug("User authenticated but not authorized");
-            return View("AccessDenied");
-        }
-
-        return View();
-    }
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
+    public async Task<IActionResult> Create() =>  View();
+    
 
     [HttpPost("create")]
+    [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
     public async Task<IActionResult> Create(Patient patient)
     {
         if (ModelState.IsValid)

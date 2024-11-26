@@ -11,7 +11,7 @@ public class NotesController : Controller
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<NotesController> _logger;
     private readonly string _noteServiceUrl;
-
+    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
     private readonly PatientService _patientService;
 
     public NotesController(ILogger<NotesController> logger,
@@ -30,6 +30,16 @@ public class NotesController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied to Notes. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
         if (response.IsSuccessStatusCode)
         {
             List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
@@ -58,6 +68,17 @@ public class NotesController : Controller
 
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(request);
+        if (responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+
+        if (responseFromNoteService.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied. Status code: {StatusCode}", responseFromNoteService.StatusCode);
+            return View("AccessDenied");
+        }
 
         if (responseFromNoteService.IsSuccessStatusCode)
         {
@@ -76,12 +97,29 @@ public class NotesController : Controller
     }
 
     [HttpGet("create")]
-    public IActionResult Create(int patientId, string lastName, string firstName)
+    public async Task<IActionResult> Create(int patientId, string lastName, string firstName)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
+
+        // Vérifier les droits d'accès en essayant d'accéder aux notes du patient
+        HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{patientId}");
+        HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("User authenticated but not authorized");
+            return View("AccessDenied");
+        }
+
         ViewBag.PatientId = patientId;
         ViewBag.LastName = lastName;
         ViewBag.FirstName = firstName;
@@ -108,9 +146,15 @@ public class NotesController : Controller
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                _logger.LogDebug("User not authenticated. Redirecting to login");
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
             }
 
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogDebug("User authenticated but not authorized");
+                return View("AccessDenied");
+            }
             if (response.IsSuccessStatusCode)
             {
                 Note? createdNote = await response.Content.ReadFromJsonAsync<Note>();
@@ -127,7 +171,7 @@ public class NotesController : Controller
             ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note - Error from the server", "Unable to create note.", response);
             return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
         }
-        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "odel state is not valid.");
+        ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, "Failed to create note", "Model state is not valid.");
         return View(note);
     }
 
@@ -139,6 +183,17 @@ public class NotesController : Controller
             HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                _logger.LogDebug("User not authenticated. Redirecting to login");
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
+                return View("AccessDenied");
+            }
             if (response.IsSuccessStatusCode)
             {
                 Note? note = await response.Content.ReadFromJsonAsync<Note>();
@@ -174,7 +229,14 @@ public class NotesController : Controller
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+                _logger.LogDebug("User not authenticated. Redirecting to login");
+                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+            }
+
+            if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
+                return View("AccessDenied");
             }
             if (response.IsSuccessStatusCode)
             {
@@ -202,6 +264,18 @@ public class NotesController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
+
         if (response.IsSuccessStatusCode)
         {
             Note? note = await response.Content.ReadFromJsonAsync<Note>();
@@ -222,6 +296,18 @@ public class NotesController : Controller
 
         HttpRequestMessage request = new(HttpMethod.Delete, $"{_noteServiceUrl}/{Uri.EscapeDataString(id)}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
+        }
 
         if (response.IsSuccessStatusCode)
         {
@@ -244,7 +330,14 @@ public class NotesController : Controller
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            return RedirectToAction(nameof(AuthController.Login), nameof(AuthController).Replace("Controller", ""));
+            _logger.LogDebug("User not authenticated. Redirecting to login");
+            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _logger.LogDebug("Access denied to Notes. Status code: {StatusCode}", response.StatusCode);
+            return View("AccessDenied");
         }
 
         if (response.IsSuccessStatusCode)
@@ -252,6 +345,7 @@ public class NotesController : Controller
             List<Note>? notes = await response.Content.ReadFromJsonAsync<List<Note>>();
             return View(notes);
         }
+
         ErrorHandlingUtils.HandleErrorResponse(_logger, ModelState, TempData, $"Failed to load notes for patient with id {patientId}. Status code: {response.StatusCode}", "Unable to load notes for patient.", response);
         return RedirectToAction(nameof(Index), nameof(HomeController).Replace("Controller", ""));
     }

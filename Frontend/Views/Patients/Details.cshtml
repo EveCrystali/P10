@@ -63,7 +63,8 @@
                 <p>@(note.Creator != null ? note.Creator : "Inconnu")</p>
 
                 <div>
-                    <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id" class="btn btn-sm btn-warning me-2">Éditer</a>
+                    <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id"
+                       class="btn btn-sm btn-warning me-2">Éditer</a>
                     <a asp-controller="Notes" asp-action="Delete" asp-route-id="@note.Id" class="btn btn-sm btn-danger">Supprimer</a>
                 </div>
             </div>

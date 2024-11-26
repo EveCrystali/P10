@@ -9,7 +9,7 @@
 <html lang="fr">
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Édition d'un Patient</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -17,76 +17,82 @@
 
 <body style="background-color: #f8f9fa;">
 
-    <div class="container py-5">
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-center">
-                @TempData["Error"]
-            </div>
-        }
-
-        <div class="card shadow-sm">
-            <div class="card-header text-center" style="background-color: #ff9800; color: white;">
-                <h4><i class="fas fa-edit"></i> Modifier un Patient</h4>
-            </div>
-            <div class="card-body">
-                <form id="patientForm" method="POST" asp-controller="Patients" asp-action="Edit">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="FirstName" class="form-label text-primary"><i class="fas fa-user"></i> Prénom</label>
-                        <input asp-for="FirstName" class="form-control" required />
-                        <span asp-validation-for="FirstName" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="LastName" class="form-label text-primary"><i class="fas fa-user-tag"></i> Nom</label>
-                        <input asp-for="LastName" class="form-control" required />
-                        <span asp-validation-for="LastName" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="DateOfBirth" class="form-label text-primary"><i class="fas fa-calendar"></i> Date de Naissance</label>
-                        <input asp-for="DateOfBirth" type="date" class="form-control" required />
-                        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Gender" class="form-label text-primary"><i class="fas fa-venus-mars"></i> Sexe</label>
-                        <select asp-for="Gender" class="form-control" required>
-                            <option value="M">Masculin</option>
-                            <option value="F">Féminin</option>
-                        </select>
-                        <span asp-validation-for="Gender" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Address" class="form-label text-primary"><i class="fas fa-map-marker-alt"></i> Adresse</label>
-                        <input asp-for="Address" class="form-control" required />
-                        <span asp-validation-for="Address" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="PhoneNumber" class="form-label text-primary"><i class="fas fa-phone"></i> Téléphone</label>
-                        <input asp-for="PhoneNumber" type="tel" class="form-control" required />
-                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                    </div>
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fas fa-save"></i> Enregistrer
-                        </button>
-                       
-                    </div>
-                </form>
-            </div>
+<div class="container py-5">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
         </div>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
-            <i class="fas fa-arrow-left"></i> Retour à la liste
-        </a>
-    </div>
+    }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <div class="card shadow-sm">
+        <div class="card-header text-center" style="background-color: #ff9800; color: white;">
+            <h4><i class="fas fa-edit"></i> Modifier un Patient</h4>
+        </div>
+        <div class="card-body">
+            <form id="patientForm" method="POST" asp-controller="Patients" asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"
+                     style="display:none;"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label text-primary"><i class="fas fa-user"></i>
+                        Prénom</label>
+                    <input asp-for="FirstName" class="form-control" required/>
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label text-primary"><i class="fas fa-user-tag"></i>
+                        Nom</label>
+                    <input asp-for="LastName" class="form-control" required/>
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DateOfBirth" class="form-label text-primary"><i class="fas fa-calendar"></i> Date de
+                        Naissance</label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" required/>
+                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Gender" class="form-label text-primary"><i class="fas fa-venus-mars"></i>
+                        Sexe</label>
+                    <select asp-for="Gender" class="form-control" required>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label text-primary"><i class="fas fa-map-marker-alt"></i>
+                        Adresse</label>
+                    <input asp-for="Address" class="form-control" required/>
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label text-primary"><i class="fas fa-phone"></i> Téléphone</label>
+                    <input asp-for="PhoneNumber" type="tel" class="form-control" required/>
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+        <i class="fas fa-arrow-left"></i> Retour à la liste
+    </a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

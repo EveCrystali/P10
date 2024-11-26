@@ -1,10 +1,9 @@
 using System.Net;
+using Frontend.Extensions;
 using Frontend.Models;
 using Frontend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Frontend.Extensions;
-
 namespace Frontend.Controllers;
 
 [Route("patient")]
@@ -257,7 +256,7 @@ public class PatientsController : Controller
 
         IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
         if (authResult != null) return authResult;
-        
+
         if (response.IsSuccessStatusCode)
         {
             return RedirectToAction(nameof(Index), _controllerHomeControllerName);

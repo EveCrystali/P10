@@ -1,7 +1,6 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc;
 using Frontend.Controllers;
-
+using Microsoft.AspNetCore.Mvc;
 namespace Frontend.Extensions;
 
 public static class ControllerExtensions

@@ -20,7 +20,7 @@
     $(document).ready(function () {
         console.log("Starting to fetch user data from /status");
         $.ajax({
-            url: window.location.protocol + '//' + window.location.host + '/auth/status', 
+            url: window.location.protocol + '//' + window.location.host + '/auth/status',
             method: "GET",
             success: function (data) {
                 console.log("Received user data from /status", data);

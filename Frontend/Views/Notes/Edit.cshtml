@@ -2,14 +2,14 @@
 @model Note
 
 @{
-Layout = "_Layout";
+    Layout = "_Layout";
 }
 
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Édition d'une Note</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -20,9 +20,9 @@ Layout = "_Layout";
 <div class="container py-5">
     @if (TempData["Error"] != null)
     {
-    <div class="alert alert-danger text-center">
-        @TempData["Error"]
-    </div>
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
+        </div>
     }
 
     <div class="card shadow-sm">
@@ -30,17 +30,20 @@ Layout = "_Layout";
             <h4><i class="fas fa-edit"></i> Modifier une Note</h4>
         </div>
         <div class="card-body">
-            <form id="noteForm" class="needs-validation" method="POST" asp-controller="Notes" asp-action="Edit" novalidate>
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
+            <form id="noteForm" class="needs-validation" method="POST" asp-controller="Notes" asp-action="Edit"
+                  novalidate>
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"
+                     style="display:none;"></div>
 
                 <div class="mb-3">
                     <label asp-for="Title" class="form-label text-primary"><i class="fas fa-heading"></i> Titre</label>
-                    <input asp-for="Title" class="form-control" required />
+                    <input asp-for="Title" class="form-control" required/>
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Body" class="form-label text-primary"><i class="fas fa-align-left"></i> Contenu</label>
+                    <label asp-for="Body" class="form-label text-primary"><i class="fas fa-align-left"></i>
+                        Contenu</label>
                     <textarea asp-for="Body" class="form-control" rows="5" required></textarea>
                     <span asp-validation-for="Body" class="text-danger"></span>
                 </div>

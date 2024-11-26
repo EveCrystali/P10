@@ -2,14 +2,14 @@
 @model Note
 
 @{
-Layout = "_Layout";
+    Layout = "_Layout";
 }
 
 <!DOCTYPE html>
 <html lang="fr" xml:lang="fr">
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Détails de la Note</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -20,69 +20,70 @@ Layout = "_Layout";
 <div class="container py-5">
     @if (TempData["Error"] != null)
     {
-    <div class="alert alert-danger text-center">
-        @TempData["Error"]
-    </div>
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
+        </div>
     }
 
     @if (Model == null)
     {
-    <div class="alert alert-warning text-center">
-        <i class="fas fa-exclamation-triangle"></i> Une erreur s'est produite. Impossible d'afficher le détail de la note.
-    </div>
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-triangle"></i> Une erreur s'est produite. Impossible d'afficher le détail de la
+            note.
+        </div>
     }
     else
     {
-    <div class="card shadow-sm">
-        <div class="card-header text-center" style="background-color: #4caf50; color: white;">
-            <h4><i class="fas fa-sticky-note"></i> Détails de la Note</h4>
-        </div>
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-4 text-success">
-                    <i class="fas fa-heading"></i> Titre
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.DisplayFor(model => model.Title)
-                </dd>
-                <dt class="col-sm-4 text-success">
-                    <i class="fas fa-align-left"></i> Contenu
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.Raw(Model.Body?.Replace("\n", "<br>"))
-                </dd>
-                <dt class="col-sm-4 text-success">
-                    <i class="fas fa-calendar-plus"></i> Date de Création
-                </dt>
-                <dd class="col-sm-8">
-                    @Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm")
-                </dd>
-                <dt class="col-sm-4 text-success">
-                    <i class="fas fa-calendar-check"></i> Dernière Mise à Jour
-                </dt>
-                <dd class="col-sm-8">
-                    @Model.LastUpdatedDate?.ToString("dd/MM/yyyy HH:mm")
-                </dd>
-                <dt class="col-sm-4 text-success">
-                    <i class="fas fa-user"></i> Créateur
-                </dt>
-                <dd class="col-sm-8">
-                    @Html.DisplayFor(model => model.Creator)
-                </dd>
-            </dl>
-        </div>
-        <div class="card-footer text-center bg-light">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
-                <i class="fas fa-edit"></i> Editer
+        <div class="card shadow-sm">
+            <div class="card-header text-center" style="background-color: #4caf50; color: white;">
+                <h4><i class="fas fa-sticky-note"></i> Détails de la Note</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4 text-success">
+                        <i class="fas fa-heading"></i> Titre
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.Title)
+                    </dd>
+                    <dt class="col-sm-4 text-success">
+                        <i class="fas fa-align-left"></i> Contenu
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.Raw(Model.Body?.Replace("\n", "<br>"))
+                    </dd>
+                    <dt class="col-sm-4 text-success">
+                        <i class="fas fa-calendar-plus"></i> Date de Création
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.CreatedDate?.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+                    <dt class="col-sm-4 text-success">
+                        <i class="fas fa-calendar-check"></i> Dernière Mise à Jour
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Model.LastUpdatedDate?.ToString("dd/MM/yyyy HH:mm")
+                    </dd>
+                    <dt class="col-sm-4 text-success">
+                        <i class="fas fa-user"></i> Créateur
+                    </dt>
+                    <dd class="col-sm-8">
+                        @Html.DisplayFor(model => model.Creator)
+                    </dd>
+                </dl>
+            </div>
+            <div class="card-footer text-center bg-light">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">
+                    <i class="fas fa-edit"></i> Editer
+                </a>
+                <a asp-controller="Notes" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Supprimer
+                </a>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
             </a>
-            <a asp-controller="Notes" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
-                <i class="fas fa-trash"></i> Supprimer
-            </a>
         </div>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Retour à la liste
-        </a>
-    </div>
     }
 </div>
 

@@ -1,18 +1,18 @@
 using System.Globalization;
 using System.Net;
+using Frontend.Extensions;
 using Frontend.Models;
 using Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Frontend.Extensions;
 namespace Frontend.Controllers;
 
 [Route("note")]
 public class NotesController : Controller
 {
+    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
     private readonly HttpClientService _httpClientService;
     private readonly ILogger<NotesController> _logger;
     private readonly string _noteServiceUrl;
-    private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
     private readonly PatientService _patientService;
 
     public NotesController(ILogger<NotesController> logger,

@@ -9,7 +9,7 @@
 <html lang="fr">
 
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width"/>
     <title>Créer une Note</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -17,55 +17,57 @@
 
 <body style="background-color: #f8f9fa;">
 
-    <div class="container py-5">
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-center">
-                @TempData["Error"]
-            </div>
-        }
+<div class="container py-5">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
+        </div>
+    }
 
-        <div class="card shadow-sm">
-            <div class="card-header text-center" style="background-color: #4caf50; color: white;">
-                <h4><i class="fas fa-plus-circle"></i> Créer une Nouvelle Note</h4>
-            </div>
-            <div class="card-body">
-                <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none;"></div>
+    <div class="card shadow-sm">
+        <div class="card-header text-center" style="background-color: #4caf50; color: white;">
+            <h4><i class="fas fa-plus-circle"></i> Créer une Nouvelle Note</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"
+                     style="display:none;"></div>
 
-                    <input type="hidden" name="PatientId" value="@ViewBag.PatientId" />
+                <input type="hidden" name="PatientId" value="@ViewBag.PatientId"/>
 
-                    <div class="mb-3">
-                        <label class="form-label text-success"><i class="fas fa-user"></i> Patient</label>
-                        <input type="text" value="@ViewBag.FirstName @ViewBag.LastName" class="form-control" readonly />
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label text-success"><i class="fas fa-user"></i> Patient</label>
+                    <input type="text" value="@ViewBag.FirstName @ViewBag.LastName" class="form-control" readonly/>
+                </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label text-success"><i class="fas fa-heading"></i> Titre</label>
-                        <input asp-for="Title" class="form-control" />
-                        <span asp-validation-for="Title" class="text-danger"></span>
-                    </div>
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label text-success"><i class="fas fa-heading"></i> Titre</label>
+                    <input asp-for="Title" class="form-control"/>
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Body" class="form-label text-success"><i class="fas fa-align-left"></i> Contenu</label>
-                        <textarea asp-for="Body" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Body" class="text-danger"></span>
-                    </div>
+                <div class="mb-3">
+                    <label asp-for="Body" class="form-label text-success"><i class="fas fa-align-left"></i>
+                        Contenu</label>
+                    <textarea asp-for="Body" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Body" class="text-danger"></span>
+                </div>
 
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-save"></i> Enregistrer
-                        </button>
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
-                            <i class="fas fa-arrow-left"></i> Retour à la liste
-                        </a>
-                    </div>
-                </form>
-            </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-lg ms-2">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

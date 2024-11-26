@@ -19,57 +19,64 @@
 
     @if (TempData["Error"] != null)
     {
-    <div class="alert alert-danger text-center">
-        @TempData["Error"]
-    </div>
+        <div class="alert alert-danger text-center">
+            @TempData["Error"]
+        </div>
     }
 
     @if (Model != null && Model.Any())
     {
-    <div class="row g-4">
-        @foreach (Note note in Model)
-        {
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title" style="color: #4caf50;">@note.Title</h5>
-                    <p class="card-text">@Html.Raw(note.Body?.Replace("\n", "<br>"))</p>
-                    <div class="text-muted">
-                        @if (note.CreatedDate.HasValue)
-                        {
-                        <small><i class="fas fa-calendar-alt"></i> Créée le : @note.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small><br>
-                        }
-                        @if (note.LastUpdatedDate.HasValue)
-                        {
-                        <small><i class="fas fa-edit"></i> Dernière mise à jour : @note.LastUpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small><br>
-                        }
-                        @if (!string.IsNullOrEmpty(note.Creator))
-                        {
-                        <small><i class="fas fa-user"></i> Créateur : @note.Creator</small>
-                        }
+        <div class="row g-4">
+            @foreach (Note note in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title" style="color: #4caf50;">@note.Title</h5>
+                            <p class="card-text">@Html.Raw(note.Body?.Replace("\n", "<br>"))</p>
+                            <div class="text-muted">
+                                @if (note.CreatedDate.HasValue)
+                                {
+                                    <small><i class="fas fa-calendar-alt"></i> Créée le
+                                        : @note.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <br>
+                                }
+                                @if (note.LastUpdatedDate.HasValue)
+                                {
+                                    <small><i class="fas fa-edit"></i> Dernière mise à jour
+                                        : @note.LastUpdatedDate.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <br>
+                                }
+                                @if (!string.IsNullOrEmpty(note.Creator))
+                                {
+                                    <small><i class="fas fa-user"></i> Créateur : @note.Creator</small>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer text-center bg-light">
+                            <a asp-controller="Notes" asp-action="Details" asp-route-id="@note.Id"
+                               class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-info-circle"></i> Détails
+                            </a>
+                            <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id"
+                               class="btn btn-warning btn-sm me-2">
+                                <i class="fas fa-edit"></i> Editer
+                            </a>
+                            <a asp-controller="Notes" asp-action="Delete" asp-route-id="@note.Id"
+                               class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="card-footer text-center bg-light">
-                    <a asp-controller="Notes" asp-action="Details" asp-route-id="@note.Id" class="btn btn-info btn-sm me-2">
-                        <i class="fas fa-info-circle"></i> Détails
-                    </a>
-                    <a asp-controller="Notes" asp-action="Edit" asp-route-id="@note.Id" class="btn btn-warning btn-sm me-2">
-                        <i class="fas fa-edit"></i> Editer
-                    </a>
-                    <a asp-controller="Notes" asp-action="Delete" asp-route-id="@note.Id" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </a>
-                </div>
-            </div>
+            }
         </div>
-        }
-    </div>
     }
     else
     {
-    <div class="alert alert-info text-center">
-        <i class="fas fa-info-circle"></i> Aucune note trouvée.
-    </div>
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> Aucune note trouvée.
+        </div>
     }
 </div>
 

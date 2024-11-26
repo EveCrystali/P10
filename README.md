@@ -115,7 +115,7 @@ BackendPatient utilise SQL Server via Entity Framework pour la gestion des patie
    - .NET 8 SDK
 
 3. Restaurez les bases de données SQL Server pour les services BackendPatient et Auth :
-   - Utilisez les fichiers de sauvegarde dans `P10>BackupSQLServerDB` et créer l'utilisateur `backend_user` dans SMSS pour les services BackendPatient et Auth (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes) et [Mapper le login 'backend_user' aux bases de données restaurées :](#mapper-le-login-backend_user-aux-bases-de-données-restaurées-))
+   - Utilisez les fichiers de sauvegarde dans `P10>SQLServerDBBackup` et créer l'utilisateur `backend_user` dans SMSS pour les services BackendPatient et Auth (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes) et [Mapper le login 'backend_user' aux bases de données restaurées :](#mapper-le-login-backend_user-aux-bases-de-données-restaurées-))
 
 4. Lancez les services avec Docker :
 
@@ -177,11 +177,11 @@ Le projet utilise **Docker** pour la gestion des services backend, frontend, l'A
 
 ## Restauration des Bases de Données
 
-Les bases de données SQL Server pour les microservices `BackendPatient` et `Auth` ne sont pas contenerisées dans Docker. Vous pouvez les restaurer depuis les fichiers de sauvegarde fournis dans `P10>BackupSQLServerDB` (recommandé) ou décider de créer manuellement des bases de données SQL Server via SQL Server Express puis utiliser des migrations to code first avec Entity Framework (non recommandé). Une seule de ces deux méthodes est à réaliser. Pour plus de détails sur la restauration des bases de données SQL Server, voir la section **Restauration des Bases de Données à partir des Sauvegardes**. Pour plus de détails sur la création manuelle des bases de données SQL Server avec migrations to code first, voir la section **Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)**.
+Les bases de données SQL Server pour les microservices `BackendPatient` et `Auth` ne sont pas contenerisées dans Docker. Vous pouvez les restaurer depuis les fichiers de sauvegarde fournis dans `P10>SQLServerDBBackup` (recommandé) ou décider de créer manuellement des bases de données SQL Server via SQL Server Express puis utiliser des migrations to code first avec Entity Framework (non recommandé). Une seule de ces deux méthodes est à réaliser. Pour plus de détails sur la restauration des bases de données SQL Server, voir la section **Restauration des Bases de Données à partir des Sauvegardes**. Pour plus de détails sur la création manuelle des bases de données SQL Server avec migrations to code first, voir la section **Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)**.
 
 ### Recommandé : Restauration des Bases de Données à partir des Sauvegardes
 
-Pour simplifier la configuration des bases de données, vous pouvez restaurer les bases de données à partir des fichiers de sauvegarde fournis dans P10>BackupSQLServerDB.
+Pour simplifier la configuration des bases de données, vous pouvez restaurer les bases de données à partir des fichiers de sauvegarde fournis dans P10>SQLServerDBBackup.
 
 #### Étapes de Restauration des données des Bases de Données :
 

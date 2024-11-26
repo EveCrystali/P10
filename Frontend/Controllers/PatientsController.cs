@@ -3,6 +3,7 @@ using Frontend.Models;
 using Frontend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Frontend.Extensions;
 
 namespace Frontend.Controllers;
 
@@ -46,19 +47,8 @@ public class PatientsController : Controller
         HttpRequestMessage requestForBackendNote = new(HttpMethod.Get, $"{_noteServiceUrl}/patient/{id}");
         HttpResponseMessage responseFromNoteService = await _httpClientService.SendAsync(requestForBackendNote);
 
-        if (responseFromPatientService.StatusCode == HttpStatusCode.Unauthorized ||
-            responseFromNoteService.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            _logger.LogDebug("User not authenticated. Redirecting to login");
-            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-        }
-
-        if (responseFromPatientService.StatusCode == HttpStatusCode.Forbidden ||
-            responseFromNoteService.StatusCode == HttpStatusCode.Forbidden)
-        {
-            _logger.LogDebug("User authenticated but not authorized");
-            return View("AccessDenied");
-        }
+        IActionResult? authResult = this.HandleAuthorizationResponse(responseFromNoteService.StatusCode, _logger);
+        if (authResult != null) return authResult;
 
         if (responseFromPatientService.IsSuccessStatusCode && responseFromNoteService.IsSuccessStatusCode)
         {
@@ -118,8 +108,8 @@ public class PatientsController : Controller
 
     [HttpGet("create")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-    public async Task<IActionResult> Create() =>  View();
-    
+    public async Task<IActionResult> Create() => View();
+
 
     [HttpPost("create")]
     [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
@@ -133,17 +123,8 @@ public class PatientsController : Controller
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogDebug("User not authenticated. Redirecting to login");
-                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-            }
-
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-            {
-                _logger.LogDebug("User authenticated but not authorized");
-                return View("AccessDenied");
-            }
+            IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
+            if (authResult != null) return authResult;
 
             if (response.IsSuccessStatusCode)
             {
@@ -178,17 +159,9 @@ public class PatientsController : Controller
             HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogDebug("User not authenticated. Redirecting to login");
-                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-            }
+            IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
+            if (authResult != null) return authResult;
 
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-            {
-                _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
-                return View("AccessDenied");
-            }
             if (response.IsSuccessStatusCode)
             {
                 Patient? patient = await response.Content.ReadFromJsonAsync<Patient>();
@@ -223,17 +196,10 @@ public class PatientsController : Controller
                 Content = JsonContent.Create(patient)
             };
             HttpResponseMessage response = await _httpClientService.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogDebug("User not authenticated. Redirecting to login");
-                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-            }
 
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-            {
-                _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
-                return View("AccessDenied");
-            }
+            IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
+            if (authResult != null) return authResult;
+
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Patient with id {PatientId} was successfully updated.", patient.Id);
@@ -263,17 +229,9 @@ public class PatientsController : Controller
         HttpRequestMessage request = new(HttpMethod.Get, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            _logger.LogDebug("User not authenticated. Redirecting to login");
-            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-        }
+        IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
+        if (authResult != null) return authResult;
 
-        if (response.StatusCode == HttpStatusCode.Forbidden)
-        {
-            _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
-            return View("AccessDenied");
-        }
         if (response.IsSuccessStatusCode)
         {
             Patient? patient = await response.Content.ReadFromJsonAsync<Patient>();
@@ -297,16 +255,9 @@ public class PatientsController : Controller
         HttpRequestMessage request = new(HttpMethod.Delete, $"{_patientServiceUrl}/{id}");
         HttpResponseMessage response = await _httpClientService.SendAsync(request);
 
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            _logger.LogDebug("User not authenticated. Redirecting to login");
-            return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-        }
-        if (response.StatusCode == HttpStatusCode.Forbidden)
-        {
-            _logger.LogDebug("Access denied. Status code: {StatusCode}", response.StatusCode);
-            return View("AccessDenied");
-        }
+        IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
+        if (authResult != null) return authResult;
+        
         if (response.IsSuccessStatusCode)
         {
             return RedirectToAction(nameof(Index), _controllerHomeControllerName);

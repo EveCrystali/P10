@@ -115,7 +115,7 @@ BackendPatient utilise SQL Server via Entity Framework pour la gestion des patie
    - .NET 8 SDK
 
 3. Restaurez les bases de données SQL Server pour les services BackendPatient et Auth :
-   - Utilisez les fichiers de sauvegarde dans `P10>SQLServerDBBackup` pour restaurer les bases de données pour les services BackendPatient et Auth, restaurez l'utilisateur `backend_user` et attribuez lui les permissions appropriées (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes)
+   - Utilisez les fichiers de sauvegarde contenus dans `P10>SQLServerDBBackup` pour restaurer les bases de données des micro-services BackendPatient et Auth, et aussi restaurer l'utilisateur `backend_user` avec ses permissions appropriées nécessaires(voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes)
 
 4. Lancez les services avec Docker :
 
@@ -179,7 +179,7 @@ Les bases de données SQL Server pour les microservices `BackendPatient` et `Aut
 
 ### Recommandé : Restauration des Bases de Données à partir des Sauvegardes
 
-Pour simplifier la configuration des bases de données, vous pouvez restaurer les bases de données à partir des fichiers de sauvegarde fournis dans P10>SQLServerDBBackup.
+Pour simplifier la configuration des bases de données, vous pouvez restaurer les bases de données nécessaires `PatientDb` et `AuthServiceDb` avec l'utilisateur `backend_user` à partir des fichiers de sauvegarde fournis ``AuthServiceDb.bak`` et ``PatientDb.bak``, ainsi que le le script SQL fourni (`create_backend_user.sql`) dans ``P10>SQLServerDBBackup``.
 
 #### Étapes de Restauration des données des Bases de Données
 

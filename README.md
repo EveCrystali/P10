@@ -106,24 +106,27 @@ BackendPatient utilise SQL Server via Entity Framework pour la gestion des patie
 
     ```bash
     git clone https://github.com/EveCrystali/P10.git
-    cd P10  
+    cd P10
     ```
 
 2. Assurez-vous d'avoir installé :
    - Docker Desktop
    - SQL Server Express
 
-3. Restaurez les bases de données SQL Server pour les services BackendPatient et Auth :
-   - Utilisez les fichiers de sauvegarde contenus dans `P10>SQLServerDBBackup` pour restaurer les bases de données des micro-services BackendPatient et Auth, et aussi restaurer l'utilisateur `backend_user` avec ses permissions appropriées nécessaires (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes))
+3. Restaurez les bases de données SQL Server pour les services BackendPatient et Auth depuis SQL Server Management Studio (SSMS) :
+   - Utilisez les fichiers de sauvegarde contenus dans `P10>SQLServerDBBackup` pour restaurer les bases de données des micro-services BackendPatient et Auth (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes)) pour plus de détails.
 
-4. Lancez les services avec Docker :
+4. Exécutez le script SQL fourni (`create_backend_user.sql`) sur votre instance SQL Server :
+   - Depuis SQL Server Management Studio (SSMS), dans `Fichier > Ouvrir > Fichier` sélectionnez le fichier `create_backend_user.sql` dans le dossier `SQLServerDBBackup`
+   - Exécutez le script `create_backend_user.sql` depuis l'onglet de requête
 
-   ```bash
-   docker-compose build --no-cache
-   docker-compose up -d
-   ```
+5. Lancez les services avec Docker :
+    ```bash
+    docker-compose build --no-cache
+    docker-compose up -d
+    ```
 
-5. Accédez à l'application :
+6. Accédez à l'application :
    - Frontend : <http://localhost:7000>
 
 Pour plus de détails sur l'installation et la configuration, consultez les sections suivantes.
@@ -184,7 +187,7 @@ Pour simplifier la configuration des bases de données, vous pouvez restaurer le
 1. **Ouvrir SQL Server Management Studio (SSMS) :**
    - Lancez **SSMS** et connectez-vous à votre instance SQL Server.
 
-    *Toutes les étapes suivantes s'effectue dans l'instance SQL Server.*
+*Toutes les étapes suivantes s'effectue dans l'instance SQL Server.*
   
 2. **Restaurer `AuthServiceDb` :**
    - Faites un clic droit sur `Base de données` dans l’Explorateur d’objets et sélectionnez ``Restaurer la base de données``

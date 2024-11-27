@@ -6,7 +6,6 @@ Le but de l'application que vous développez est de permettre la détection du d
 
 Ce projet est une application web composée de plusieurs microservices backend et frontend. Il utilise **ASP.NET Core 8** pour les services backend et un frontend basé sur **ASP.NET MVC**.
 
-
 ## Sommaire
 
 - [P10 Projet Éducatif](#p10-projet-éducatif)
@@ -20,11 +19,8 @@ Ce projet est une application web composée de plusieurs microservices backend e
   - [Installation de SQL Server Express](#installation-de-sql-server-express)
   - [Restauration des Bases de Données](#restauration-des-bases-de-données)
     - [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes)
-      - [Étapes de Restauration des données des Bases de Données :](#étapes-de-restauration-des-données-des-bases-de-données-)
-    - [Mapper le login 'backend\_user' aux bases de données restaurées :](#mapper-le-login-backend_user-aux-bases-de-données-restaurées-)
-    - [Non recommandé : Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)](#non-recommandé--restauration-des-bases-de-données-en-utilisant-les-migrations-entity-framework-sql-server)
-      - [BackendPatient](#backendpatient)
-      - [Auth](#auth)
+      - [Étapes de Restauration des données des Bases de Données](#étapes-de-restauration-des-données-des-bases-de-données)
+    - [Résolution des erreurs fréquentes](#résolution-des-erreurs-fréquentes)
   - [Docker](#docker)
   - [Configuration](#configuration)
     - [Variables d'environnement](#variables-denvironnement)
@@ -33,9 +29,13 @@ Ce projet est une application web composée de plusieurs microservices backend e
     - [Authentification](#authentification)
     - [Autorisation](#autorisation)
     - [Comptes Utilisateurs par Défaut](#comptes-utilisateurs-par-défaut)
+  - [~~❌ DEPRECIE : Restaurations manuelles des bases de donnees avec les utilisateurs ❌~~](#-deprecie--restaurations-manuelles-des-bases-de-donnees-avec-les-utilisateurs-)
+    - [~~Mapper le login 'backend\_user' aux bases de données restaurées :~~](#mapper-le-login-backend_user-aux-bases-de-données-restaurées-)
+    - [~~Non recommandé : Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)~~](#non-recommandé--restauration-des-bases-de-données-en-utilisant-les-migrations-entity-framework-sql-server)
+      - [~~BackendPatient~~](#backendpatient)
+      - [~~Auth~~](#auth)
 
 ## Structure du Projet
-
 
 ```mermaid
 graph TD
@@ -115,7 +115,7 @@ BackendPatient utilise SQL Server via Entity Framework pour la gestion des patie
    - .NET 8 SDK
 
 3. Restaurez les bases de données SQL Server pour les services BackendPatient et Auth :
-   - Utilisez les fichiers de sauvegarde dans `P10>SQLServerDBBackup` et créer l'utilisateur `backend_user` dans SMSS pour les services BackendPatient et Auth (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes) et [Mapper le login 'backend_user' aux bases de données restaurées :](#mapper-le-login-backend_user-aux-bases-de-données-restaurées-))
+   - Utilisez les fichiers de sauvegarde dans `P10>SQLServerDBBackup` pour restaurer les bases de données pour les services BackendPatient et Auth, restaurez l'utilisateur `backend_user` et attribuez lui les permissions appropriées (voir [Recommandé : Restauration des Bases de Données à partir des Sauvegardes](#recommandé--restauration-des-bases-de-données-à-partir-des-sauvegardes)
 
 4. Lancez les services avec Docker :
 
@@ -125,7 +125,7 @@ BackendPatient utilise SQL Server via Entity Framework pour la gestion des patie
    ```
 
 5. Accédez à l'application :
-   - Frontend : http://localhost:7000
+   - Frontend : <http://localhost:7000>
 
 Pour plus de détails sur l'installation et la configuration, consultez les sections suivantes.
 
@@ -151,11 +151,9 @@ Le projet utilise **Docker** pour la gestion des services backend, frontend, l'A
 2. Assurez-vous d'avoir dotnet 8 installé sur votre machine.
 
 3. Assurez vous d'avoir installé l'outil Entity Framework Core :
-
     `dotnet tool install --global dotnet-ef`
 
 4. Restaurez les packages NuGet pour tous les services :
-
     Depuis la racine du projet :
     `dotnet restore`
 
@@ -177,141 +175,47 @@ Le projet utilise **Docker** pour la gestion des services backend, frontend, l'A
 
 ## Restauration des Bases de Données
 
-Les bases de données SQL Server pour les microservices `BackendPatient` et `Auth` ne sont pas contenerisées dans Docker. Vous pouvez les restaurer depuis les fichiers de sauvegarde fournis dans `P10>SQLServerDBBackup` (recommandé) ou décider de créer manuellement des bases de données SQL Server via SQL Server Express puis utiliser des migrations to code first avec Entity Framework (non recommandé). Une seule de ces deux méthodes est à réaliser. Pour plus de détails sur la restauration des bases de données SQL Server, voir la section **Restauration des Bases de Données à partir des Sauvegardes**. Pour plus de détails sur la création manuelle des bases de données SQL Server avec migrations to code first, voir la section **Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)**.
+Les bases de données SQL Server pour les microservices `BackendPatient` et `Auth` ne sont pas contenerisées dans Docker. Vous pouvez les restaurer depuis les fichiers de sauvegarde fournis dans `P10>SQLServerDBBackup` (recommandé) ~~ou décider de créer manuellement des bases de données SQL Server via SQL Server Express puis utiliser des migrations to code first avec Entity Framework (non recommandé).~~ Une seule de ces deux méthodes est à réaliser. Pour plus de détails sur la restauration des bases de données SQL Server, voir la section **Restauration des Bases de Données à partir des Sauvegardes**.~~Pour plus de détails sur la création manuelle des bases de données SQL Server avec migrations to code first, voir la section **Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)**.~~
 
 ### Recommandé : Restauration des Bases de Données à partir des Sauvegardes
 
 Pour simplifier la configuration des bases de données, vous pouvez restaurer les bases de données à partir des fichiers de sauvegarde fournis dans P10>SQLServerDBBackup.
 
-#### Étapes de Restauration des données des Bases de Données :
+#### Étapes de Restauration des données des Bases de Données
 
 1. **Ouvrir SQL Server Management Studio (SSMS) :**
-
    - Lancez **SSMS** et connectez-vous à votre instance SQL Server.
 
-2. **Créer le login 'backend_user' avec accès pour les containers :**
-
-    - Dans l’Explorateur d’objets, faites un clic droit sur `Sécurité > Nouveau`, puis sélectionnez `Connexion`
-    - Sélectionnez ``Authentification SQL Server``.
-    - Nom de connexion : ``backend_user``
-    - Mot de passe : ``Str0ng!Passw0rd#2024-renew``
-    - Décochez Exiger que le mot de passe soit modifié lors de la première connexion.
-    - Dans l'onglet ``État``, assurez-vous que ``Autorisation de se connecter au moteur de base de données`` est sur ``Accorder`` et que ``Connexion`` est ``Activé``.
-    - Cliquez sur OK pour créer le login.
-
-3. **Restaurer `AuthServiceDb` :**
-
+    *Toutes les étapes suivantes s'effectue dans l'instance SQL Server.*
+  
+2. **Restaurer `AuthServiceDb` :**
    - Faites un clic droit sur `Base de données` dans l’Explorateur d’objets et sélectionnez ``Restaurer la base de données``
-   - Sélectionnez ``Support`` et naviguez jusqu’au fichier de sauvegarde `AuthServiceDb.bak`.
-   - Configurez les options si nécessaire et cliquez sur ``OK`` pour lancer la restauration.
+   - Sélectionnez ``Support``, cliquez sur ``...`` puis cliquez sur ``Àjouter`` et naviguez jusqu’au fichier de sauvegarde `AuthServiceDb.bak`.
+   - Cliquez sur ``OK`` pour lancer la restauration.
 
-4. **Restaurer `PatientDb` :**
-
+3. **Restaurer `PatientDb` :**
    - Répétez le même processus que pour `AuthServiceDb`, en sélectionnant le fichier `PatientDb.bak`.
   
-5. **Vérifier la Restauration :**
+4. **Vérifier la Restauration :**
+    - Assurez-vous que les bases de données AuthServiceDb et PatientDb apparaissent dans l’Explorateur d’objets et que les tables et données sont correctes :
+      - La base de données `AuthServiceDb` devrait contenir les tables `Users` avec 3 utilisateurs.
+      - La base de données `PatientDb` devrait contenir les tables `Patients` avec 4 patients.
 
-    - Assurez-vous que les bases de données AuthServiceDb et PatientDb apparaissent dans l’Explorateur d’objets et que les tables et données sont correctes.
+5. **Exécutez le script SQL fourni (`create_backend_user.sql`) sur votre instance SQL Server pour créer l'utilisateur `backend_user` et lui attribuer les permissions nécessaires** :
+   - Dans `Fichier > Ouvrir > Fichier` sélectionner le fichier `create_backend_user.sql` dans le dossier `SQLServerDBBackup`.
+   - Exécutez le script `create_backend_user.sql` depuis l'onglet de requête.
 
-### Mapper le login 'backend_user' aux bases de données restaurées :
+6. Vérifiez que l'utilisateur `backend_user` est bien créé dans la section **Sécurité > Connexions** de votre instance SQL Server.
 
-   1. Pour ``AuthServiceDb`` :
+> ⚠️ Assurez-vous d'exécuter toutes ces étapes **avant** de lancer les containers Docker.
 
-        - Développez ``Bases de données > AuthServiceDB > Sécurité > Utilisateurs``.
-        - Faites un clic droit sur ``Utilisateurs`` et sélectionnez ``Nouvel utilisateur``...
-        - Nom de l'utilisateur : ``backend_user``
-        - Connexion : cliquez sur ``...`` puis ``Parcourir`` et sélectionnez ``backend_user`` dans la liste déroulante et validez en cliquant sur OK.
-        - Dans l'onglet ``Schémas appartenant à un rôle``, cochez **``db_owner``**.
-        - Cliquez sur OK pour créer l'utilisateur.
+### Résolution des erreurs fréquentes
 
-   2. Pour ``PatientDb`` :
-
-        - Répétez les mêmes étapes que ci-dessus pour la base de données PatientDb.
-
-   3. **Vérifier la Restauration :**
-
-      - Assurez-vous que les bases de données `AuthServiceDb` et `PatientDb` apparaissent dans l’Explorateur d’objets et que les schémas et données sont corrects.
-
-   4. **Vérifier les permissions :**
-
-       - Assurez-vous que l'utilisateur ``backend_user`` a bien les permissions appropriées sur les deux bases de données.
-       Vous pouvez tester la connexion en utilisant l'utilisateur ``backend_user`` pour vous connecter à chaque base de données.
-
-   5. **Configurer les Chaînes de Connexion :**
-
-       - Les chaînes de connexion pour AuthServiceDb et PatientDb sont définies dans le fichier docker-compose.yml pour les services auth et backendpatient.
-       - Elles utilisent le serveur host.docker.internal,1433 pour permettre aux containers Docker d'accéder à l'instance SQL Server sur l'hôte.
-
-   6. **Configuration des Variables d’environnement :**
-
-      - Le fichier .env contient les variables suivantes, qui correspondent à l'utilisateur créé :
-
-       ```env
-       DB_USER=backend_user
-       DB_PASSWORD=Str0ng!Passw0rd#2024-renew
-       ```
-
-### Non recommandé : Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)
-
-*Si vous choisissez cette méthode, assurez-vous de modifier les variables d'environnement DB_USER et DB_PASSWORD pour correspondre aux identifiants que vous utiliserez. Notez que cette méthode est plus complexe et sujette à erreurs.*
-
-Si vous décidez de restaurer les bases de données SQL Server en utilisant des migrations to code first avec Entity Framework, n'oubliez pas de modifier les variables d'environnement `DB_USER` et `DB_PASSWORD` dans le fichier `.env` pour correspondre aux valeurs utilisées lors de la restauration. De même il vous faudra modifier le fichier `docker-compose.yml` pour modifier la configuration des chaînes de connexions `SQL_SERVER_CONNECTION_STRING` pour correspondre aux valeurs utilisées lors de la création des bases de données.
-
-
-#### BackendPatient
-
-1. Création de la base de données :
-
-   Depuis SQL Server Management Studio (SSMS) :
-   - Ouvrir **SSMS** et connectez-vous à votre instance SQL Server.
-   - Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**
-   - Entrez le nom de la base de données souhaite (par exemple, "PatientDb") et cliquez sur **OK**.
-   - Dans l'onglet **Autorisations**, sélectionnez votre nouvel utilisateur et attribuez les permissions nécessaires.
-   - Dans la page **Rôles du serveur**, cochez **dbcreator** et cliquez sur **OK**.
-   - Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**
-   - Entrez le nom de la base de données souhaite (par exemple, "PatientDb") et cliquez sur **OK**.
-
-
-2. OPTIONNEL : Création d'une nouvelle migration :
-
-    Le repository contient déjà les fichiers initiaux pour créer une migration initial.
-
-    ```bash
-    cd BackendPatient
-    dotnet ef migrations add Migration0
-    ```
-
-3. Mise à jour de la base de données :
-
-    ```bash
-    cd BackendPatient
-    dotnet ef database update
-    ```
-
-#### Auth
-
-1. Création de la base de données :
-
-   Depuis SQL Server Management Studio (SSMS) :
-   - Ouvrir **SSMS** et connectez-vous à votre instance SQL Server.
-   - Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**
-   - Entrez le nom de la base de données souhaite (par exemple, "AuthServiceDb") et cliquez sur **OK**.
-
-2. OPTIONNEL :Création d'une nouvelle migration :
-   
-    Le repository contient déjà les fichiers initiaux pour créer une migration initial.
-
-    ```bash
-    cd Auth
-    dotnet ef migrations add Migration0
-    ```
-
-3. Mise à jour de la base de données :
-
-    ```bash
-    cd Auth
-    dotnet ef database update
-    ```
+- **Erreur : "Cannot connect to SQL Server" dans Docker**  
+  Assurez-vous que :
+  - SQL Server est configuré pour accepter les connexions TCP/IP.
+  - Le port 1433 est ouvert sur votre machine hôte.
+  - Assurez-vous d'avoir installé SQL Server Express (non MS SQL Server).
 
 ## Docker
 
@@ -324,21 +228,21 @@ Si vous décidez de restaurer les bases de données SQL Server en utilisant des 
     `docker-compose up -d`
 
 3. Arrêt des services :
-    
+
     `docker-compose down`
 
 Les services suivants seront disponibles :
 
-- Frontend : http://localhost:7000
-- ApiGateway : http://localhost:5000
-- Auth : http://localhost:7201
-- BackendPatient : http://localhost:7200
-- BackendNote : http://localhost:7202
-- BackendDiabetesRiskPrediction : http://localhost:7204
-- MongoDB : http://localhost:27017
+- Frontend : <http://localhost:7000>
+- ApiGateway : <http://localhost:5000>
+- Auth : <http://localhost:7201>
+- BackendPatient : <http://localhost:7200>
+- BackendNote : <http://localhost:7202>
+- BackendDiabetesRiskPrediction : <http://localhost:7204>
+- MongoDB : <http://localhost:27017>
 - SQL Server : localhost,1433
-- Elasticsearch : http://localhost:9200
-- MongoDB Express : http://localhost:8081 
+- Elasticsearch : <http://localhost:9200>
+- MongoDB Express : <http://localhost:8081>
 
 Un service MongoDB Express est disponible sur le port 8081 afin de pouvoir visualiser les collections MongoDB.
 
@@ -360,7 +264,7 @@ L'application utilise JWT (JSON Web Tokens) pour l'authentification :
 
 1. Les tokens sont émis par le service Auth
 2. Tous les services vérifient la validité des tokens
-3. Les tokens ont une durée de validité de 15 minutes. 
+3. Les tokens ont une durée de validité de 15 minutes.
 4. La durée de validité des refresh tokens est de 7 jours.
 
 ### Autorisation
@@ -373,18 +277,108 @@ Seuls les rôles `Admin` et `Practitioner` peuvent accéder aux services backend
 Pour faciliter les tests, les comptes suivants sont disponibles :
 
 - **Admin :**
-  - **Nom d'utilisateur :** admin@email.com
+  - **Nom d'utilisateur :** <admin@email.com>
   - **Mot de passe :** 0vBZBB.QH83GeE.
   - **Rôle :** Admin
 
 - **Practitioner :**
-  - **Nom d'utilisateur :** practitioner@email.com
+  - **Nom d'utilisateur :** <practitioner@email.com>
   - **Mot de passe :** 1vBZBB.QH83GeE.
   - **Rôle :** Practitioner
 
 - **User :**
-    - **Nom d'utilisateur :** noroleuser@email.com
-    - **Mot de passe :** 2vBZBB.QH83GeE.
-    - **Rôle :** User
+  - **Nom d'utilisateur :** <noroleuser@email.com>
+  - **Mot de passe :** 2vBZBB.QH83GeE.
+  - **Rôle :** User
 
 Vous pouvez utiliser ces comptes pour vous connecter à l'application et tester les différentes fonctionnalités en fonction des rôles.
+
+---
+
+## ~~❌ DEPRECIE : Restaurations manuelles des bases de donnees avec les utilisateurs ❌~~
+
+### ~~Mapper le login 'backend_user' aux bases de données restaurées :~~
+
+   ~~1. Pour ``AuthServiceDb`` :
+        - Développez ``Bases de données > AuthServiceDB > Sécurité > Utilisateurs``.
+        - Faites un clic droit sur ``Utilisateurs`` et sélectionnez ``Nouvel utilisateur``...
+        - Nom de l'utilisateur : ``backend_user``
+        - Connexion : cliquez sur ``...`` puis ``Parcourir`` et sélectionnez ``backend_user`` dans la liste déroulante et validez en cliquant sur OK.
+        - Dans l'onglet ``Schémas appartenant à un rôle``, cochez **``db_owner``**.
+        - Cliquez sur OK pour créer l'utilisateur.~~
+   ~~2. Pour ``PatientDb`` :
+        - Répétez les mêmes étapes que ci-dessus pour la base de données PatientDb.~~
+   ~~3. **Vérifier la Restauration :**
+      - Assurez-vous que les bases de données `AuthServiceDb` et `PatientDb` apparaissent dans l’Explorateur d’objets et que les schémas et données sont corrects.~~
+   ~~4. **Vérifier les permissions :**
+       - Assurez-vous que l'utilisateur ``backend_user`` a bien les permissions appropriées sur les deux bases de données.
+       Vous pouvez tester la connexion en utilisant l'utilisateur ``backend_user`` pour vous connecter à chaque base de données.~~
+   ~~5. **Configurer les Chaînes de Connexion :**
+       - Les chaînes de connexion pour AuthServiceDb et PatientDb sont définies dans le fichier docker-compose.yml pour les services auth et backendpatient.
+       - Elles utilisent le serveur host.docker.internal,1433 pour permettre aux containers Docker d'accéder à l'instance SQL Server sur l'hôte.~~
+   ~~6. **Configuration des Variables d’environnement :**
+      - Le fichier .env contient les variables suivantes, qui correspondent à l'utilisateur créé :~~
+
+       ```env
+       DB_USER=backend_user
+       DB_PASSWORD=Str0ng!Passw0rd#2024-renew
+       ```
+
+### ~~Non recommandé : Restauration des Bases de Données en utilisant les Migrations Entity Framework (SQL Server)~~
+
+~~*Si vous choisissez cette méthode, assurez-vous de modifier les variables d'environnement DB_USER et DB_PASSWORD pour correspondre aux identifiants que vous utiliserez. Notez que cette méthode est plus complexe et sujette à erreurs.*~~
+
+~~Si vous décidez de restaurer les bases de données SQL Server en utilisant des migrations to code first avec Entity Framework, n'oubliez pas de modifier les variables d'environnement `DB_USER` et `DB_PASSWORD` dans le fichier `.env` pour correspondre aux valeurs utilisées lors de la restauration. De même il vous faudra modifier le fichier `docker-compose.yml` pour modifier la configuration des chaînes de connexions `SQL_SERVER_CONNECTION_STRING` pour correspondre aux valeurs utilisées lors de la création des bases de données.~~
+
+#### ~~BackendPatient~~
+
+~~1. Création de la base de données :~~
+   ~~Depuis SQL Server Management Studio (SSMS) :~~
+   ~~- Ouvrir **SSMS** et connectez-vous à votre instance SQL Server.~~
+   ~~- Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**~~
+   ~~- Entrez le nom de la base de données souhaite (par exemple, "PatientDb") et cliquez sur **OK**.~~
+   ~~- Dans l'onglet **Autorisations**, sélectionnez votre nouvel utilisateur et attribuez les permissions nécessaires.~~
+   ~~- Dans la page **Rôles du serveur**, cochez **dbcreator** et cliquez sur **OK**.~~
+   ~~- Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**~~
+   ~~- Entrez le nom de la base de données souhaite (par exemple, "PatientDb") et cliquez sur **OK**.~~
+
+~~2. OPTIONNEL : Création d'une nouvelle migration :~~
+
+~~Le repository contient déjà les fichiers initiaux pour créer une migration initial.~~
+
+    ```bash
+    cd BackendPatient
+    dotnet ef migrations add Migration0
+    ```
+
+~~3. Mise à jour de la base de données :~~
+
+    ```bash
+    cd BackendPatient
+    dotnet ef database update
+    ```
+
+#### ~~Auth~~
+
+~~1. Création de la base de données :~~
+
+   ~~Depuis SQL Server Management Studio (SSMS) :~~
+   ~~- Ouvrir **SSMS** et connectez-vous à votre instance SQL Server.~~
+   ~~- Faites un clic droit sur **Databases** dans l’Explorateur d’objets et sélectionnez **Create Database...**~~
+   ~~- Entrez le nom de la base de données souhaite (par exemple, "AuthServiceDb") et cliquez sur **OK**.~~
+
+~~2. OPTIONNEL :Création d'une nouvelle migration :~~
+
+    ~~Le repository contient déjà les fichiers initiaux pour créer une migration initial.~~
+
+    ```bash
+    cd Auth
+    dotnet ef migrations add Migration0~~
+    ```
+
+~~3. Mise à jour de la base de données :~~
+
+    ```bash
+    cd Auth
+    dotnet ef database update
+    ```~~

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
 }
 @using Microsoft.AspNetCore.Mvc.TagHelpers
@@ -8,59 +8,75 @@
     <h1 class="display-4">Accueil Médecin</h1>
 </div>
 @if (TempData["Error"] != null)
+
 {
     <div class="alert alert-danger my-3 text-center">
         @TempData["Error"]
     </div>
 }
-<div class="table-header d-flex justify-content-between align-items-center mt-4">
-    <h4 style="color: #4caf50;">Liste des Patients</h4>
-    <a asp-controller="Patients" method="get" id="newPatient" asp-action="Create">
-        <button class="btn btn-success btn-lg">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: #4caf50;">Liste des Patients</h2>
+    <div>
+        <a asp-controller="Patients" asp-action="Create" class="btn btn-success ms-2">
             <i class="fas fa-user-plus"></i> Créer un nouveau patient
-        </button>
-    </a>
+        </a>
+        <a asp-controller="TriggerWords" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-gear"></i> Configuration
+        </a>
+    </div>
 </div>
-<hr class="my-3" style="border-top: 3px solid #4caf50;"/>
+<hr class="my-3" style="border-top: 3px solid #4caf50;" />
 <table class="table table-bordered table-hover">
-    <thead class="thead-light" style="background-color: #81c784;">
-    <tr>
-        <th>@Html.DisplayNameFor(model => model.FirstName)</th>
-        <th>@Html.DisplayNameFor(model => model.LastName)</th>
-        <th>@Html.DisplayNameFor(model => model.DateOfBirth)</th>
-        <th class="text-center">Actions</th>
-    </tr>
+    <thead class="table-success">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+            <th>@Html.DisplayNameFor(model => model.LastName)</th>
+            <th>@Html.DisplayNameFor(model => model.DateOfBirth)</th>
+            <th class="text-center">Actions</th>
+        </tr>
     </thead>
     <tbody>
-    @foreach (Patient item in Model)
-    {
-        <tr>
-            <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
-            <td>@Html.DisplayFor(modelItem => item.LastName)</td>
-            <td>@Html.DisplayFor(modelItem => item.DateOfBirth)</td>
-            <td class="text-center">
-                <a asp-controller="Patients" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info mx-1">
-                    <i class="fas fa-info-circle"></i> Détails
-                </a>
-                <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@item.Id"
-                   class="btn btn-secondary mx-1">
-                    <i class="fas fa-sticky-note"></i> Notes
-                </a>
-                <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@item.Id"
-                   asp-route-lastName="@item.LastName" asp-route-firstName="@item.FirstName"
-                   class="btn btn-success mx-1">
-                    <i class="fas fa-plus"></i> Nouvelle note
-                </a>
-            </td>
-        </tr>
-    }
+        @foreach (Patient patient in Model)
+
+        {
+            <tr class="clickable-row" data-href="@Url.Action("Details", "Patients", new { id = patient.Id })">
+                <td>@patient.FirstName</td>
+                <td>@patient.LastName</td>
+                <td>@patient.DateOfBirth.ToString("yyyy-MM-dd")</td>
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <a asp-controller="Patients" asp-action="Details" asp-route-id="@patient.Id" class="btn btn-info">
+                            <i class="fas fa-info-circle"></i> Détails
+                        </a>
+                        <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@patient.Id"
+                            class="btn btn-secondary">
+                            <i class="fas fa-sticky-note"></i> Notes
+                        </a>
+                        <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@patient.Id"
+                            asp-route-lastName="@patient.LastName" asp-route-firstName="@patient.FirstName"
+                            class="btn btn-success mx-1">
+                            <i class="fas fa-plus"></i> Nouvelle note
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
-<div class="table-header d-flex justify-content-between align-items-center mt-4">
-    <h4 style="color: #424852;">Configuration des mots déclencheurs</h4>
-    <a asp-controller="TriggerWords" asp-action="Index">
-        <button class="btn btn-success btn-lg">
-            <i class="fa-solid fa-gear"></i> Configuration des mots déclencheurs
-        </button>
-    </a>
-</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Ajouter un gestionnaire de clic sur chaque ligne
+            const rows = document.querySelectorAll('.clickable-row');
+            rows.forEach(row => {
+                row.addEventListener('click', function (e) {
+                    // Ne pas déclencher si on clique sur un bouton
+                    if (!e.target.closest('.btn')) {
+                        window.location.href = this.dataset.href;
+                    }
+                });
+            });
+        });
+    </script>
+}

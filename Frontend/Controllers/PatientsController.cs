@@ -17,7 +17,6 @@ public class PatientsController : Controller
     private readonly string _noteServiceUrl;
     private readonly string _patientServiceUrl;
 
-
     public PatientsController(ILogger<PatientsController> logger,
                               HttpClientService httpClientService,
                               IConfiguration configuration)
@@ -60,10 +59,7 @@ public class PatientsController : Controller
                 return NotFound("Patient non trouvé");
             }
 
-            if (notes == null)
-            {
-                notes = new List<Note>();
-            }
+            notes ??= [];
 
             // Time To Get Diabetes Risk Prediction from BackendDiabetesRiskPrediction
 
@@ -76,22 +72,14 @@ public class PatientsController : Controller
             {
                 Content = JsonContent.Create(patientRiskRequest)
             };
-            _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}, Date of birth: {DateOfBirth}, Gender: {Gender}", patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
+            _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}, Date of birth: {DateOfBirth}, Gender: {Gender}",
+                                                patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
 
             // Finally let's manage the answer for DiabetesRiskPredictionService
             HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(requestForDiabetesRiskPredictionService);
 
-            if (responseFromDiabetesRiskService.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                _logger.LogInformation("User not authenticated. Redirecting to login");
-                return RedirectToAction(nameof(AuthController.Login), _controllerAuthName);
-            }
-
-            if (responseFromDiabetesRiskService.StatusCode == HttpStatusCode.Forbidden)
-            {
-                _logger.LogInformation("User authenticated but not authorized");
-                return View("AccessDenied");
-            }
+            IActionResult? authResult2 = this.HandleAuthorizationResponse(responseFromDiabetesRiskService.StatusCode, _logger);
+            if (authResult2 != null) return authResult2;
 
             _logger.LogDebug("Reading content from Json now...");
 

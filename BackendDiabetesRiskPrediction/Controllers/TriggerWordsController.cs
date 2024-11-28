@@ -1,4 +1,5 @@
 using BackendDiabetesRiskPrediction.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -6,6 +7,7 @@ namespace BackendDiabetesRiskPrediction.Controllers;
 
 [ApiController]
 [Route("triggerwords")]
+[Authorize(Policy = "RequirePractitionerRoleOrHigher")]
 public class TriggerWordsController : ControllerBase
 {
     private readonly ITriggerWordsService _triggerWordsService;

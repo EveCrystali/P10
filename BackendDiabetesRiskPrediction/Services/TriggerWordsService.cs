@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.IO;
 
 namespace BackendDiabetesRiskPrediction.Services;
 
@@ -11,13 +12,22 @@ public interface ITriggerWordsService
 
 public class TriggerWordsService : ITriggerWordsService
 {
-    private const string TriggerWordsFilePath = "triggerwords.json";
+    private const string TriggerWordsFileName = "triggerwords.json";
+    private readonly string _triggerWordsFilePath;
     private readonly ILogger<TriggerWordsService> _logger;
     private static readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public TriggerWordsService(ILogger<TriggerWordsService> logger)
     {
         _logger = logger;
+        _triggerWordsFilePath = Path.Combine("/app/data", TriggerWordsFileName);
+        
+        // Créer le répertoire s'il n'existe pas
+        var directory = Path.GetDirectoryName(_triggerWordsFilePath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
     }
 
     public HashSet<string> GetTriggerWords()
@@ -25,12 +35,12 @@ public class TriggerWordsService : ITriggerWordsService
         try
         {
             _semaphore.Wait();
-            if (!File.Exists(TriggerWordsFilePath))
+            if (!File.Exists(_triggerWordsFilePath))
             {
                 return GetDefaultTriggerWords();
             }
 
-            var json = File.ReadAllText(TriggerWordsFilePath);
+            var json = File.ReadAllText(_triggerWordsFilePath);
             return JsonSerializer.Deserialize<HashSet<string>>(json) ?? GetDefaultTriggerWords();
         }
         catch (Exception ex)
@@ -62,7 +72,7 @@ public class TriggerWordsService : ITriggerWordsService
         {
             _semaphore.Wait();
             var json = JsonSerializer.Serialize(triggerWords);
-            File.WriteAllText(TriggerWordsFilePath, json);
+            File.WriteAllText(_triggerWordsFilePath, json);
         }
         finally
         {

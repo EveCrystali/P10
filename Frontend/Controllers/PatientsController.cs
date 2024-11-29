@@ -73,7 +73,7 @@ public class PatientsController : Controller
                 Content = JsonContent.Create(patientRiskRequest)
             };
             _logger.LogInformation("Requesting Diabetes Risk Prediction for patient with id {PatientId}, Date of birth: {DateOfBirth}, Gender: {Gender}",
-                                                patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
+                                   patientRiskRequest.Id.ToString(), patientRiskRequest.DateOfBirth.ToString(), patientRiskRequest.Gender);
 
             // Finally let's manage the answer for DiabetesRiskPredictionService
             HttpResponseMessage responseFromDiabetesRiskService = await _httpClientService.SendAsync(requestForDiabetesRiskPredictionService);

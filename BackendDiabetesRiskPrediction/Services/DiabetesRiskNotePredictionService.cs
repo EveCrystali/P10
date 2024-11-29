@@ -1,23 +1,10 @@
 using BackendDiabetesRiskPrediction.Models;
 namespace BackendDiabetesRiskPrediction.Services;
 
-public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearchService, ILogger<DiabetesRiskNotePredictionService> logger)
+public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearchService, ILogger<DiabetesRiskNotePredictionService> logger, ITriggerWordsService triggerWordsService)
 {
 
-    private readonly HashSet<string> _triggerWords =
-    [
-        "Hémoglobine A1C",
-        "Microalbumine",
-        "Taille",
-        "Poids",
-        "Fumeur",
-        "Anormal",
-        "Cholestérol",
-        "Vertiges",
-        "Rechute",
-        "Réaction",
-        "Anticorps"
-    ];
+    private readonly ITriggerWordsService _triggerWordsService = triggerWordsService;
 
     public async Task<DiabetesRiskPrediction> DiabetesRiskPrediction(PatientRiskRequest? patientRiskInfo)
     {
@@ -28,13 +15,13 @@ public class DiabetesRiskNotePredictionService(ElasticsearchService elasticsearc
             return diabetesRiskPrediction;
         }
 
-        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(patientRiskInfo.Id, _triggerWords);
+        var triggerWords = _triggerWordsService.GetTriggerWords();
+        int triggersDiabetesRiskFromNotes = await DiabetesRiskPredictionNotesAnalysis(patientRiskInfo.Id, triggerWords);
 
         diabetesRiskPrediction.DiabetesRisk = DiabetesRiskPredictionCalculator(patientRiskInfo, triggersDiabetesRiskFromNotes);
 
         return diabetesRiskPrediction;
     }
-
 
     private async Task<int> DiabetesRiskPredictionNotesAnalysis(int patientId, HashSet<string> hashSetofTriggerWords) => await elasticsearchService.CountUniqueWordsInNotes(patientId, hashSetofTriggerWords);
 

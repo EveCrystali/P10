@@ -29,6 +29,7 @@ builder.Services.AddAuthorizationPolicies();
 
 builder.Services.AddSingleton<ElasticsearchService>();
 builder.Services.AddSingleton<DiabetesRiskNotePredictionService>();
+builder.Services.AddSingleton<ITriggerWordsService, TriggerWordsService>();
 
 builder.WebHost.UseUrls("http://*:7204");
 

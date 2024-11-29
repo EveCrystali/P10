@@ -76,6 +76,43 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/triggerwords",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "backenddiabetesriskprediction",
+          "Port": 7204
+        }
+      ],
+      "UpstreamPathTemplate": "/diabetesriskprediction/triggerwords",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/triggerwords/reset",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "backenddiabetesriskprediction",
+          "Port": 7204
+        }
+      ],
+      "UpstreamPathTemplate": "/diabetesriskprediction/triggerwords/reset",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "P10AuthProviderKey",
+        "AllowedScopes": []
+      }
+    },
+    {
       "DownstreamPathTemplate": "/patient/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

@@ -195,6 +195,8 @@ services:
       dockerfile: BackendDiabetesRiskPrediction/backenddiabetesriskprediction.Dockerfile
     env_file:
       - .env
+    volumes:
+      - ./BackendDiabetesRiskPrediction/Data:/app/data
     depends_on:
       - elasticsearch
       - mongodb
@@ -251,4 +253,3 @@ volumes:
 networks:
   elastic:
     driver: bridge
-

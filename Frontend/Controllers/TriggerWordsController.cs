@@ -56,27 +56,37 @@ public class TriggerWordsController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SaveTriggerWords([FromForm] string[] triggerWords)
+    public async Task<IActionResult> SaveTriggerWords([FromForm] TriggerWordsViewModel model)
     {
+        if(!ModelState.IsValid)
+        {
+            TempData["Error"] = "Les mots déclencheurs doivent avoir entre 2 et 50 caractères.";
+            return RedirectToAction(nameof(Index));
+        }
+
         try
         {
+            // Convertir HashSet en Array pour la sérialisation
+            var triggerWordsArray = model.TriggerWords.ToArray();
+            
             HttpRequestMessage requestForTriggerWords = new(HttpMethod.Post, $"{_diabetesRiskPredictionServiceUrl}/triggerwords")
             {
-                Content = new StringContent(JsonSerializer.Serialize(triggerWords), System.Text.Encoding.UTF8, "application/json")
+                Content = JsonContent.Create(triggerWordsArray)
             };
-            HttpResponseMessage responseForTriggerWords = await _httpClientService.SendAsync(requestForTriggerWords);
 
-            IActionResult? authResult = this.HandleAuthorizationResponse(responseForTriggerWords.StatusCode, _logger);
+            HttpResponseMessage response = await _httpClientService.SendAsync(requestForTriggerWords);
+
+            IActionResult? authResult = this.HandleAuthorizationResponse(response.StatusCode, _logger);
             if (authResult != null) return authResult;
 
-            if (responseForTriggerWords.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 TempData["Success"] = "Mots déclencheurs sauvegardés avec succès";
             }
             else
             {
                 TempData["Error"] = "Erreur lors de la sauvegarde des mots déclencheurs";
-                _logger.LogError("Erreur lors de la sauvegarde des mots déclencheurs: {StatusCode}", responseForTriggerWords.StatusCode);
+                _logger.LogError("Erreur lors de la sauvegarde des mots déclencheurs: {StatusCode}", response.StatusCode);
             }
         }
         catch (Exception ex)
@@ -92,6 +102,11 @@ public class TriggerWordsController : Controller
     [Route("reset")]
     public async Task<IActionResult> Reset()
     {
+        if(!ModelState.IsValid)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+        
         try
         {
             HttpRequestMessage requestForTriggerWords = new(HttpMethod.Post, $"{_diabetesRiskPredictionServiceUrl}/triggerwords/reset");

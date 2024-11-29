@@ -102,13 +102,9 @@ public class TriggerWordsController : Controller
     [Route("reset")]
     public async Task<IActionResult> Reset()
     {
-        if(!ModelState.IsValid)
-        {
-            return RedirectToAction(nameof(Index));
-        }
-        
         try
         {
+            _logger.LogDebug("ResetToDefault from TriggerWordsController called");
             HttpRequestMessage requestForTriggerWords = new(HttpMethod.Post, $"{_diabetesRiskPredictionServiceUrl}/triggerwords/reset");
             HttpResponseMessage responseForTriggerWords = await _httpClientService.SendAsync(requestForTriggerWords);
 
@@ -117,20 +113,21 @@ public class TriggerWordsController : Controller
 
             if (responseForTriggerWords.IsSuccessStatusCode)
             {
-                TempData["Success"] = "Mots déclencheurs réinitialisés avec succès";
+                TempData["Success"] = "Les mots déclencheurs ont été réinitialisés avec succès.";
             }
             else
             {
-                TempData["Error"] = "Erreur lors de la réinitialisation des mots déclencheurs";
                 _logger.LogError("Erreur lors de la réinitialisation des mots déclencheurs: {StatusCode}", responseForTriggerWords.StatusCode);
+                TempData["Error"] = "Une erreur est survenue lors de la réinitialisation des mots déclencheurs.";
             }
+            
+            return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            TempData["Error"] = "Erreur lors de la réinitialisation des mots déclencheurs";
-            _logger.LogError(ex, "Erreur lors de la réinitialisation des mots déclencheurs");
+            _logger.LogError(ex, "Exception lors de la réinitialisation des mots déclencheurs");
+            TempData["Error"] = "Une erreur est survenue lors de la réinitialisation des mots déclencheurs.";
+            return RedirectToAction(nameof(Index));
         }
-
-        return RedirectToAction(nameof(Index));
     }
 }

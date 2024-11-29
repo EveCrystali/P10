@@ -1,4 +1,5 @@
 using BackendDiabetesRiskPrediction.Services;
+using BackendDiabetesRiskPrediction.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -8,16 +9,10 @@ namespace BackendDiabetesRiskPrediction.Controllers;
 [ApiController]
 [Route("triggerwords")]
 [Authorize(Policy = "RequirePractitionerRoleOrHigher")]
-public class TriggerWordsController : ControllerBase
+public class TriggerWordsController(ITriggerWordsService triggerWordsService, ILogger<TriggerWordsController> logger) : ControllerBase
 {
-    private readonly ITriggerWordsService _triggerWordsService;
-    private readonly ILogger<TriggerWordsController> _logger;
-
-    public TriggerWordsController(ITriggerWordsService triggerWordsService, ILogger<TriggerWordsController> logger)
-    {
-        _triggerWordsService = triggerWordsService;
-        _logger = logger;
-    }
+    private readonly ITriggerWordsService _triggerWordsService = triggerWordsService;
+    private readonly ILogger<TriggerWordsController> _logger = logger;
 
     [HttpGet]
     public ActionResult<HashSet<string>> GetTriggerWords()
@@ -35,11 +30,16 @@ public class TriggerWordsController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult SaveTriggerWords([FromBody] HashSet<string> triggerWords)
+    public ActionResult SaveTriggerWords([FromBody, TriggerWordValidation] HashSet<string> triggerWords)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         try
         {
-            if (triggerWords == null || !triggerWords.Any())
+            if (triggerWords == null || triggerWords.Count == 0)
             {
                 return BadRequest("La liste des mots déclencheurs ne peut pas être vide");
             }
@@ -64,11 +64,13 @@ public class TriggerWordsController : ControllerBase
     }
 
     [HttpPost("reset")]
-    public ActionResult ResetToDefault()
+    public ActionResult ResetTriggerWords()
     {
+        logger.LogDebug("ResetToDefault called");
         try
         {
             var defaultWords = _triggerWordsService.ResetToDefault();
+            logger.LogInformation("ResetToDefault completed");
             return Ok(defaultWords);
         }
         catch (Exception ex)

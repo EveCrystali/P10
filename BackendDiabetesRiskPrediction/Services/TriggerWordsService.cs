@@ -58,7 +58,7 @@ public class TriggerWordsService : ITriggerWordsService
     {
         ArgumentNullException.ThrowIfNull(triggerWords);
         
-        if (!triggerWords.Any())
+        if (triggerWords.Count == 0)
         {
             throw new ArgumentException("La liste des mots déclencheurs ne peut pas être vide", nameof(triggerWords));
         }
@@ -82,13 +82,14 @@ public class TriggerWordsService : ITriggerWordsService
 
     public HashSet<string> ResetToDefault()
     {
-        var defaultWords = GetDefaultTriggerWords();
+        _logger.LogDebug("ResetToDefault from TriggerWordsService called");
+        HashSet<string> defaultWords = GetDefaultTriggerWords();
         SaveTriggerWords(defaultWords);
         return defaultWords;
     }
 
-    public static HashSet<string> GetDefaultTriggerWords() => new()
-    {
+    public static HashSet<string> GetDefaultTriggerWords() =>
+    [
         "Hémoglobine A1C",
         "Microalbumine",
         "Taille",
@@ -100,5 +101,5 @@ public class TriggerWordsService : ITriggerWordsService
         "Rechute",
         "Réaction",
         "Anticorps"
-    };
+    ];
 }

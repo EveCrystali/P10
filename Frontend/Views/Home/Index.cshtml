@@ -24,37 +24,41 @@
         </a>
     </div>
 </div>
-<hr class="my-3" style="border-top: 3px solid #4caf50;" />
+<hr class="my-3" style="border-top: 3px solid #4caf50;"/>
 <table class="table table-bordered table-hover">
     <thead class="table-success">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.FirstName)</th>
-            <th>@Html.DisplayNameFor(model => model.LastName)</th>
-            <th>@Html.DisplayNameFor(model => model.DateOfBirth)</th>
-            <th class="text-center">Actions</th>
-        </tr>
+    <tr>
+        <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+        <th>@Html.DisplayNameFor(model => model.LastName)</th>
+        <th>@Html.DisplayNameFor(model => model.DateOfBirth)</th>
+        <th class="text-center">Actions</th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (Patient patient in Model)
-        {
-            <tr class="clickable-row" style="cursor: pointer;" onclick="window.location='@Url.Action("Details", "Patients", new { id = patient.Id })'">
-                <td>@patient.FirstName</td>
-                <td>@patient.LastName</td>
-                <td>@patient.DateOfBirth.ToString("yyyy-MM-dd")</td>
-                <td class="text-center">
-                    <div class="btn-group" role="group">
-                        <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@patient.Id"
-                            class="btn btn-secondary">
-                            <i class="fas fa-sticky-note"></i> Notes
-                        </a>
-                        <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@patient.Id"
-                            asp-route-lastName="@patient.LastName" asp-route-firstName="@patient.FirstName"
-                            class="btn btn-success mx-1">
-                            <i class="fas fa-plus"></i> Nouvelle note
-                        </a>
-                    </div>
-                </td>
-            </tr>
-        }
+    @foreach (Patient patient in Model)
+    {
+        <tr class="clickable-row" style="cursor: pointer;"
+            onclick="window.location='@Url.Action("Details", "Patients", new
+                                      {
+                                          id = patient.Id
+                                      })'">
+            <td>@patient.FirstName</td>
+            <td>@patient.LastName</td>
+            <td>@patient.DateOfBirth.ToString("yyyy-MM-dd")</td>
+            <td class="text-center">
+                <div class="btn-group" role="group">
+                    <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@patient.Id"
+                       class="btn btn-secondary">
+                        <i class="fas fa-sticky-note"></i> Notes
+                    </a>
+                    <a asp-controller="Notes" asp-action="Create" asp-route-patientId="@patient.Id"
+                       asp-route-lastName="@patient.LastName" asp-route-firstName="@patient.FirstName"
+                       class="btn btn-success mx-1">
+                        <i class="fas fa-plus"></i> Nouvelle note
+                    </a>
+                </div>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>

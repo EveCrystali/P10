@@ -1,21 +1,20 @@
+using System.Text.Json;
 using Frontend.Extensions;
 using Frontend.Models;
 using Frontend.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-
 namespace Frontend.Controllers;
 
 [Route("TriggerWords")]
 public class TriggerWordsController : Controller
 {
-    private readonly HttpClientService _httpClientService;
-    private readonly ILogger<TriggerWordsController> _logger;
-
-    private readonly string _diabetesRiskPredictionServiceUrl;
 
     private readonly string _controllerAuthName = nameof(AuthController).Replace("Controller", "");
     private readonly string _controllerHomeControllerName = nameof(HomeController).Replace("Controller", "");
+
+    private readonly string _diabetesRiskPredictionServiceUrl;
+    private readonly HttpClientService _httpClientService;
+    private readonly ILogger<TriggerWordsController> _logger;
 
     public TriggerWordsController(HttpClientService httpClientService, ILogger<TriggerWordsController> logger, IConfiguration configuration)
     {
@@ -40,8 +39,11 @@ public class TriggerWordsController : Controller
             if (responseForTriggerWords.IsSuccessStatusCode)
             {
                 string content = await responseForTriggerWords.Content.ReadAsStringAsync();
-                var triggerWords = JsonSerializer.Deserialize<HashSet<string>>(content);
-                var viewModel = new TriggerWordsViewModel { TriggerWords = triggerWords ?? [] };
+                HashSet<string>? triggerWords = JsonSerializer.Deserialize<HashSet<string>>(content);
+                TriggerWordsViewModel? viewModel = new()
+                {
+                    TriggerWords = triggerWords ?? []
+                };
                 return View(viewModel);
             }
 
@@ -58,7 +60,7 @@ public class TriggerWordsController : Controller
     [HttpPost]
     public async Task<IActionResult> SaveTriggerWords([FromForm] TriggerWordsViewModel model)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
             TempData["Error"] = "Les mots déclencheurs doivent avoir entre 2 et 50 caractères.";
             return RedirectToAction(nameof(Index));
@@ -67,8 +69,8 @@ public class TriggerWordsController : Controller
         try
         {
             // Convertir HashSet en Array pour la sérialisation
-            var triggerWordsArray = model.TriggerWords.ToArray();
-            
+            string[]? triggerWordsArray = model.TriggerWords.ToArray();
+
             HttpRequestMessage requestForTriggerWords = new(HttpMethod.Post, $"{_diabetesRiskPredictionServiceUrl}/triggerwords")
             {
                 Content = JsonContent.Create(triggerWordsArray)
@@ -120,7 +122,7 @@ public class TriggerWordsController : Controller
                 _logger.LogError("Erreur lors de la réinitialisation des mots déclencheurs: {StatusCode}", responseForTriggerWords.StatusCode);
                 TempData["Error"] = "Une erreur est survenue lors de la réinitialisation des mots déclencheurs.";
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)

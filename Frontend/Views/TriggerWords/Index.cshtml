@@ -25,7 +25,7 @@
     }
     <form asp-action="SaveTriggerWords" method="post" id="triggerWordsForm">
         <div class="mb-3" id="triggerWordsList">
-            @foreach (var word in Model.TriggerWords)
+            @foreach (string word in Model.TriggerWords)
             {
                 <div class="input-group mb-2">
                     <input type="text" name="TriggerWords" class="form-control" value="@word" required minlength="2"

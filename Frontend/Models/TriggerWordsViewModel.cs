@@ -1,17 +1,16 @@
-namespace Frontend.Models;
-
 using System.ComponentModel.DataAnnotations;
+namespace Frontend.Models;
 
 public class StringLengthHashSetAttribute(int minLength, int maxLength) : ValidationAttribute
 {
-    private readonly int _minLength = minLength;
     private readonly int _maxLength = maxLength;
+    private readonly int _minLength = minLength;
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         if (value is HashSet<string> hashSet)
         {
-            foreach (var str in hashSet)
+            foreach (string? str in hashSet)
             {
                 if (str.Length < _minLength || str.Length > _maxLength)
                 {
@@ -26,5 +25,5 @@ public class StringLengthHashSetAttribute(int minLength, int maxLength) : Valida
 public class TriggerWordsViewModel
 {
     [StringLengthHashSet(2, 50, ErrorMessage = "Les mots déclencheurs doivent avoir entre 2 et 50 caractères.")]
-    public HashSet<string> TriggerWords { get; set; } = new HashSet<string>();
+    public HashSet<string> TriggerWords { get; set; } = new();
 }

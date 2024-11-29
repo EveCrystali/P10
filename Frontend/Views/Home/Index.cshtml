@@ -8,7 +8,6 @@
     <h1 class="display-4">Accueil Médecin</h1>
 </div>
 @if (TempData["Error"] != null)
-
 {
     <div class="alert alert-danger my-3 text-center">
         @TempData["Error"]
@@ -37,17 +36,13 @@
     </thead>
     <tbody>
         @foreach (Patient patient in Model)
-
         {
-            <tr class="clickable-row" data-href="@Url.Action("Details", "Patients", new { id = patient.Id })">
+            <tr class="clickable-row" style="cursor: pointer;" onclick="window.location='@Url.Action("Details", "Patients", new { id = patient.Id })'">
                 <td>@patient.FirstName</td>
                 <td>@patient.LastName</td>
                 <td>@patient.DateOfBirth.ToString("yyyy-MM-dd")</td>
                 <td class="text-center">
                     <div class="btn-group" role="group">
-                        <a asp-controller="Patients" asp-action="Details" asp-route-id="@patient.Id" class="btn btn-info">
-                            <i class="fas fa-info-circle"></i> Détails
-                        </a>
                         <a asp-controller="Notes" asp-action="GetNotesFromPatientId" asp-route-patientId="@patient.Id"
                             class="btn btn-secondary">
                             <i class="fas fa-sticky-note"></i> Notes
@@ -63,20 +58,3 @@
         }
     </tbody>
 </table>
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Ajouter un gestionnaire de clic sur chaque ligne
-            const rows = document.querySelectorAll('.clickable-row');
-            rows.forEach(row => {
-                row.addEventListener('click', function (e) {
-                    // Ne pas déclencher si on clique sur un bouton
-                    if (!e.target.closest('.btn')) {
-                        window.location.href = this.dataset.href;
-                    }
-                });
-            });
-        });
-    </script>
-}

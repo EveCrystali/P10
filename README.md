@@ -1,10 +1,11 @@
 # P10 Projet Éducatif
 
-Le but de l'application que vous développez est de permettre la détection du diabète de type 2 chez les patients. En utilisant une architecture microservices, cette application permettra de gérer les dossiers patients, les notes des médecins, et d'anticiper le niveau de risque de diabète d'un patient. L'objectif final est donc de fournir une solution complète pour le dépistage des risques de diabète, en respectant les normes de qualité de données, en assurant la sécurité de l'accès aux données des patients et en suivant les principes du Green Code pour la protection de l'environnement.
+Le **but** de l'application que vous développez est de permettre la détection du diabète de type 2 chez les patients. En utilisant une **architecture microservices**, cette application permettra de **gérer les dossiers patients, les notes des médecins, et d'anticiper le niveau de risque de diabète d'un patient** en se basant sur ses caractérisitques (âge, genre, etc.) et les notes le concernant (recherche intelligente dans les notes de facteurs aggravant).  
+L'objectif final est donc de fournir une solution complète pour le dépistage des risques de diabète, en respectant les normes de qualité de données, en assurant la **sécurité** de l'accès aux données des patients et en suivant les principes du **Green Code** pour la protection de l'environnement.
 
 ## Description
 
-Ce projet est une application web composée de plusieurs microservices backend et frontend. Il utilise **ASP.NET Core 8** pour les services backend et un frontend basé sur **ASP.NET MVC**.
+Ce projet est une a**pplication web composée de plusieurs microservices backend et frontend**. Il utilise **ASP.NET Core 8** pour les services backend et un frontend basé sur **ASP.NET MVC**.
 
 ## Sommaire
 

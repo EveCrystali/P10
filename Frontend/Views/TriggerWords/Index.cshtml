@@ -1,0 +1,79 @@
+@model TriggerWordsViewModel
+@{
+    ViewData["Title"] = "Configuration des mots déclencheurs";
+}
+<div class="container">
+    <div class="mb-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à l'accueil
+        </a>
+    </div>
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <form asp-action="SaveTriggerWords" method="post" id="triggerWordsForm">
+        <div class="mb-3" id="triggerWordsList">
+            @foreach (string word in Model.TriggerWords)
+            {
+                <div class="input-group mb-2">
+                    <input type="text" name="TriggerWords" class="form-control" value="@word" required minlength="2"
+                           maxlength="50"/>
+                    <button type="button" class="btn btn-danger" onclick="removeWord(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            }
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-success" onclick="addWord()">
+                <i class="bi bi-plus-circle"></i> Ajouter un mot
+            </button>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Sauvegarder
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-3 text-end">
+        <form asp-action="reset" method="post">
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+            </button>
+        </form>
+    </div>
+
+    @section Scripts {
+        <script>
+            function addWord() {
+                const wordsList = document.getElementById('triggerWordsList');
+                const div = document.createElement('div');
+                div.className = 'input-group mb-2';
+                div.innerHTML = `
+                        <input type="text" name="TriggerWords" class="form-control" required minlength="2" maxlength="50"/>
+                        <button type="button" class="btn btn-danger" onclick="removeWord(this)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
+                wordsList.appendChild(div);
+                div.querySelector('input').focus();
+            }
+
+            function removeWord(button) {
+                button.closest('.input-group').remove();
+            }
+        </script>
+    }
+</div>
+
